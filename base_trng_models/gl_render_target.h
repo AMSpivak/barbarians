@@ -1,3 +1,5 @@
+#ifndef GL_ENGINE_RENDER_TARGET
+#define GL_ENGINE_RENDER_TARGET
 #include <GL/glew.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -21,7 +23,7 @@ public:
 	virtual ~glRenderTarget();
 
 	void set();
-    
+
 protected:
 
 	virtual void GenerateBuffers();
@@ -45,3 +47,4 @@ private:
 	void GenerateBuffers();
 
 };
+#endif

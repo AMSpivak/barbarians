@@ -11,6 +11,7 @@
 
 #include "glresourses.h"
 #include "glscene.h"
+#include "gl_light.h"
 #include "gl_render_target.h"
 
 
@@ -147,20 +148,21 @@ int main(int argc, char const *argv[])
 	GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
 
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
+    m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
 
 
 	std::vector <std::shared_ptr<glModel> > Models;
 	std::vector <std::shared_ptr<Animation> > Animations;
 
 	Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl",Animations));
-
+/*
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/base.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/hair.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyer.mdl",Animations));
-	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyel.mdl",Animations));
+	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyel.mdl",Animations));*/
 	//Models.emplace_back(std::make_shared<glModel>("material/bgirl/bck.mdl",Animations));
-	//Models.emplace_back(std::make_shared<glModel>("material/new_brb/barb.mdl",Animations));
-	//Models.emplace_back(std::make_shared<glModel>("material/new_brb/head.mdl",Animations));
+	Models.emplace_back(std::make_shared<glModel>("material/new_brb/barb.mdl",Animations));
+	Models.emplace_back(std::make_shared<glModel>("material/new_brb/head.mdl",Animations));
 
 
 	GLuint sky_texture;
@@ -189,8 +191,8 @@ int main(int argc, char const *argv[])
 	//float angle = 0.0f;
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	Models[1]->model = glm::translate(Models[1]->model, glm::vec3(0.0f, -0.72f, 0.0f));
-	//Models[1]->model = glm::rotate(Models[1]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	Models[1]->model = glm::translate(Models[1]->model, glm::vec3(0.0f, -0.92f, 0.0f));
+	Models[1]->model = glm::rotate(Models[1]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	//test_model.model = glm::rotate(test_model.model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	double time = glfwGetTime();
@@ -236,7 +238,7 @@ int main(int argc, char const *argv[])
 				light_dir_vector = glm::normalize(light_position);
 				time = time_now;
 				//Models[1]->model = glm::rotate(Models[1]->model, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
-				Models[1]->model = glm::rotate(Models[1]->model, glm::radians(key_angle), glm::vec3(0.0f, 1.0f, 0.0f));
+				Models[1]->model = glm::rotate(Models[1]->model, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
 
 				key_angle = 0;
@@ -355,10 +357,43 @@ int main(int argc, char const *argv[])
 		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
 		glUniform3fv(light_dir, 1, glm::value_ptr(light_dir_vector));
 
+        glm::vec3 light_color_vector = glm::vec3(0.5f,0.5f,1.0f);
+        GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
+        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
+
 		GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
 		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
         renderQuad();
+        glClear(GL_DEPTH_BUFFER_BIT);
+        current_shader = m_shader_map["deffered_simple"];
+        glUseProgram(current_shader);
+
+		glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
+
+		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
+
+		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
+
+        glm::vec4 light_pos_vector = glm::vec4(0.0f,-0.5f,0.0f,15.0f);
+
+		GLuint light_pos  = glGetUniformLocation(current_shader, "LightLocation");
+		glUniform4fv(light_pos, 1, glm::value_ptr(light_pos_vector));
+
+        glm::vec3 light_color_vector2 = glm::vec3(9.0f,5.5f,0.2f);
+        light_color  = glGetUniformLocation(current_shader, "LightColor");
+        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
+
+		/*LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
+		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));*/
+
+        renderQuad();
+
 
 
 
