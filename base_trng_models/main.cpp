@@ -159,8 +159,8 @@ int main(int argc, char const *argv[])
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/base.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/hair.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyer.mdl",Animations));
-	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyel.mdl",Animations));*/
-	//Models.emplace_back(std::make_shared<glModel>("material/bgirl/bck.mdl",Animations));
+	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyel.mdl",Animations));/**/
+
 	Models.emplace_back(std::make_shared<glModel>("material/new_brb/barb.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/new_brb/head.mdl",Animations));
 

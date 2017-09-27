@@ -54,6 +54,7 @@ public:
 
 	glm::mat4 model;
 	GLuint diffuse_texture;
+    GLuint utility_texture;
 	std::vector <Bone> bones;
 
 	glModel()
@@ -92,7 +93,8 @@ public:
 
 	~glModel()
 	{
-		glDeleteTextures(1,&diffuse_texture);
+        glDeleteTextures(1,&diffuse_texture);
+		glDeleteTextures(1,&utility_texture);
 		glDeleteVertexArrays(1, &VAO);
 		glDeleteBuffers(1, &VBO);
 		glDeleteBuffers(1, &VBO_BONES);
