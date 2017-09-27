@@ -67,6 +67,10 @@ void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuse_texture);
+
+	glUniform1i(glGetUniformLocation(shaderProgram, "UtilityTexture"), 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, utility_texture);
     
 
 	glUniformMatrix4fv(boneLoc, bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));

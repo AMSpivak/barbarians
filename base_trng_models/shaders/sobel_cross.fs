@@ -6,6 +6,7 @@ in vec2 TexCoords;
 uniform sampler2D texMap;
 uniform sampler2D NormalMap;
 uniform sampler2D DepthMap;
+uniform sampler2D LightMap;
 
 void main()
 {
@@ -43,7 +44,7 @@ void main()
 	//v = 0.25 *v;
 	//v = pow(v,4);
 	//FragColor  =/* (1.0-v_n )*(1.0 - d_depth)**/texture(texMap, TexCoords);
-	FragColor  = (1.0-v_n )*(1.0 - d_depth)*texture(texMap, TexCoords);
+	FragColor  = (1.0-v_n )*(1.0 - d_depth)*texture(texMap, TexCoords)*vec4(texture(LightMap, TexCoords).xyz,1.0);
 	//vec4(v,v,v, 1.0);
 	//vec4 texColor = texture(texMap, TexCoords);
     //FragColor = vec4(texColor.xyz, 1.0);

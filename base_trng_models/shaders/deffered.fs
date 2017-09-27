@@ -62,7 +62,7 @@ void main()
     //float res = min((shadow_res), norm_l);// * norm_l);//min(shadow_res,norm_l);
     float res = shadow_res* norm_l;// * norm_l);//min(shadow_res,norm_l);
     res    = smoothstep(0.45,0.55,res);
-    FragColor =vec4((0.4 +0.6 *  (res) )* LightColor * texColor.xyz,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
+    FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
 
     //FragColor =vec4(0.4 +0.6 *  (res) * LightColor,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
     //FragColor =  vec4((0.3 +0.7 *  (norm_l)) * texColor.xyz,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;

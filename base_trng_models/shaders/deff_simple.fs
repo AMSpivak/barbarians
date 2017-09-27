@@ -30,5 +30,5 @@ void main()
 
     //float res    = smoothstep(0.45,0.55,norm_l);
     //FragColor =vec4( texColor.xyz,1.0);
-    FragColor =vec4(0.6 *  (res) * LightColor * texColor.xyz,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
+    FragColor =vec4((res) * LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
 }

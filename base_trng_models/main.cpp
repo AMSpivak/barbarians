@@ -149,7 +149,9 @@ int main(int argc, char const *argv[])
 
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
-
+    m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
+	m_shader_map.insert ( std::pair<std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
+	
 
 	std::vector <std::shared_ptr<glModel> > Models;
 	std::vector <std::shared_ptr<Animation> > Animations;
@@ -205,7 +207,7 @@ int main(int argc, char const *argv[])
 
 	while(!glfwWindowShouldClose(window))
 	{
-
+		GLuint current_shader;
 
 		int models_count = Models.size();
 		double time_now = glfwGetTime();
@@ -280,18 +282,19 @@ int main(int argc, char const *argv[])
 		/**/
 		//*------------------------------
 		render_target.set();
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_BACK);
 
-		glUseProgram(shader_norm);
+		
 
-
-		cameraLoc  = glGetUniformLocation(shader_norm, "camera");
+		current_shader = m_shader_map["deff_1st_pass"];
+		glUseProgram(current_shader);
+		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
 
-		for(int i = 0; i < models_count; i++) Models[i]->Draw(shader_norm,now_frame);
+		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
 
 
 
@@ -326,7 +329,7 @@ int main(int argc, char const *argv[])
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glViewport(0, 0, width, height);
@@ -334,7 +337,17 @@ int main(int argc, char const *argv[])
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        GLuint current_shader = m_shader_map["deffered"];
+		current_shader = m_shader_map["luminocity"];
+
+		glUseProgram(current_shader);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
+
+		renderQuad();
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+        current_shader = m_shader_map["deffered"];
 
 		glUseProgram(current_shader);
 
@@ -364,7 +377,8 @@ int main(int argc, char const *argv[])
 		GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
 		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
-        renderQuad();
+		renderQuad();
+		
         glClear(GL_DEPTH_BUFFER_BIT);
         current_shader = m_shader_map["deffered_simple"];
         glUseProgram(current_shader);
@@ -415,7 +429,7 @@ int main(int argc, char const *argv[])
 
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, final_render_target.AlbedoMap);
+		glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
 
 		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
 		glActiveTexture(GL_TEXTURE1);
@@ -425,6 +439,10 @@ int main(int argc, char const *argv[])
 		glUniform1i(glGetUniformLocation(current_shader, "DepthMap"), 2);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, render_target.depthMap);
+
+		glUniform1i(glGetUniformLocation(current_shader, "LightMap"), 3);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, final_render_target.AlbedoMap);
 
         renderQuad();
 
