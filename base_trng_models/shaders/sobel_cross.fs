@@ -10,7 +10,8 @@ uniform sampler2D LightMap;
 
 void main()
 {
-
+	if(texture(texMap, TexCoords.xy).w < 0.05)
+        discard;
 
 	vec2 texelSize = 0.7 / textureSize(NormalMap, 0);
 

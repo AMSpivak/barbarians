@@ -146,12 +146,16 @@ int main(int argc, char const *argv[])
 	GLuint shader_sprite = LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs");
 	GLuint shader_sobel = LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs");
 	GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
-
-    m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
+	
+	
+	
+	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs")) );
+	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
 	
+	//GLuint sky_tex = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
 
 	std::vector <std::shared_ptr<glModel> > Models;
 	std::vector <std::shared_ptr<Animation> > Animations;
@@ -329,7 +333,7 @@ int main(int argc, char const *argv[])
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-		glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
+		glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glViewport(0, 0, width, height);
@@ -419,7 +423,8 @@ int main(int argc, char const *argv[])
 
 		glViewport(0, 0, width, height);
 
-
+		glClearColor(1.0f, 0.4f, 0.4f, 1.0f);
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
