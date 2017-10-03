@@ -143,12 +143,12 @@ int main(int argc, char const *argv[])
 	GLuint shader_dbg = LoadshaderProgram("shaders/dbg.vs","shaders/dbg.fs");
 	GLuint shader_shadow = LoadshaderProgram("shaders/vert1_sh.vs","shaders/frag1_sh.fs");
 	GLuint shader_norm = LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs");
-	GLuint shader_sprite = LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs");
+	//GLuint shader_sprite = LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs");
 	GLuint shader_sobel = LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs");
 	GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
-	
-	
-	
+
+
+
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
@@ -425,11 +425,17 @@ int main(int argc, char const *argv[])
 		glViewport(0, 0, width, height);
 
 		glClearColor(1.0f, 0.4f, 0.4f, 1.0f);
-		
+
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        current_shader = m_shader_map["sprite"];
+		glUseProgram(current_shader);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, sky_texture);
+        renderQuad();
 
+        glClear(GL_DEPTH_BUFFER_BIT);
 		current_shader = shader_sobel;
 
 		glUseProgram(current_shader);
