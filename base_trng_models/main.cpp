@@ -149,7 +149,7 @@ int main(int argc, char const *argv[])
 
 
 
-	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs")) );
+	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
@@ -428,13 +428,24 @@ int main(int argc, char const *argv[])
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        {
+            current_shader = m_shader_map["sprite"];
+    		glUseProgram(current_shader);
 
-        current_shader = m_shader_map["sprite"];
-		glUseProgram(current_shader);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, sky_texture);
-        renderQuad();
+            glm::mat4 model_m = glm::mat4(1.0f);
+            model_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
+            glm::mat4 camera_m = glm::mat4(1.0f);
+            cameraLoc  = glGetUniformLocation(current_shader, "camera");
+    		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
 
+            GLuint model_matrix  = glGetUniformLocation(current_shader, "model");
+            glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, sky_texture);
+
+            renderQuad();
+        }
         glClear(GL_DEPTH_BUFFER_BIT);
 		current_shader = shader_sobel;
 
