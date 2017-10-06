@@ -170,7 +170,7 @@ int main(int argc, char const *argv[])
 
 	Models.emplace_back(std::make_shared<glModel>("material/new_brb/barb.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/new_brb/head.mdl",Animations));
-
+    Models.emplace_back(std::make_shared<glModel>("material/b_axe/axe.mdl",Animations));
 
 	GLuint sky_texture;
 	LoadTexture("material/sky.png",sky_texture);
