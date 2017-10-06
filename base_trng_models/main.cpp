@@ -13,6 +13,7 @@
 #include "glscene.h"
 #include "gl_light.h"
 #include "gl_render_target.h"
+#include "gl_model.h"
 
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -138,17 +139,17 @@ int main(int argc, char const *argv[])
 
     std::map<std::string,GLuint> m_shader_map;
 
-    GLuint shaderProgram = LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs");
+    //GLuint shaderProgram = LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs");
 	GLuint shaderProgram2 = LoadshaderProgram("shaders/vertex2.vs","shaders/frag2.fs");
 	GLuint shader_dbg = LoadshaderProgram("shaders/dbg.vs","shaders/dbg.fs");
 	GLuint shader_shadow = LoadshaderProgram("shaders/vert1_sh.vs","shaders/frag1_sh.fs");
 	GLuint shader_norm = LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs");
-	//GLuint shader_sprite = LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs");
+	
 	GLuint shader_sobel = LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs");
 	GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
 
 
-
+	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
@@ -271,18 +272,16 @@ int main(int argc, char const *argv[])
 
 
                 glClear( GL_DEPTH_BUFFER_BIT);
-
-		glUseProgram(shaderProgram);
-		cameraLoc  = glGetUniformLocation(shaderProgram, "camera");
+		current_shader = m_shader_map["shadowmap"];
+		glUseProgram(current_shader);
+		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
 
-		for(int i = 0; i < models_count; i++) Models[i]->Draw(shaderProgram,now_frame);
+		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
 
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
-		//dress_model.Draw(shaderProgram2,animation_3,now_frame);
-		//head_model.Draw(shaderProgram2,animation_2,now_frame);
 
 		/**/
 		//*------------------------------
