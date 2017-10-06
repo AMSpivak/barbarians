@@ -305,26 +305,6 @@ int main(int argc, char const *argv[])
 
 
 
-		/*
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glEnable(GL_MULTISAMPLE);
-		glViewport(0, 0, width, height);
-
-
-		/**/
-		/*
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glCullFace(GL_FRONT);
-		glUseProgram(shaderProgram2);
-		cameraLoc  = glGetUniformLocation(shaderProgram2, "camera");
-		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
-
-
-		for(int i = 0; i < models_count; i++) Models[i]->Draw(shaderProgram2,now_frame);
-
-		/**/
 
 
 		/*---------------------------------------------*/
@@ -334,12 +314,10 @@ int main(int argc, char const *argv[])
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-		glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
 		glViewport(0, 0, width, height);
-
-
+		
+		glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		current_shader = m_shader_map["luminocity"];
@@ -456,16 +434,16 @@ int main(int argc, char const *argv[])
 		glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
 
 		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE0+1);
 		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
 
 
 		glUniform1i(glGetUniformLocation(current_shader, "DepthMap"), 2);
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE0+2);
 		glBindTexture(GL_TEXTURE_2D, render_target.depthMap);
 
 		glUniform1i(glGetUniformLocation(current_shader, "LightMap"), 3);
-		glActiveTexture(GL_TEXTURE3);
+		glActiveTexture(GL_TEXTURE0+3);
 		glBindTexture(GL_TEXTURE_2D, final_render_target.AlbedoMap);
 
         renderQuad();
