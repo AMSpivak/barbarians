@@ -14,7 +14,7 @@
 #include "gl_light.h"
 #include "gl_render_target.h"
 #include "gl_model.h"
-
+#include "gl_character.h"
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
@@ -169,9 +169,14 @@ int main(int argc, char const *argv[])
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyer.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyel.mdl",Animations));/**/
 
-	Models.emplace_back(std::make_shared<glModel>("material/new_brb/barb.mdl",Animations));
-	Models.emplace_back(std::make_shared<glModel>("material/new_brb/head.mdl",Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/b_axe/axe.mdl",Animations));
+	//Models.emplace_back(std::make_shared<glModel>("material/new_brb/barb.mdl",Animations));
+	//Models.emplace_back(std::make_shared<glModel>("material/new_brb/head.mdl",Animations));
+    //Models.emplace_back(std::make_shared<glModel>("material/b_axe/axe.mdl",Animations));
+	GlCharacter hero;
+
+	hero.AddModel("material/new_brb/barb.mdl");
+	hero.AddModel("material/new_brb/head.mdl");
+	hero.AddModel("material/b_axe/axe.mdl");
 
 	GLuint sky_texture;
 	LoadTexture("material/sky.png",sky_texture);
@@ -199,8 +204,8 @@ int main(int argc, char const *argv[])
 	//float angle = 0.0f;
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	Models[1]->model = glm::translate(Models[1]->model, glm::vec3(0.0f, -0.92f, 0.0f));
-	Models[1]->model = glm::rotate(Models[1]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	hero.model_matrix = glm::translate(hero.model_matrix, glm::vec3(0.0f, -0.92f, 0.0f));
+	hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	//test_model.model = glm::rotate(test_model.model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	double time = glfwGetTime();
@@ -210,6 +215,8 @@ int main(int argc, char const *argv[])
 
 	//float m_mass[16*31] ={0};
 	glm::vec3 light_dir_vector = glm::normalize(light_position);
+
+	hero.Process();
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -245,17 +252,18 @@ int main(int argc, char const *argv[])
 				Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 				light_dir_vector = glm::normalize(light_position);
 				time = time_now;
-				//Models[1]->model = glm::rotate(Models[1]->model, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
-				Models[1]->model = glm::rotate(Models[1]->model, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
-
+				hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
+				
 
 				key_angle = 0;
 				now_frame++;
 				if(now_frame == Animations[0]->frames.size()) now_frame = 3;
-
+				hero.Process();
+				/*
 				for(int i = 0; i < models_count; i++)
 					if(Models[i]->parent_idx != -1)
 					Models[i]-> model = Models[Models[i]->parent_idx+1]->model * Animations[Models[i]->parent_idx+1]->frames[now_frame].bones[Models[i]->parent_bone];
+				/**/
 			}
 
 
@@ -280,6 +288,8 @@ int main(int argc, char const *argv[])
 
 		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
 
+		hero.Draw(current_shader);
+
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
 
@@ -300,6 +310,7 @@ int main(int argc, char const *argv[])
 
 		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
 
+		hero.Draw(current_shader);
 
 
 

@@ -13,14 +13,16 @@ class IGlModel
 private:
 
 public:
-	int parent_idx;
-	int parent_bone;
+	int parent;
+	int parent_attach_point;
 
     glm::mat4 model_matrix;
 
-    
-    virtual ~IGlModel() = 0;
-    virtual void Draw() = 0;
+    IGlModel():model_matrix()
+    {}
+    virtual ~IGlModel(){}
+    virtual void Draw(GLuint shader) = 0;
+    virtual void Process() = 0;
 };
 
 
