@@ -128,6 +128,7 @@ int main(int argc, char const *argv[])
 	std::vector <std::shared_ptr<Animation> > Animations;
 
 	Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl",Animations));
+	//Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl",Animations));
 /*
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/base.mdl",Animations));
 	Models.emplace_back(std::make_shared<glModel>("material/bgirl/hair.mdl",Animations));
@@ -153,7 +154,8 @@ int main(int argc, char const *argv[])
 
 
 	glCamera Camera;
-	Camera.SetCameraLocation(glm::vec3(12.0f, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//Camera.SetCameraLocation(glm::vec3(12.0f, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Camera.SetCameraLens(45,(float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f, 100.0f);
 	glLight Light;
 	float light_angle = 90.0f;
@@ -165,14 +167,15 @@ int main(int argc, char const *argv[])
 	float f_near = 1.f;
 	float f_far = 35.0f;
 	Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
-	//Light.SetCameraLens(45,(float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f, 100.0f);
-	//float angle = 0.0f;
+
+	//Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
+	
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	hero.model_matrix = glm::translate(hero.model_matrix, glm::vec3(0.0f, -0.92f, 0.0f));
+
+
 	hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-	//test_model.model = glm::rotate(test_model.model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	double time = glfwGetTime();
 
 
@@ -212,8 +215,9 @@ int main(int argc, char const *argv[])
 
 
                 Camera.SetCameraLocation(glm::vec3(distance, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                //Camera.SetCameraLocation(glm::vec3(distance, distance, -distance),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-				glm::vec3 light_position = glm::vec3(7.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
+				//glm::vec3 light_position = glm::vec3(7.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
 				Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 				light_dir_vector = glm::normalize(light_position);
 				time = time_now;
