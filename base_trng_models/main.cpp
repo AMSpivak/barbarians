@@ -25,40 +25,6 @@ float key_angle = 0.0f;
 
 std::map <int, bool> inputs;
 
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-
-void renderQuad()
-{
-    if (quadVAO == 0)
-    {
-        float quadVertices[] = {
-            // positions        // texture Coords
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        // setup plane VAO
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    }
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
-}
-
-
-
-
-
 
 int main(int argc, char const *argv[])
 {
@@ -140,15 +106,14 @@ int main(int argc, char const *argv[])
     std::map<std::string,GLuint> m_shader_map;
 
     //GLuint shaderProgram = LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs");
-	GLuint shaderProgram2 = LoadshaderProgram("shaders/vertex2.vs","shaders/frag2.fs");
+	/*GLuint shaderProgram2 = LoadshaderProgram("shaders/vertex2.vs","shaders/frag2.fs");
 	GLuint shader_dbg = LoadshaderProgram("shaders/dbg.vs","shaders/dbg.fs");
 	GLuint shader_shadow = LoadshaderProgram("shaders/vert1_sh.vs","shaders/frag1_sh.fs");
 	GLuint shader_norm = LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs");
-	
-	GLuint shader_sobel = LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs");
-	GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
 
+	GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");*/
 
+    m_shader_map.insert ( std::pair<std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
@@ -253,7 +218,7 @@ int main(int argc, char const *argv[])
 				light_dir_vector = glm::normalize(light_position);
 				time = time_now;
 				hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
-				
+
 
 				key_angle = 0;
 				now_frame++;
@@ -275,11 +240,8 @@ int main(int argc, char const *argv[])
 
 		unsigned int cameraLoc;
 
-
 		Light.SetLigtRender();
-
-
-                glClear( GL_DEPTH_BUFFER_BIT);
+        glClear( GL_DEPTH_BUFFER_BIT);
 		current_shader = m_shader_map["shadowmap"];
 		glUseProgram(current_shader);
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
@@ -324,9 +286,9 @@ int main(int argc, char const *argv[])
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-		
+
 		glViewport(0, 0, width, height);
-		
+
 		glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -396,9 +358,6 @@ int main(int argc, char const *argv[])
         light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
 
-		/*LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
-		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));*/
-
         renderQuad();
 
 
@@ -435,7 +394,7 @@ int main(int argc, char const *argv[])
             renderQuad();
         }
         glClear(GL_DEPTH_BUFFER_BIT);
-		current_shader = shader_sobel;
+		current_shader = m_shader_map["sobel"];
 
 		glUseProgram(current_shader);
 

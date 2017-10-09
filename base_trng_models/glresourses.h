@@ -49,5 +49,6 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 void LoadBonesArray(std::string FileName,std::vector <Bone> &bones,int &bones_count);
 void LoadTexture(std::string FileName,GLuint &texture);
 
+void renderQuad();
 
 #endif
