@@ -137,7 +137,7 @@ int main(int argc, char const *argv[])
         m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Hero",r_model));
     }
 
-	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));;
+	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
 
 	hero.AddModel("material/new_brb/barb.mdl");
 	hero.AddModel("material/new_brb/head.mdl");
