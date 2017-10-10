@@ -95,24 +95,25 @@ int main(int argc, char const *argv[])
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
+    std::map<std::string,GLuint> m_shader_map;
+    std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
+    {
+        std::shared_ptr<glRenderTarget> r_target(new glRenderTargetDeffered());
+        m_render_target_map.insert( std::pair<std::string,std::shared_ptr<glRenderTarget>>("base_deffered",r_target));
+        std::shared_ptr<glRenderTarget> r_target_final(new glRenderTarget());
+        m_render_target_map.insert( std::pair<std::string,std::shared_ptr<glRenderTarget>>("final",r_target_final));
+    }
 
-	glRenderTargetDeffered render_target;
+    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
+	glRenderTarget &final_render_target = *(m_render_target_map["final"].get());
+	//glRenderTargetDeffered render_target;
 	render_target.InitBuffer(width, height);
 
-	glRenderTarget final_render_target;
+	//glRenderTarget final_render_target;
 	final_render_target.InitBuffer(width, height);
     // Build and compile our shader program
 
-    std::map<std::string,GLuint> m_shader_map;
-
-    //GLuint shaderProgram = LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs");
-	/*GLuint shaderProgram2 = LoadshaderProgram("shaders/vertex2.vs","shaders/frag2.fs");
-	GLuint shader_dbg = LoadshaderProgram("shaders/dbg.vs","shaders/dbg.fs");
-	GLuint shader_shadow = LoadshaderProgram("shaders/vert1_sh.vs","shaders/frag1_sh.fs");
-	GLuint shader_norm = LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs");
-
-	GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");*/
-
+	//GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
     m_shader_map.insert ( std::pair<std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
@@ -121,7 +122,6 @@ int main(int argc, char const *argv[])
     m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
 
-	//GLuint sky_tex = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
 
 
 	std::vector <std::shared_ptr<glModel> > Models;
@@ -129,16 +129,15 @@ int main(int argc, char const *argv[])
 
 	Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl",Animations));
 	//Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl",Animations));
-/*
-	Models.emplace_back(std::make_shared<glModel>("material/bgirl/base.mdl",Animations));
-	Models.emplace_back(std::make_shared<glModel>("material/bgirl/hair.mdl",Animations));
-	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyer.mdl",Animations));
-	Models.emplace_back(std::make_shared<glModel>("material/bgirl/eyel.mdl",Animations));/**/
 
-	//Models.emplace_back(std::make_shared<glModel>("material/new_brb/barb.mdl",Animations));
-	//Models.emplace_back(std::make_shared<glModel>("material/new_brb/head.mdl",Animations));
-    //Models.emplace_back(std::make_shared<glModel>("material/b_axe/axe.mdl",Animations));
-	GlCharacter hero;
+    std::map<std::string,std::shared_ptr<IGlModel>> m_glmodels_map;
+
+    {
+        std::shared_ptr<IGlModel> r_model(new GlCharacter());
+        m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Hero",r_model));
+    }
+
+	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));;
 
 	hero.AddModel("material/new_brb/barb.mdl");
 	hero.AddModel("material/new_brb/head.mdl");
@@ -157,6 +156,7 @@ int main(int argc, char const *argv[])
 	//Camera.SetCameraLocation(glm::vec3(12.0f, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Camera.SetCameraLens(45,(float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f, 100.0f);
+
 	glLight Light;
 	float light_angle = 90.0f;
 	float light_radius = 20.0f;
@@ -168,8 +168,8 @@ int main(int argc, char const *argv[])
 	float f_far = 35.0f;
 	Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
 
-	//Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
-	
+	Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
+
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
