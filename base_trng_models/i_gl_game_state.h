@@ -13,7 +13,7 @@
 class IGlGameState
 {
 private:
-   
+
     //std::map<std::string,GLuint> &m_shader_map;
 protected:
     std::map<std::string,GLuint> &m_shader_map;
@@ -30,7 +30,7 @@ public:
     }
     virtual ~IGlGameState(){}
     virtual void Draw() = 0;
-    virtual void Process() = 0;
+    virtual void Process(std::map <int, bool> &inputs) = 0;
 };
 
 

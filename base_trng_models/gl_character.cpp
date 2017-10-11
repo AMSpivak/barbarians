@@ -1,25 +1,47 @@
 #include "gl_character.h"
 
 GlCharacter::GlCharacter():
-                            now_frame(0)
-                            
+                         now_frame(0)
+                        ,current_animation(nullptr)
 {
 
 }
+
 GlCharacter::~GlCharacter()
 {
 
 }
+
+void GlCharacter::UseSequence(const std::string & name)
+{
+    current_animation = &sequence[name];
+}
+
+void GlCharacter::AddSequence(const std::string & name, const AnimationSequence & in_sequence)
+{
+    sequence.insert( std::pair<std::string, AnimationSequence>(name,in_sequence));
+}
+
 void GlCharacter::Draw(GLuint shader)
 {
+
     int models_count = Models.size();
     for(int i = 0; i < models_count; i++) Models[i]->Draw(shader,now_frame);
 }
+
 void GlCharacter::Process()
 {
-    now_frame++;
-    if(now_frame == Animations[0]->frames.size()) now_frame = 3;
-    
+    if(current_animation == nullptr)
+    {
+        now_frame = 0;
+    }
+    else
+    {
+        now_frame++;
+
+        if(now_frame > current_animation->end_frame || now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
+    }
+
     int models_count = Models.size();
     for(int i = 0; i < models_count; i++)
     if(Models[i]->parent_idx != -1)

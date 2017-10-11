@@ -1,14 +1,14 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "gl_game_state_arena.h"
+#include "gl_game_state_dungeon.h"
 #include "glm/glm.hpp"
 #include "glm/trigonometric.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glscene.h"
 
-GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
+GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
                                     std::map<std::string,std::shared_ptr<IGlModel>> & models_map,
                                     size_t screen_width,
@@ -18,11 +18,11 @@ GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
                                                         ,m_models_map(models_map)
                                                         ,light_angle (90.0f)
                                                         ,light_radius (20.0f)
-                                                        ,now_frame(3)
+                                                        ,now_frame(91)
                                                         ,key_angle(0.0f)
 {
-    Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl",Animations));
-    Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
+    Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
+    //Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
 
     Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -39,14 +39,16 @@ GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
 
     LoadTexture("material/sky.png",sky_texture);
     time = glfwGetTime();/**/
+    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
+    hero.UseSequence("stance");
 }
 
-void GlGameStateArena::Draw()
+void GlGameStateDungeon::Draw()
 {
 
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     glRenderTarget &final_render_target = *(m_render_target_map["final"].get());
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
+    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
 
     size_t width = IGlGameState::m_screen_width;
     size_t height = IGlGameState::m_screen_height;
@@ -64,8 +66,23 @@ void GlGameStateArena::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
+        glm::mat4 model_matrix = Models[0]->model;
+        glm::mat4 pos_matrix;
 
-		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
+        for(int iy = -2; iy < 3; iy++)
+        {
+            pos_matrix = glm::mat4();
+            pos_matrix = glm::translate(pos_matrix, glm::vec3(-4.0f, 0.0f, 2.0f*iy));
+
+            for(int ix = 0; ix < 5; ix++)
+            {
+                Models[0]->model = pos_matrix * model_matrix;
+                pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+                Models[0]->Draw(current_shader,now_frame);
+            }
+        }
+        Models[0]->model = model_matrix;
+
 
 		hero.Draw(current_shader);
 
@@ -86,8 +103,19 @@ void GlGameStateArena::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
+        for(int iy = -2; iy < 3; iy++)
+        {
+            pos_matrix = glm::mat4();
+            pos_matrix = glm::translate(pos_matrix, glm::vec3(-4.0f, 0.0f, 2.0f*iy));
 
-		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
+            for(int ix = 0; ix < 5; ix++)
+            {
+                Models[0]->model = pos_matrix * model_matrix;
+                pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+                Models[0]->Draw(current_shader,now_frame);
+            }
+        }
+        Models[0]->model = model_matrix;
 
 		hero.Draw(current_shader);
 
@@ -147,7 +175,7 @@ void GlGameStateArena::Draw()
 		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
 		renderQuad();
-
+/*
         glClear(GL_DEPTH_BUFFER_BIT);
         current_shader = m_shader_map["deffered_simple"];
         glUseProgram(current_shader);
@@ -172,7 +200,7 @@ void GlGameStateArena::Draw()
         light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
 
-        renderQuad();
+        renderQuad();*/
 
 
 
@@ -233,7 +261,7 @@ void GlGameStateArena::Draw()
 
 
 }
-void GlGameStateArena::Process(std::map <int, bool> &inputs)
+void GlGameStateDungeon::Process(std::map <int, bool> &inputs)
 {
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
@@ -249,7 +277,9 @@ void GlGameStateArena::Process(std::map <int, bool> &inputs)
                     if(inputs[GLFW_KEY_RIGHT]) key_angle +=5.0f;
                     if(inputs[GLFW_KEY_LEFT]) key_angle -=5.0f;
 
-                    if(inputs[GLFW_KEY_UP]) light_angle +=2.0f;
+                    if(inputs[GLFW_KEY_UP]) hero.UseSequence("walk");//light_angle +=2.0f;
+                    else hero.UseSequence("stance");
+
                     if(inputs[GLFW_KEY_DOWN]) light_angle -=2.0f;
 
                     if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
@@ -263,8 +293,8 @@ void GlGameStateArena::Process(std::map <int, bool> &inputs)
 
 
 
-                    Camera.SetCameraLocation(glm::vec3(distance, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                    //Camera.SetCameraLocation(glm::vec3(distance, distance, -distance),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    //Camera.SetCameraLocation(glm::vec3(distance, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    Camera.SetCameraLocation(glm::vec3(distance, distance, -distance),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
                     glm::vec3 light_position = glm::vec3(7.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
                     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -275,7 +305,7 @@ void GlGameStateArena::Process(std::map <int, bool> &inputs)
 
                     key_angle = 0;
                     now_frame++;
-                    if(now_frame == Animations[0]->frames.size()) now_frame = 3;
+                    if(now_frame == 99 + 1) now_frame = 91;
                     hero.Process();
                 }
 /**/

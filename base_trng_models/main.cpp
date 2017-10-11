@@ -15,7 +15,9 @@
 #include "gl_render_target.h"
 #include "gl_model.h"
 #include "gl_character.h"
-
+#include "gl_game_state_arena.h"
+#include "gl_game_state_dungeon.h"
+#include "animation_sequence.h"
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
@@ -113,7 +115,7 @@ int main(int argc, char const *argv[])
 	final_render_target.InitBuffer(width, height);
     // Build and compile our shader program
 
-	//GLuint shader_sky = LoadshaderProgram("shaders/sky.vs","shaders/sky.fs");
+
     m_shader_map.insert ( std::pair<std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
@@ -128,7 +130,6 @@ int main(int argc, char const *argv[])
 	std::vector <std::shared_ptr<Animation> > Animations;
 
 	Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl",Animations));
-	//Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl",Animations));
 
     std::map<std::string,std::shared_ptr<IGlModel>> m_glmodels_map;
 
@@ -142,286 +143,35 @@ int main(int argc, char const *argv[])
 	hero.AddModel("material/new_brb/barb.mdl");
 	hero.AddModel("material/new_brb/head.mdl");
 	hero.AddModel("material/b_axe/axe.mdl");
+    AnimationSequence as_stance(91,99);
+    AnimationSequence as_walk(127,135);
+    hero.AddSequence("stance",as_stance);
+    hero.AddSequence("walk",as_walk);
 
-	GLuint sky_texture;
-	LoadTexture("material/sky.png",sky_texture);
 
-	//glEnable(GL_MULTISAMPLE);
+
+
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
 
 
-	glCamera Camera;
-	//Camera.SetCameraLocation(glm::vec3(12.0f, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	Camera.SetCameraLens(45,(float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f, 100.0f);
-
-	glLight Light;
-	float light_angle = 90.0f;
-	float light_radius = 20.0f;
-
-	glm::vec3 light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
-
-	Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	float f_near = 1.f;
-	float f_far = 35.0f;
-	Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
-
-	Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
-
-	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
 
 	hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-	double time = glfwGetTime();
 
+    GlGameStateArena game_state_arena(m_shader_map,m_render_target_map,m_glmodels_map,width,height);
+    GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,width,height);
+    IGlGameState * game_state = &game_state_arena;
+    game_state = &game_state_dungeon;
 
-	int now_frame = 3;
-
-	//float m_mass[16*31] ={0};
-	glm::vec3 light_dir_vector = glm::normalize(light_position);
-
-	hero.Process();
 
 	while(!glfwWindowShouldClose(window))
 	{
 		GLuint current_shader;
-
-		int models_count = Models.size();
-		double time_now = glfwGetTime();
-		std::cout<<(time_now - time)<<'\n';
-		if((time_now - time)>(1.0/15.0))
-			{
-                static float distance = 12.f;
-
-				if(inputs[GLFW_KEY_RIGHT]) key_angle +=5.0f;
-				if(inputs[GLFW_KEY_LEFT]) key_angle -=5.0f;
-
-				if(inputs[GLFW_KEY_UP]) light_angle +=2.0f;
-				if(inputs[GLFW_KEY_DOWN]) light_angle -=2.0f;
-
-                if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
-                if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
-
-                if(distance<1.0f)distance=1.0f;
-				if(distance>14.0f)distance=14.0f;
-
-				if(light_angle<10.0f)light_angle=10.0f;
-				if(light_angle>170.0f)light_angle=170.0f;
-
-
-
-                Camera.SetCameraLocation(glm::vec3(distance, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                //Camera.SetCameraLocation(glm::vec3(distance, distance, -distance),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-				//glm::vec3 light_position = glm::vec3(7.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
-				Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-				light_dir_vector = glm::normalize(light_position);
-				time = time_now;
-				hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
-
-
-				key_angle = 0;
-				now_frame++;
-				if(now_frame == Animations[0]->frames.size()) now_frame = 3;
-				hero.Process();
-				/*
-				for(int i = 0; i < models_count; i++)
-					if(Models[i]->parent_idx != -1)
-					Models[i]-> model = Models[Models[i]->parent_idx+1]->model * Animations[Models[i]->parent_idx+1]->frames[now_frame].bones[Models[i]->parent_bone];
-				/**/
-			}
-
-
-		//dress_model.model = Models[0]->model * Animations[0]->frames[now_frame].bones[8];
-		//head_model.model = Models[0]->model * Animations[0]->frames[now_frame].bones[19];
-
-		glDisable(GL_MULTISAMPLE);
-		glDisable(GL_CULL_FACE);
-
-		unsigned int cameraLoc;
-
-		Light.SetLigtRender();
-        glClear( GL_DEPTH_BUFFER_BIT);
-		current_shader = m_shader_map["shadowmap"];
-		glUseProgram(current_shader);
-		cameraLoc  = glGetUniformLocation(current_shader, "camera");
-		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
-
-
-		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
-
-		hero.Draw(current_shader);
-
-		glCullFace(GL_BACK);
-		glEnable(GL_CULL_FACE);
-
-		/**/
-		//*------------------------------
-		render_target.set();
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glCullFace(GL_BACK);
-
-
-
-		current_shader = m_shader_map["deff_1st_pass"];
-		glUseProgram(current_shader);
-		cameraLoc  = glGetUniformLocation(current_shader, "camera");
-		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
-
-
-		for(int i = 0; i < models_count; i++) Models[i]->Draw(current_shader,now_frame);
-
-		hero.Draw(current_shader);
-
-
-
-
-
-
-		/*---------------------------------------------*/
-
-
-		final_render_target.set();
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-
-
-		glViewport(0, 0, width, height);
-
-		glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		current_shader = m_shader_map["luminocity"];
-
-		glUseProgram(current_shader);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
-
-		renderQuad();
-
-		glClear(GL_DEPTH_BUFFER_BIT);
-
-        current_shader = m_shader_map["deffered"];
-
-		glUseProgram(current_shader);
-
-		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, Light.depthMap);
-
-
-		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
-		glUniform3fv(light_dir, 1, glm::value_ptr(light_dir_vector));
-
-        glm::vec3 light_color_vector = glm::vec3(0.5f,0.5f,1.0f);
-        GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
-        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
-
-		GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
-		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
-
-		renderQuad();
-
-        glClear(GL_DEPTH_BUFFER_BIT);
-        current_shader = m_shader_map["deffered_simple"];
-        glUseProgram(current_shader);
-
-		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
-
-        glm::vec4 light_pos_vector = glm::vec4(0.0f,-0.5f,0.0f,15.0f);
-
-		GLuint light_pos  = glGetUniformLocation(current_shader, "LightLocation");
-		glUniform4fv(light_pos, 1, glm::value_ptr(light_pos_vector));
-
-        glm::vec3 light_color_vector2 = glm::vec3(9.0f,5.5f,0.2f);
-        light_color  = glGetUniformLocation(current_shader, "LightColor");
-        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
-
-        renderQuad();
-
-
-
-
-        glDisable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	   //glEnable(GL_MULTISAMPLE);
-
-		glViewport(0, 0, width, height);
-
-		glClearColor(1.0f, 0.4f, 0.4f, 1.0f);
-
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        {
-            current_shader = m_shader_map["sprite"];
-    		glUseProgram(current_shader);
-
-            glm::mat4 model_m = glm::mat4(1.0f);
-            model_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
-            glm::mat4 camera_m = glm::mat4(1.0f);
-            cameraLoc  = glGetUniformLocation(current_shader, "camera");
-    		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
-
-            GLuint model_matrix  = glGetUniformLocation(current_shader, "model");
-            glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, sky_texture);
-
-            renderQuad();
-        }
-        glClear(GL_DEPTH_BUFFER_BIT);
-		current_shader = m_shader_map["sobel"];
-
-		glUseProgram(current_shader);
-
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
-		glActiveTexture(GL_TEXTURE0+1);
-		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
-
-
-		glUniform1i(glGetUniformLocation(current_shader, "DepthMap"), 2);
-		glActiveTexture(GL_TEXTURE0+2);
-		glBindTexture(GL_TEXTURE_2D, render_target.depthMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "LightMap"), 3);
-		glActiveTexture(GL_TEXTURE0+3);
-		glBindTexture(GL_TEXTURE_2D, final_render_target.AlbedoMap);
-
-        renderQuad();
-
-
+        game_state->Process(inputs);
+        game_state->Draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
