@@ -1,12 +1,17 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "gl_game_state_dungeon.h"
+
+//#define GLM_SWIZZLE_XYZW
+
 #include "glm/glm.hpp"
+
 #include "glm/trigonometric.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/rotate_vector.hpp"
 #include "glscene.h"
+#include "gl_game_state_dungeon.h"
 
 GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
@@ -83,8 +88,13 @@ void GlGameStateDungeon::Draw()
         }
         Models[0]->model = model_matrix;
 
-
+        pos_matrix = glm::mat4();
+        pos_matrix = glm::translate(pos_matrix, hero_position);
+        model_matrix = hero.model_matrix;
+        hero.model_matrix = pos_matrix * model_matrix;
+        hero.RefreshMatrixes();
 		hero.Draw(current_shader);
+        hero.model_matrix = model_matrix;
 
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
@@ -103,6 +113,8 @@ void GlGameStateDungeon::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
+        model_matrix = Models[0]->model;
+
         for(int iy = -2; iy < 3; iy++)
         {
             pos_matrix = glm::mat4();
@@ -117,7 +129,14 @@ void GlGameStateDungeon::Draw()
         }
         Models[0]->model = model_matrix;
 
-		hero.Draw(current_shader);
+        //model_matrix = hero.model_matrix;
+        //pos_matrix = glm::mat4();
+        //pos_matrix = glm::translate(pos_matrix, hero_position);
+
+        //hero.model_matrix = pos_matrix * model_matrix;
+        //hero.Process();
+        hero.Draw(current_shader);
+        //hero.model_matrix = model_matrix;
 
 
 
@@ -274,11 +293,23 @@ void GlGameStateDungeon::Process(std::map <int, bool> &inputs)
                 {
                     static float distance = 12.f;
 
-                    if(inputs[GLFW_KEY_RIGHT]) key_angle +=5.0f;
-                    if(inputs[GLFW_KEY_LEFT]) key_angle -=5.0f;
+                    if(inputs[GLFW_KEY_RIGHT]) key_angle -=5.0f;
+                    if(inputs[GLFW_KEY_LEFT]) key_angle +=5.0f;
 
-                    if(inputs[GLFW_KEY_UP]) hero.UseSequence("walk");//light_angle +=2.0f;
-                    else hero.UseSequence("stance");
+                    if(inputs[GLFW_KEY_UP]&&!inputs[GLFW_KEY_SPACE])
+                    {
+                        hero.UseSequence("walk");//light_angle +=2.0f;
+                        glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.1f,0.0f,1.0f);
+                        hero_position += glm::vec3(move_h);//move.xyz();//glm::vec3(move);
+                    }else
+                    if(inputs[GLFW_KEY_SPACE])
+                    {
+                        hero.UseSequence("strike");
+                    }
+                    else
+                    {
+                        hero.UseSequence("stance");
+                    }
 
                     if(inputs[GLFW_KEY_DOWN]) light_angle -=2.0f;
 
@@ -300,6 +331,7 @@ void GlGameStateDungeon::Process(std::map <int, bool> &inputs)
                     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                     glm::vec3  light_dir_vector = glm::normalize(light_position);
                     time = time_now;
+                    //hero.model_matrix = glm::translate(hero.model_matrix, glm::vec3(0.0f, 0.0f, 1.0f));
                     hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
 

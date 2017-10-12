@@ -32,6 +32,7 @@ private:
     int now_frame;
     double time;
     float key_angle;
+    glm::vec3 hero_position;
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
 };

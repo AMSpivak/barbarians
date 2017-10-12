@@ -28,20 +28,8 @@ void GlCharacter::Draw(GLuint shader)
     int models_count = Models.size();
     for(int i = 0; i < models_count; i++) Models[i]->Draw(shader,now_frame);
 }
-
-void GlCharacter::Process()
+void GlCharacter::RefreshMatrixes()
 {
-    if(current_animation == nullptr)
-    {
-        now_frame = 0;
-    }
-    else
-    {
-        now_frame++;
-
-        if(now_frame > current_animation->end_frame || now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
-    }
-
     int models_count = Models.size();
     for(int i = 0; i < models_count; i++)
     if(Models[i]->parent_idx != -1)
@@ -56,6 +44,22 @@ void GlCharacter::Process()
     {
         Models[i]-> model = model_matrix;
     }
+}
+
+void GlCharacter::Process()
+{
+    if(current_animation == nullptr)
+    {
+        now_frame = 0;
+    }
+    else
+    {
+        now_frame++;
+
+        if(now_frame > current_animation->end_frame || now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
+    }
+
+    RefreshMatrixes();
 }
 void GlCharacter::AddModel(std::string name)
 {

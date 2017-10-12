@@ -147,6 +147,8 @@ int main(int argc, char const *argv[])
     AnimationSequence as_walk(127,135);
     hero.AddSequence("stance",as_stance);
     hero.AddSequence("walk",as_walk);
+    AnimationSequence as_strike(149,157);
+    hero.AddSequence("strike",as_strike);
 
 
 
@@ -202,6 +204,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (key == GLFW_KEY_DOWN )
 		inputs[GLFW_KEY_DOWN] = (action != GLFW_RELEASE) ?  true : false;
+
+    if (key == GLFW_KEY_SPACE )
+    		inputs[GLFW_KEY_SPACE] = (action != GLFW_RELEASE) ?  true : false;
 
     if (key == GLFW_KEY_LEFT_BRACKET )
         inputs[GLFW_KEY_LEFT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;
