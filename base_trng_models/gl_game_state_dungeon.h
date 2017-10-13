@@ -27,7 +27,8 @@ private:
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
     GLuint sky_texture;
 
-    std::vector <int> m_dungeon_map;
+    std::vector <int> m_dungeon_map_tiles;
+    std::vector <int> m_dungeon_map_objects;
     size_t m_dungeon_floors;
     size_t m_dungeon_width;
     size_t m_dungeon_height;

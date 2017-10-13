@@ -53,9 +53,11 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 
     m_dungeon_width = 5;
     m_dungeon_height = 5;
-    m_dungeon_floors = 5;
-    m_dungeon_map.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
-
+    m_dungeon_floors = 1;
+    m_dungeon_map_objects.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
+    m_dungeon_map_objects[1] = 1;
+    m_dungeon_map_tiles.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
+    hero_position = glm::vec3(5.0f,0.0f,5.0f);
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
 {
@@ -69,10 +71,23 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
 
         for(int ix = 0; ix < m_dungeon_width; ix++)
         {
-            int index = m_dungeon_map[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+            int index = m_dungeon_map_tiles[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
             pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
             if(index>=0)
             {
+
+                model_matrix = Models[index]->model;
+                Models[index]->model = pos_matrix * model_matrix;
+                //pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+                Models[index]->Draw(current_shader,now_frame);
+                Models[index]->model = model_matrix;
+            }
+            
+            index = m_dungeon_map_objects[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+            if(index>0)
+            {
+
+                model_matrix = Models[index]->model;
                 Models[index]->model = pos_matrix * model_matrix;
                 //pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
                 Models[index]->Draw(current_shader,now_frame);
@@ -81,6 +96,7 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
         }
     }/**/
     //Models[index]->model = model_matrix;
+    
 }
 void GlGameStateDungeon::Draw()
 {
