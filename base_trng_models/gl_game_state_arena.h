@@ -18,7 +18,7 @@ public:
 
     ~GlGameStateArena(){}
     void Draw();
-    void Process(std::map <int, bool> &inputs);
+    IGlGameState * Process(std::map <int, bool> &inputs);
 private:
     std::vector <std::shared_ptr<glModel> > Models;
     std::vector <std::shared_ptr<Animation> > Animations;

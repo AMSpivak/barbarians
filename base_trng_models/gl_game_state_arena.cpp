@@ -233,7 +233,7 @@ void GlGameStateArena::Draw()
 
 
 }
-void GlGameStateArena::Process(std::map <int, bool> &inputs)
+IGlGameState *  GlGameStateArena::Process(std::map <int, bool> &inputs)
 {
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
@@ -278,6 +278,7 @@ void GlGameStateArena::Process(std::map <int, bool> &inputs)
                     if(now_frame == Animations[0]->frames.size()) now_frame = 3;
                     hero.Process();
                 }
+            return this;
 /**/
 
 }

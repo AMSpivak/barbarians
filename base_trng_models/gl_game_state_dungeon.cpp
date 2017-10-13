@@ -27,10 +27,14 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                                         ,key_angle(0.0f)
 {
     Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/statue/statue.mdl", Animations));
     //Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
-
-    Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    int models_count = Models.size();
+    for(auto tmpModel : Models)
+    {
+        tmpModel->model = glm::rotate(tmpModel->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        tmpModel->model = glm::rotate(tmpModel->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    }
 
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
@@ -46,8 +50,38 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     time = glfwGetTime();/**/
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
-}
 
+    m_dungeon_width = 5;
+    m_dungeon_height = 5;
+    m_dungeon_floors = 5;
+    m_dungeon_map.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
+
+}
+void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
+{
+    glm::mat4 model_matrix = Models[0]->model;
+    glm::mat4 pos_matrix;
+    size_t iz = 0;
+    for(int iy = 0; iy < m_dungeon_height; iy++)
+    {
+        pos_matrix = glm::mat4();
+        pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
+
+        for(int ix = 0; ix < m_dungeon_width; ix++)
+        {
+            int index = m_dungeon_map[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+            pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+            if(index>=0)
+            {
+                Models[index]->model = pos_matrix * model_matrix;
+                //pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+                Models[index]->Draw(current_shader,now_frame);
+                Models[index]->model = model_matrix;
+            }
+        }
+    }/**/
+    //Models[index]->model = model_matrix;
+}
 void GlGameStateDungeon::Draw()
 {
 
@@ -71,30 +105,15 @@ void GlGameStateDungeon::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
-        glm::mat4 model_matrix = Models[0]->model;
-        glm::mat4 pos_matrix;
+        DrawDungeon(current_shader);
 
-        for(int iy = -2; iy < 3; iy++)
-        {
-            pos_matrix = glm::mat4();
-            pos_matrix = glm::translate(pos_matrix, glm::vec3(-4.0f, 0.0f, 2.0f*iy));
-
-            for(int ix = 0; ix < 5; ix++)
-            {
-                Models[0]->model = pos_matrix * model_matrix;
-                pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-                Models[0]->Draw(current_shader,now_frame);
-            }
-        }
-        Models[0]->model = model_matrix;
-
-        pos_matrix = glm::mat4();
-        pos_matrix = glm::translate(pos_matrix, hero_position);
-        model_matrix = hero.model_matrix;
-        hero.model_matrix = pos_matrix * model_matrix;
-        hero.RefreshMatrixes();
+        //pos_matrix = glm::mat4();
+        //pos_matrix = glm::translate(pos_matrix, hero_position);
+        //model_matrix = hero.model_matrix;
+        //hero.model_matrix = pos_matrix * model_matrix;
+        //hero.RefreshMatrixes();
 		hero.Draw(current_shader);
-        hero.model_matrix = model_matrix;
+        //hero.model_matrix = model_matrix;
 
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
@@ -113,21 +132,7 @@ void GlGameStateDungeon::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
-        model_matrix = Models[0]->model;
-
-        for(int iy = -2; iy < 3; iy++)
-        {
-            pos_matrix = glm::mat4();
-            pos_matrix = glm::translate(pos_matrix, glm::vec3(-4.0f, 0.0f, 2.0f*iy));
-
-            for(int ix = 0; ix < 5; ix++)
-            {
-                Models[0]->model = pos_matrix * model_matrix;
-                pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-                Models[0]->Draw(current_shader,now_frame);
-            }
-        }
-        Models[0]->model = model_matrix;
+        DrawDungeon(current_shader);
 
         //model_matrix = hero.model_matrix;
         //pos_matrix = glm::mat4();
@@ -186,7 +191,7 @@ void GlGameStateDungeon::Draw()
 		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
 		glUniform3fv(light_dir, 1, glm::value_ptr(light_dir_vector));
 
-        glm::vec3 light_color_vector = glm::vec3(0.5f,0.5f,1.0f);
+        glm::vec3 light_color_vector = glm::vec3(1.0f,1.0f,1.0f);
         GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 
@@ -280,7 +285,7 @@ void GlGameStateDungeon::Draw()
 
 
 }
-void GlGameStateDungeon::Process(std::map <int, bool> &inputs)
+IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
 {
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
@@ -340,6 +345,7 @@ void GlGameStateDungeon::Process(std::map <int, bool> &inputs)
                     if(now_frame == 99 + 1) now_frame = 91;
                     hero.Process();
                 }
+                return this;
 /**/
 
 }
