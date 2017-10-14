@@ -25,6 +25,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                                         ,light_radius (20.0f)
                                                         ,now_frame(91)
                                                         ,key_angle(0.0f)
+                                                        ,m_dungeon(10,10,1)
 {
     Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/statue/statue.mdl", Animations));
@@ -50,29 +51,30 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     time = glfwGetTime();/**/
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
-
+/*
     m_dungeon_width = 5;
     m_dungeon_height = 5;
     m_dungeon_floors = 1;
     m_dungeon_map_objects.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
     m_dungeon_map_objects[1] = 1;
-    m_dungeon_map_tiles.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
-    hero_position = glm::vec3(5.0f,0.0f,5.0f);
+    m_dungeon_map_tiles.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);*/
+    hero_position = glm::vec3(10.0f,0.0f,10.0f);
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
 {
     glm::mat4 model_matrix = Models[0]->model;
     glm::mat4 pos_matrix;
     size_t iz = 0;
-    for(int iy = 0; iy < m_dungeon_height; iy++)
+    for(int iy = 0; iy < m_dungeon.Height(); iy++)
     {
         pos_matrix = glm::mat4();
         pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
 
-        for(int ix = 0; ix < m_dungeon_width; ix++)
+        for(int ix = 0; ix < m_dungeon.Width(); ix++)
         {
-            int index = m_dungeon_map_tiles[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
-            pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+            int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
+            //m_dungeon_map_tiles[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+           
             if(index>=0)
             {
 
@@ -83,7 +85,7 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
                 Models[index]->model = model_matrix;
             }
             
-            index = m_dungeon_map_objects[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+            index = m_dungeon.GetMapObjectIndex(ix,iy,iz);//m_dungeon_map_objects[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
             if(index>0)
             {
 
@@ -93,6 +95,7 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
                 Models[index]->Draw(current_shader,now_frame);
                 Models[index]->model = model_matrix;
             }
+            pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
         }
     }/**/
     //Models[index]->model = model_matrix;
@@ -301,6 +304,92 @@ void GlGameStateDungeon::Draw()
 
 
 }
+
+
+void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
+{
+    float hero_radius =1.0f;
+
+    int x = static_cast<int>(hero_position[0]*0.5f);
+    int z = static_cast<int>(hero_position[2]*0.5f);
+    float sh_x = hero_move[0];
+    if(sh_x < 0)
+    {
+        float frac = hero_position [0] - 2.0f*x;
+        if(frac + sh_x - hero_radius < -1.0f)
+        { 
+            if(m_dungeon.GetMapObjectIndex(x-1,z,0)>0||m_dungeon.GetMapTilesIndex(x-1,z,0)<0)
+            {
+                sh_x =-1.0f + hero_radius - frac;
+            } 
+        }
+    }
+
+    if(sh_x > 0)
+    {
+        float frac = hero_position [0] - 2.0f*x;
+        if(frac + sh_x + hero_radius > 1.0f)
+        { 
+            if(m_dungeon.GetMapObjectIndex(x+1,z,0)>0||m_dungeon.GetMapTilesIndex(x+1,z,0)<0)
+            {
+                sh_x =1.0f - hero_radius - frac;
+            } 
+        }
+    }
+
+    float sh_z = hero_move[2];
+    if(sh_z < 0)
+    {
+        float frac = hero_position [2] - 2.0f*z;
+        if(frac + sh_z - hero_radius < -1.0f)
+        { 
+            if(m_dungeon.GetMapObjectIndex(x,z-1,0)>0||m_dungeon.GetMapTilesIndex(x,z-1,0)<0)
+            {
+                sh_z =-1.0f + hero_radius - frac;
+            } 
+        }
+    }
+
+    if(sh_z > 0)
+    {
+        float frac = hero_position [2] - 2.0f*z;
+        if(frac + sh_z + hero_radius > 1.0f)
+        { 
+            if(m_dungeon.GetMapObjectIndex(x,z+1,0)>0||m_dungeon.GetMapTilesIndex(x,z+1,0)<0)
+            {
+                sh_z =1.0f - hero_radius - frac;
+            } 
+        }
+    }
+
+    
+
+    hero_position += glm::vec3(sh_x,0,sh_z);
+/*
+    glm::vec3 new_pos = hero_position + hero_move;// + hero_radius*glm::normalize(hero_move);
+
+    int xn = static_cast<int>(new_pos[0]*0.5f);
+    int zn = static_cast<int>(new_pos[2]*0.5f);
+
+    //hero_position += hero_move;
+    std::cout<<"\n" <<x<<" "<<z<<" "<<xn<<" "<<zn<<" "<<" \n";
+    std::cout<<"\n" <<hero_position[0]<<" "<<hero_position[2]<<" "<<hero_position[1]<<" "<<" \n";
+    if(m_dungeon.GetMapObjectIndex(xn,zn,0)>0||m_dungeon.GetMapTilesIndex(xn,zn,0)<0)
+    {
+        float zp = zn + z;
+        zp-= hero_radius * (zn - z);
+        new_pos[2] = zp;
+    }
+    std::cout<<"\n" <<m_dungeon.GetMapTilesIndex(xn,zn,0)<<" "<<m_dungeon.GetMapTilesIndex(xn,z,0)<<" \n";
+    if(m_dungeon.GetMapObjectIndex(xn,z,0)>0||m_dungeon.GetMapTilesIndex(xn,z,0)<0)
+    {
+        float xp = xn + x;
+        xp-= hero_radius * (xn - x);
+        new_pos[0] = xp;
+    }
+
+    hero_position = new_pos;*/
+}
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
 {
 
@@ -309,7 +398,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
 
             int models_count = Models.size();
             double time_now = glfwGetTime();
-            std::cout<<(time_now - time)<<'\n';
+            //std::cout<<(time_now - time)<<'\n';
             if((time_now - time)>(1.0/15.0))
                 {
                     static float distance = 12.f;
@@ -320,8 +409,10 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
                     if(inputs[GLFW_KEY_UP]&&!inputs[GLFW_KEY_SPACE])
                     {
                         hero.UseSequence("walk");//light_angle +=2.0f;
+                        //MoveHero(glm::vec3(0.0f,0.1f,0.0f));
                         glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.1f,0.0f,1.0f);
-                        hero_position += glm::vec3(move_h);//move.xyz();//glm::vec3(move);
+                        MoveHero(glm::vec3(move_h));
+                        //hero_position += glm::vec3(move_h);//move.xyz();//glm::vec3(move);
                     }else
                     if(inputs[GLFW_KEY_SPACE])
                     {
