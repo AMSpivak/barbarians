@@ -1,6 +1,10 @@
 CC=g++
-CFLAGS=-c  -I".\includes"  -std=gnu++11
-LDFLAGS=  -lglew32 -lSOIL -lglfw3 -lopengl32 -static-libgcc -static-libstdc++  -l:libgdi32.a -L".\gl"
+CFLAGS=-c  -I".\includes" -I".\glm"  -std=gnu++11
+ifdef SYSTEMROOT
+	LDFLAGS=  -lglew32 -lSOIL -lglfw3 -lopengl32 -static-libgcc -static-libstdc++  -l:libgdi32.a -L".\gl"
+else
+	LDFLAGS=  -lGLEW -lSOIL -lGL `pkg-config --cflags glfw3` `pkg-config --static --libs glfw3`
+endif
 SOURCES= main.cpp glresourses.cpp gl_render_target.cpp glscene.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=game
