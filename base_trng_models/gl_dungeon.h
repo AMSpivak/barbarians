@@ -13,6 +13,8 @@ public:
         m_dungeon_map_objects.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
         m_dungeon_map_objects[1] = 1;
         m_dungeon_map_tiles.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
+        for(size_t p = 0; p < m_dungeon_width; p++)
+            m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*8 +p] = 2;
     } 
     int GetMapTilesIndex(int x, int y, int z)
     {

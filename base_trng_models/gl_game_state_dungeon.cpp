@@ -29,6 +29,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 {
     Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/statue/statue.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wall/wall.mdl", Animations));
     //Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
     int models_count = Models.size();
     for(auto tmpModel : Models)
@@ -40,7 +41,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
 
-    light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
+    //light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
+    light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle))); 
     light_dir_vector = glm::normalize(light_position);
     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     float f_near = 1.f;
@@ -423,7 +425,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
                         hero.UseSequence("stance");
                     }
 
-                    if(inputs[GLFW_KEY_DOWN]) light_angle -=2.0f;
+                    if(inputs[GLFW_KEY_DOWN]) {}//light_angle -=2.0f;
 
                     if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
                     if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
@@ -438,8 +440,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
 
                     //Camera.SetCameraLocation(glm::vec3(distance, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                     Camera.SetCameraLocation(glm::vec3(distance, distance, -distance),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-                    glm::vec3 light_position = glm::vec3(7.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
+                    light_radius = 10;
+                    glm::vec3 light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
                     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                     glm::vec3  light_dir_vector = glm::normalize(light_position);
                     time = time_now;
