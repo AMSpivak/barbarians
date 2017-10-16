@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-c  -I".\includes" -I".\glm"  -std=gnu++11
-ifdef SYSTEMROOT
+ifeq ($(OS),Windows_NT)
 	LDFLAGS=  -lglew32 -lSOIL -lglfw3 -lopengl32 -static-libgcc -static-libstdc++  -l:libgdi32.a -L".\gl"
 else
 	LDFLAGS=  -lGLEW -lSOIL -lGL `pkg-config --cflags glfw3` `pkg-config --static --libs glfw3`
