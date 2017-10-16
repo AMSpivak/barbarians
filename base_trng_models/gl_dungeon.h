@@ -23,10 +23,10 @@ public:
         m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*9 +3] = 3;   
         m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*9 ] = 3;
     
-
         m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*4 +3] = 0;
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*5 +3] = 0;
         m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*3 +4] = 1;
-        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*5 +4] = 1;
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*6 +4] = 1;
 
     } 
     int GetMapTilesIndex(int x, int y, int z)

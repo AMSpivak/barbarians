@@ -45,6 +45,7 @@ private:
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
     void DrawDungeon(GLuint current_shader);
+    void DrawLight();
     void MoveHero(const glm::vec3 & hero_move);
 };
 

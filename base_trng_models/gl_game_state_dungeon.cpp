@@ -105,6 +105,36 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
     //Models[index]->model = model_matrix;
     
 }
+
+void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector)
+{
+    
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+        current_shader = m_shader_map["deffered_simple"];
+        glUseProgram(current_shader);
+
+		glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
+
+		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
+
+		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
+
+
+		GLuint light_pos  = glGetUniformLocation(current_shader, "LightLocation");
+		glUniform4fv(light_pos, 1, glm::value_ptr(light_pos_vector));
+
+        
+        light_color  = glGetUniformLocation(current_shader, "LightColor");
+        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
+
+        renderQuad();
+}
 void GlGameStateDungeon::Draw()
 {
 
@@ -403,7 +433,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
             int models_count = Models.size();
             double time_now = glfwGetTime();
             //std::cout<<(time_now - time)<<'\n';
-            if((time_now - time)>(1.0/15.0))
+            if((time_now - time)>(1.0/30.0))
                 {
                     static float distance = 12.f;
 
