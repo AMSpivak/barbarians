@@ -11,10 +11,23 @@ public:
         m_dungeon_height = y;
         m_dungeon_floors = z;
         m_dungeon_map_objects.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
-        m_dungeon_map_objects[1] = 1;
+        //m_dungeon_map_objects[1] = 1;
         m_dungeon_map_tiles.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
         for(size_t p = 0; p < m_dungeon_width; p++)
-            m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*8 +p] = 2;
+        {
+            m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*9 +p] = 2;
+            m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*p +0] = 4;
+            m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*p +3] = 4;
+        }
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*9 +9] = 3;
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*9 +3] = 3;   
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*9 ] = 3;
+    
+
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*4 +3] = 0;
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*3 +4] = 1;
+        m_dungeon_map_objects[0*m_dungeon_width*m_dungeon_height + m_dungeon_width*5 +4] = 1;
+
     } 
     int GetMapTilesIndex(int x, int y, int z)
     {

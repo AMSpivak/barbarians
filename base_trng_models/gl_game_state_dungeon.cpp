@@ -30,6 +30,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/statue/statue.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/wall/wall.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wallcross/wallcross.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wally/wall.mdl", Animations));
     //Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
     int models_count = Models.size();
     for(auto tmpModel : Models)
