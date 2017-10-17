@@ -18,7 +18,11 @@ public:
         size_t screen_width,
         size_t screen_height);
 
-    ~GlGameStateDungeon(){}
+    ~GlGameStateDungeon()
+    {
+        glDeleteTextures(1,&sky_texture);
+		glDeleteTextures(1,&fx_texture);
+    }
     void Draw();
     IGlGameState * Process(std::map <int, bool> &inputs);
 private:
@@ -26,7 +30,7 @@ private:
     std::vector <std::shared_ptr<Animation> > Animations;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
-    GLuint sky_texture;
+    GLuint sky_texture, fx_texture;
     GlDungeon m_dungeon;
 
     /*std::vector <int> m_dungeon_map_tiles;
@@ -45,8 +49,9 @@ private:
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
     void DrawDungeon(GLuint current_shader);
-    void DrawLight();
+    void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
     void MoveHero(const glm::vec3 & hero_move);
+    void DrawFxSprite(GLuint current_shader, GLuint texture);
 };
 
 #endif

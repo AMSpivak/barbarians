@@ -24,6 +24,17 @@ public:
 		full_matrix =  projection * view;
 		return full_matrix;
 	}
+
+	const glm::mat4 &CameraViewMatrix()
+	{
+		return view;
+	}
+
+	const glm::mat4 &CameraProjectionMatrix()
+	{
+		return projection;
+	}
+
 	void SetCameraLocation(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
 	{
 		view = glm::lookAt(position,target,up);

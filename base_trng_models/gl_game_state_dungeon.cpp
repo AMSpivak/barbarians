@@ -51,7 +51,9 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
 
-    LoadTexture("material/sky.png",sky_texture);
+    LoadTexture("material/dungeon_bck.png",sky_texture);
+    LoadTexture("material/fireball.png",fx_texture);
+    
     time = glfwGetTime();/**/
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
@@ -106,12 +108,12 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
     
 }
 
-void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector)
+void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target )
 {
     
 
         glClear(GL_DEPTH_BUFFER_BIT);
-        current_shader = m_shader_map["deffered_simple"];
+        //current_shader = m_shader_map["deffered_simple"];
         glUseProgram(current_shader);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -130,10 +132,29 @@ void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::
 		glUniform4fv(light_pos, 1, glm::value_ptr(light_pos_vector));
 
         
-        light_color  = glGetUniformLocation(current_shader, "LightColor");
-        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
+        GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
+        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 
         renderQuad();
+}
+void GlGameStateDungeon::DrawFxSprite(GLuint current_shader, GLuint texture)
+{
+    //current_shader = m_shader_map["sprite"];
+    glUseProgram(current_shader);
+
+    glm::mat4 model_m = glm::mat4(1.0f);
+    model_m = glm::scale(model_m,glm::vec3(1.0f,1.0f,1.0f));
+    glm::mat4 camera_m = glm::mat4(1.0f);
+    GLuint cameraLoc  = glGetUniformLocation(current_shader, "camera");
+    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
+
+    GLuint model_matrix  = glGetUniformLocation(current_shader, "model");
+    glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    renderQuad();
 }
 void GlGameStateDungeon::Draw()
 {
