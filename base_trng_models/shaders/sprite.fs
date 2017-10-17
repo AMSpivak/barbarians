@@ -15,5 +15,6 @@ void main()
 	//v = pow(v,4);
 	//FragColor = vec4(v,v,v, 1.0);
 	vec4 texColor = texture(texMap, TexCoords);
-    FragColor = vec4(texColor.xyz, 1.0);
+    FragColor = texColor;
+	//vec4(texColor.xyz, 1.0);
 }

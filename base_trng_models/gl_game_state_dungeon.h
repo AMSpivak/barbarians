@@ -33,11 +33,6 @@ private:
     GLuint sky_texture, fx_texture;
     GlDungeon m_dungeon;
 
-    /*std::vector <int> m_dungeon_map_tiles;
-    std::vector <int> m_dungeon_map_objects;
-    size_t m_dungeon_floors;
-    size_t m_dungeon_width;
-    size_t m_dungeon_height;*/
     glLight Light;
     float light_angle;
     float light_radius;
@@ -51,7 +46,7 @@ private:
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
     void MoveHero(const glm::vec3 & hero_move);
-    void DrawFxSprite(GLuint current_shader, GLuint texture);
+    void DrawFxSprite(GLuint &current_shader, GLuint texture);
 };
 
 #endif

@@ -10,6 +10,6 @@ uniform mat4 camera;
 void main()
 {
     TexCoords = aTexCoords;
-    //gl_Position = camera * model * vec4(aPos, 1.0);
-    gl_Position = model * vec4(aPos, 1.0);
+    gl_Position = camera * model * vec4(aPos, 1.0);
+    //gl_Position = model * vec4(aPos, 1.0);
 }
