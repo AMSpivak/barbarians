@@ -147,11 +147,13 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
     glUseProgram(current_shader);
 
     glm::mat4 model_m = glm::mat4(1.0f);
-    model_m = glm::translate(model_m,glm::vec3(0.0f,0.0f,1.0f));
+    model_m =  glm::translate(model_m,glm::vec3(0.0f,0.0f,-1.0f));
     glm::mat4 camera_m = glm::mat4(1.0f);
     GLuint cameraLoc  = glGetUniformLocation(current_shader, "camera");
-    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraProjectionMatrix()));
-    //glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
+    camera_m = Camera.CameraMatrix();
+//    camera_m = Camera.CameraProjectionMatrix();
+    //glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraProjectionMatrix()));
+    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
 
     GLuint model_matrix  = glGetUniformLocation(current_shader, "model");
     glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
