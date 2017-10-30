@@ -16,7 +16,7 @@ public:
     GlSpinner(GLTextureAtlas &texture_atlas,size_t sectors);
 
     ~GlSpinner(){}
-    Draw(GLuint spriteShader,float angle,float x_start, float x_end);
+    void Draw(GLuint spriteShader,float angle,float x_start, float x_end);
 private:
     GLTextureAtlas &m_texture_atlas;
     size_t m_sectors;

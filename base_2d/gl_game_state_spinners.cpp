@@ -56,21 +56,29 @@ IGlGameState * GlGameStateSpinner::Process(std::map <int, bool> &inputs)
         for(int i =0;i<spinning_count;i++)
         {
             angles[i]+= (time_now - time) * speeds[i];
+
             if(angles[i]>360.0) angles[i] -=360.0f;
             speeds[i] -=(time_now - time) * 10.1f;
+
             if(speeds[i]<0.0f) 
             {
                 speeds[i] = 0;
-                float pos = (angles[i] )/sector_angle - 0.5f;
+                float pos = angles[i] /sector_angle - 0.5f;
                 float r_pos = round(pos);
-                if(abs(pos - r_pos) < 0.001f)
+
+                //std::cout<<"\n"<<pos<<" "<<r_pos<<"\n";
+
+                if(std::abs(pos - r_pos) < 0.001f)
                 {
+                    //std::cout<<"\n stop \n";
                     spinning_count--;
                     angles[i] = sector_angle * 0.5 + sector_angle* r_pos;
                 }
                 else
                 {
-                    //angles[i] = (0.9f*angles[i] + sector_angle * 0.05 + sector_angle* r_pos);
+                    //std::cout<<"\n spin \n";
+                    
+                    angles[i] = (0.9f*angles[i] + sector_angle * 0.05f + 0.1f*sector_angle* r_pos);
                 }
             }
         }

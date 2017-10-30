@@ -11,7 +11,7 @@ GlSpinner::GlSpinner(GLTextureAtlas &texture_atlas,size_t sectors)
     textures.emplace_back(m_texture_atlas.AssignTexture("material/cards/ace_of_hearts.png"));
 }
 
-GlSpinner::Draw(GLuint spriteShader,float angle,float x_start, float x_end)
+void GlSpinner::Draw(GLuint spriteShader,float angle,float x_start, float x_end)
 {
     angle *= PI/180.0;
 
