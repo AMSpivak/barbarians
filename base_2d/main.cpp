@@ -15,7 +15,7 @@
 #include "gl_render_target.h"
 
 #include "gl_texture_atlas.h"
-
+#include "gl_game_state_spinners.h"
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
@@ -37,25 +37,20 @@ int main(int argc, char const *argv[])
 	inputs[GLFW_KEY_RIGHT] = false;
 	inputs[GLFW_KEY_UP] =  false;
 	inputs[GLFW_KEY_DOWN] = false;
-    inputs[GLFW_KEY_RIGHT_BRACKET] = false;
-    inputs[GLFW_KEY_LEFT_BRACKET] = false;
+    inputs[GLFW_KEY_SPACE] = false;
 
-	//Инициализация GLFW
+
+	//GLFW
 	glfwInit();
-	//Настройка GLFW
-	//Задается минимальная требуемая версия OpenGL.
-	//Мажорная
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	//Минорная
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	//Установка профайла для которого создается контекст
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//Выключение возможности изменения размера окна
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	//multisampling
-	//glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	//GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "My Title", monitor, NULL);
 	GLFWwindow* window;
 	
 
@@ -100,25 +95,9 @@ int main(int argc, char const *argv[])
 	glViewport(0, 0, width, height);
 
     std::map<std::string,GLuint> m_shader_map;
-    std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
-    {
-        std::shared_ptr<glRenderTarget> r_target(new glRenderTargetDeffered());
-        m_render_target_map.insert( std::pair<std::string,std::shared_ptr<glRenderTarget>>("base_deffered",r_target));
-        std::shared_ptr<glRenderTarget> r_target_final(new glRenderTarget());
-        m_render_target_map.insert( std::pair<std::string,std::shared_ptr<glRenderTarget>>("final",r_target_final));
-    }
-
-    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
-	glRenderTarget &final_render_target = *(m_render_target_map["final"].get());
-	//glRenderTargetDeffered render_target;
-	render_target.InitBuffer(width, height);
-
-	//glRenderTarget final_render_target;
-	final_render_target.InitBuffer(width, height);
-    // Build and compile our shader program
 
 
-m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
+	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
 
 
 
@@ -129,45 +108,22 @@ m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram(
 	glDisable(GL_CULL_FACE);
 
 
-
-
-    /*GlGameStateArena game_state_arena(m_shader_map,m_render_target_map,m_glmodels_map,width,height);
-    GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,width,height);
-    IGlGameState * game_state = &game_state_arena;
-    game_state = &game_state_dungeon;*/
 	GLTextureAtlas texture_atlas;
-	std::shared_ptr<GLuint> cursor = texture_atlas.AssignTexture("material/cursor.png");
-	std::cout<<*(cursor.get())<<"\n";
-	cursor = texture_atlas.AssignTexture("material/cursor.png");
+	
+	GlGameStateSpinner  game_state_spinner(m_shader_map,texture_atlas,width,height);
+	IGlGameState * game_state = &game_state_spinner;
 
-	std::cout<<*(cursor.get())<<"\n";
-
-	glEnable(GL_ALPHA_TEST);
-	glEnable(GL_BLEND);	
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	GLuint spriteShader = m_shader_map["sprite"];
 
 	while(!glfwWindowShouldClose(window))
 	{
+        game_state->Process(inputs);
+		game_state->Draw();
 		
-
-		
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		float sx =0.1f;
-		float px =0.0f;
-		float sy =sx*width/height;
-		float py =0.0f;
-
-		renderSprite(spriteShader,0.0f,0.0f,1.0f,0.0f,1.0f,1.0f,0.0f,1.0f,glm::vec4(1.0f,1.0f,1.0f,1.0f),cursor.get());
-        //game_state->Process(inputs);
-        //game_state->Draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-
+	
 
 	glfwTerminate();
 	return 0;
@@ -197,10 +153,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_SPACE )
     		inputs[GLFW_KEY_SPACE] = (action != GLFW_RELEASE) ?  true : false;
 
-    if (key == GLFW_KEY_LEFT_BRACKET )
-        inputs[GLFW_KEY_LEFT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;
 
-    if (key == GLFW_KEY_RIGHT_BRACKET )
-        inputs[GLFW_KEY_RIGHT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;
 
 }
