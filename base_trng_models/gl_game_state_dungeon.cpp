@@ -140,6 +140,7 @@ void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::
 
 void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 {
+    glDisable(GL_CULL_FACE);
     if(current_shader == 0)
     {
         current_shader = m_shader_map["sprite"];
@@ -147,19 +148,21 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
     glUseProgram(current_shader);
 
     glm::mat4 model_m = glm::mat4(1.0f);
-    model_m = glm::translate(model_m,glm::vec3(0.0f,0.0f,1.0f));
+    model_m = glm::translate(model_m,glm::vec3(0.5f,0.5f,0.0f));
     glm::mat4 camera_m = glm::mat4(1.0f);
     GLuint cameraLoc  = glGetUniformLocation(current_shader, "camera");
-    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraProjectionMatrix()));
-    //glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
+   //glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraProjectionMatrix()));
+    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
 
     GLuint model_matrix  = glGetUniformLocation(current_shader, "model");
-    glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
-
+    //glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
+    glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(Camera.CameraProjectionMatrix()));
+  
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
     renderQuad();
+    glEnable(GL_CULL_FACE);
 }
 void GlGameStateDungeon::Draw()
 {
@@ -185,14 +188,7 @@ void GlGameStateDungeon::Draw()
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
         DrawDungeon(current_shader);
-
-        //pos_matrix = glm::mat4();
-        //pos_matrix = glm::translate(pos_matrix, hero_position);
-        //model_matrix = hero.model_matrix;
-        //hero.model_matrix = pos_matrix * model_matrix;
-        //hero.RefreshMatrixes();
 		hero.Draw(current_shader);
-        //hero.model_matrix = model_matrix;
 
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
