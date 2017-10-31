@@ -21,7 +21,10 @@ private:
     size_t spinning_count;
     float speeds[5] ={0};
     float angles[5] ={0};
-    //std::vector <std::shared_ptr<GLuint> > textures;
+    //std::shared_ptr<GLuint> button_texture;
+    //std::shared_ptr<GLuint> fx_texture;
+    std::vector <std::shared_ptr<GLuint> > textures;
+    float fx_angle,fx_radius;
 
 };
 
