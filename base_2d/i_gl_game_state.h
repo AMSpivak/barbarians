@@ -35,6 +35,8 @@ public:
     virtual ~IGlGameState(){}
     virtual void Draw() = 0;
     virtual IGlGameState * Process(std::map <int, bool> &inputs) = 0;
+    virtual void SwitchIn() = 0;
+    virtual void SwitchOut() = 0;
 };
 
 
