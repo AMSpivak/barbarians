@@ -1,7 +1,7 @@
 #include "gl_spinner.h"
 #include <math.h>  
 
-const double PI = 3.14159265;
+
 
 GlSpinner::GlSpinner(GLTextureAtlas &texture_atlas,size_t sectors)
                     : m_texture_atlas(texture_atlas)

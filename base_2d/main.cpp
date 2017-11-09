@@ -104,7 +104,7 @@ int main(int argc, char const *argv[])
 
 
 
-	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
 
@@ -122,8 +122,6 @@ int main(int argc, char const *argv[])
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-	
 
 	glfwTerminate();
 	return 0;

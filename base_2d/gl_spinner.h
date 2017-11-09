@@ -9,7 +9,7 @@
 #include <map>
 #include "glscene.h"
 #include "gl_texture_atlas.h"
-
+const double PI = 3.14159265;
 class GlSpinner
 {
 public: 

@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 base_2d/*.o
+=======
+*.o
+*.tags
+>>>>>>> c33a268e8a46de9cc526ec6cad76ca118ec5513f
