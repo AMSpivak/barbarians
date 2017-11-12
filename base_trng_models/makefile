@@ -7,7 +7,7 @@ else
 endif
 SOURCES= main.cpp gl_texture_atlas.cpp glresourses.cpp gl_render_target.cpp glscene.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=game
+EXECUTABLE=gamMSpivae
 
 all: $(SOURCES) $(EXECUTABLE)
 
