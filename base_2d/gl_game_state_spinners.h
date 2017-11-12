@@ -15,6 +15,8 @@ public:
     ~GlGameStateSpinner(){}
     void Draw();
     IGlGameState * Process(std::map <int, bool> &inputs);
+    void SwitchIn(){}
+    void SwitchOut(){}
 private:
     GlSpinner spinner;
     double time;

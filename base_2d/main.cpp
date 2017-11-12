@@ -108,7 +108,7 @@ int main(int argc, char const *argv[])
 	glDisable(GL_CULL_FACE);
 
 
-	GLTextureAtlas texture_atlas;
+	GLTextureAtlas texture_atlas("");
 	
 	GlGameStateSpinner  game_state_spinner(m_shader_map,texture_atlas,width,height);
 	IGlGameState * game_state = &game_state_spinner;

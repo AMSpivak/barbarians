@@ -103,13 +103,8 @@ IGlGameState * GlGameStateSpinner::Process(std::map <int, bool> &inputs)
                 else
                 {
                     //std::cout<<"\n spin \n";
-<<<<<<< HEAD
-                    
-                    angles[i] = (0.9f*angles[i] + sector_angle * 0.05f + 0.1f*sector_angle* r_pos);
-=======
                     float s = 0.77f * (time_now - time);
                     angles[i] = (1.0f -s)*angles[i] + s*(sector_angle * 0.5f + sector_angle* r_pos);
->>>>>>> c33a268e8a46de9cc526ec6cad76ca118ec5513f
                 }
             }
         }

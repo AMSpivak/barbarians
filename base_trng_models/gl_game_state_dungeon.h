@@ -15,6 +15,7 @@ public:
     GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
         std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
         std::map<std::string,std::shared_ptr<IGlModel>> &models_map,
+        GLTextureAtlas &texture_atlas,
         size_t screen_width,
         size_t screen_height);
 
@@ -25,6 +26,8 @@ public:
     }
     void Draw();
     IGlGameState * Process(std::map <int, bool> &inputs);
+    void SwitchIn(){}
+    void SwitchOut(){}
 private:
     std::vector <std::shared_ptr<glModel> > Models;
     std::vector <std::shared_ptr<Animation> > Animations;
