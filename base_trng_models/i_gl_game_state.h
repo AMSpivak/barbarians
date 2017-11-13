@@ -9,7 +9,7 @@
 //#include <vector>
 #include <map>
 #include "glscene.h"
-#include "gl_texture_atlas.h"
+#include "gl_resources_manager.h"
 class IGlGameState
 {
 private:
@@ -17,16 +17,16 @@ private:
     //std::map<std::string,GLuint> &m_shader_map;
 protected:
     std::map<std::string,GLuint> &m_shader_map;
-    GLTextureAtlas &m_texture_atlas;
+    GLResourcesManager &m_resources_manager;
     
     size_t m_screen_width;
     size_t m_screen_height;
 public:
-    IGlGameState(std::map<std::string,GLuint> &shader_map,GLTextureAtlas &texture_atlas,
+    IGlGameState(std::map<std::string,GLuint> &shader_map,GLResourcesManager &resources_manager,
 
                     size_t screen_width, size_t screen_height):
                     m_shader_map(shader_map)
-                    ,m_texture_atlas(texture_atlas)
+                    ,m_resources_manager(resources_manager)
     {
         
         m_screen_width = screen_width;
