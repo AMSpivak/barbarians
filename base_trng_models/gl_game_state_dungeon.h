@@ -15,7 +15,7 @@ public:
     GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
         std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
         std::map<std::string,std::shared_ptr<IGlModel>> &models_map,
-        GLTextureAtlas &texture_atlas,
+        GLResourcesManager &resources_manager,
         size_t screen_width,
         size_t screen_height);
 

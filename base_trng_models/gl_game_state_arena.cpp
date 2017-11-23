@@ -11,10 +11,10 @@
 GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
                                     std::map<std::string,std::shared_ptr<IGlModel>> & models_map,
-                                    GLTextureAtlas &texture_atlas,
+                                    GLResourcesManager &resources_manager,
                                     size_t screen_width,
                                     size_t screen_height):
-                                                        IGlGameState(shader_map,texture_atlas,screen_width,screen_height)
+                                                        IGlGameState(shader_map,resources_manager,screen_width,screen_height)
                                                         ,m_render_target_map(render_target_map)
                                                         ,m_models_map(models_map)
                                                         ,light_angle (90.0f)
@@ -37,7 +37,7 @@ GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
     float f_near = 1.f;
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
-    sky_texture = m_texture_atlas.AssignTexture("material/sky.png");
+    sky_texture = m_resources_manager.m_texture_atlas.AssignTexture("material/sky.png");
     //LoadTexture("material/sky.png",sky_texture);
     time = glfwGetTime();/**/
 }

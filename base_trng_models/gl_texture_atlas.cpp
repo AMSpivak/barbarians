@@ -24,7 +24,7 @@ std::shared_ptr<GLuint> GLTextureAtlas::AssignTexture(const std::string & FileNa
     //GLuint * texture = new;
     std::shared_ptr<GLuint> texture(new GLuint);
     m_texture_map.insert( std::pair<std::string,std::shared_ptr<GLuint>>(FileName,texture));
-    LoadTexture(FileName,*(texture.get()));
+    LoadTexture(m_resourse_folder + FileName,*(texture.get()));
     return texture;
 
 }

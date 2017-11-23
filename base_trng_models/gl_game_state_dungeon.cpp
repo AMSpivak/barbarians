@@ -16,10 +16,10 @@
 GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
                                     std::map<std::string,std::shared_ptr<IGlModel>> & models_map,
-                                    GLTextureAtlas &texture_atlas,
+                                    GLResourcesManager &resources_manager,
                                     size_t screen_width,
                                     size_t screen_height):
-                                                        IGlGameState(shader_map,texture_atlas,screen_width,screen_height)
+                                                        IGlGameState(shader_map,resources_manager,screen_width,screen_height)
                                                         ,m_render_target_map(render_target_map)
                                                         ,m_models_map(models_map)
                                                         ,light_angle (90.0f)

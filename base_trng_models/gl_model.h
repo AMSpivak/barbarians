@@ -10,6 +10,7 @@
 #include "glresourses.h"
 #include <iostream>
 
+#include "gl_resources_manager.h"
 
 class glModel
 {
@@ -18,6 +19,7 @@ class glModel
 	int vertexcount;
 	int bonescount;
 	std::shared_ptr<Animation> animation;
+	//GLResourcesManager &m_resources_manager;
 
 public:
 	int parent_idx;

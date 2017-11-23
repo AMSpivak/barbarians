@@ -10,7 +10,7 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "glresourses.h"
-#include "gl_texture_atlas.h"
+#include "gl_resources_manager.h"
 
 #include "glscene.h"
 #include "gl_light.h"
@@ -99,7 +99,9 @@ int main(int argc, char const *argv[])
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	GLTextureAtlas texture_atlas("");
+	
+
+	GLResourcesManager resources_atlas("");
 
     std::map<std::string,GLuint> m_shader_map;
 
@@ -168,10 +170,10 @@ int main(int argc, char const *argv[])
 	hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 
-    GlGameStateArena game_state_arena(m_shader_map,m_render_target_map,m_glmodels_map,texture_atlas,width,height);
-    GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,texture_atlas,width,height);
+    GlGameStateArena game_state_arena(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
+    //GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
     IGlGameState * game_state = &game_state_arena;
-    game_state = &game_state_dungeon;
+    //game_state = &game_state_dungeon;
 
 
 	while(!glfwWindowShouldClose(window))
