@@ -12,6 +12,7 @@
 #include "glm/gtx/rotate_vector.hpp"
 #include "glscene.h"
 #include "gl_game_state_dungeon.h"
+#include "collision.h"
 
 GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
@@ -373,26 +374,52 @@ void GlGameStateDungeon::Draw()
 glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec3 & position_circle, float radius)
 {
     glm::vec3 intersection = position_circle - position_cube;
+    glm::vec3 return_value = glm::vec3(0.0f,0.0f,0.0f);
+    
+    
+    float intersect_x = CollisionOnAxe(position_cube[0] -1.0f,
+                                        position_cube[0] + 1.0f,
+                                        position_circle[0]  - radius,
+                                        position_circle[0]  + radius
+                                        );
+    if(intersect_x < 0.0001f) return glm::vec3(0.0f,0.0f,0.0f);
+    float intersect = intersect_x;
 
-    for(int i = 0; i <3; i++)
+    return_value = glm::vec3(intersection[0] > 0 ? intersect_x : -intersect_x,0.0f,0.0f);
+
+    float intersect_z = CollisionOnAxe(position_cube[2] -1.0f,
+                                        position_cube[2] + 1.0f,
+                                        position_circle[2]  - radius,
+                                        position_circle[2]  + radius
+                                        );
+    if(intersect_z < 0.0001f) return glm::vec3(0.0f,0.0f,0.0f);
+    if(intersect_z<intersect)
     {
-        if(abs(intersection[i]) > (1.0f+ radius)) 
-        {
-            intersection[i] = 0.0f;
-        }
-        else
-        {
-            if(intersection[i] > 0.0f)
-            {
-                intersection[i] = position_cube[i] + 1.0f -position_circle[i]  + radius;
-            }
-            else
-            {
-                intersection[i] =  -(position_circle[i]  + radius - position_cube[i] + 1.0f);                
-            }
-        }
+        intersect = intersect_z;
+
+        return_value = glm::vec3(0.0f,0.0f,intersection[2] > 0 ? intersect_z : -intersect_z);
     }
-    return intersection;
+    glm::vec3 axe = glm::normalize(glm::vec3(1.0f,0.0f,1.0f));
+
+
+    float pos2_axe = glm::dot(position_circle - position_cube,axe);
+
+    float intersect_xz = CollisionOnAxe( -1.414f,
+                                        + 1.414f,
+                                        pos2_axe  - radius,
+                                        pos2_axe  + radius
+                                        );
+
+    if(intersect_xz < 0.0001f) return glm::vec3(0.0f,0.0f,0.0f);
+    if(intersect_xz<intersect)
+    {
+        if(pos2_axe < 0 ) 
+            intersect_xz = -intersect_xz;
+
+        return_value = glm::vec3(intersect_xz,0.0f,intersect_xz);
+    }
+    return return_value;
+    
 
 }
 
@@ -417,13 +444,18 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
         {
 
             xp = x +ix;
-            zp = z +zp;
+            zp = z +iz;
+            std::cout<<"("<<xp<<" "<<zp<<"): ("<<new_position[0]<<" "<<new_position[2]<<"): ";
             if(m_dungeon.GetMapObjectIndex(xp,zp,0)>0||m_dungeon.GetMapTilesIndex(xp,zp,0)<0)
             {
-                glm::vec3 intersection =IntersectionProjection(glm::vec3(2.0f * xp,0.0f,2.0f * zp), new_position, hero_radius);
-                std::cout<<"("<<intersection[0]<<" "<<intersection[2]<<") ";
-                int index = (abs(intersection[0])<abs(intersection[2])) ? 0 :2;
-                new_position[index] += intersection[index];
+                glm::vec3 tile_position = glm::vec3(2.0f * xp,0.0f,2.0f * zp);
+                glm::vec3 intersection =IntersectionProjection(tile_position, new_position, hero_radius);
+                std::cout<<":("<<intersection[0]<<" "<<intersection[2]<<") ";
+                new_position += intersection;
+            }
+            else
+            {
+                std::cout<<":("<<0<<" "<<0<<") ";                
             }
         }
         std::cout<<"\n";
