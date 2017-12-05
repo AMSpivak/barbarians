@@ -370,14 +370,74 @@ void GlGameStateDungeon::Draw()
 
 }
 
+glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec3 & position_circle, float radius)
+{
+    glm::vec3 intersection = position_circle - position_cube;
+
+    for(int i = 0; i <3; i++)
+    {
+        if(abs(intersection[i]) > (1.0f+ radius)) 
+        {
+            intersection[i] = 0.0f;
+        }
+        else
+        {
+            if(intersection[i] > 0.0f)
+            {
+                intersection[i] = position_cube[i] + 1.0f -position_circle[i]  + radius;
+            }
+            else
+            {
+                intersection[i] =  -(position_circle[i]  + radius - position_cube[i] + 1.0f);                
+            }
+        }
+    }
+    return intersection;
+
+}
 
 void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
 {
     float hero_radius =1.0f;
+    glm::vec3 new_position = hero_position + hero_move;
 
-    int x = static_cast<int>(hero_position[0]*0.5f);
-    int z = static_cast<int>(hero_position[2]*0.5f);
-    float sh_x = hero_move[0];
+    int x = static_cast<int>(new_position[0]*0.5f);
+    int z = static_cast<int>(new_position[2]*0.5f);
+
+
+    int xp = x;
+    int zp = z;
+    std::cout<<"====\n";
+
+    std::cout<<new_position[0]<<" "<<new_position[2]<<"\n====\n";
+    std::cout<<xp<<" "<<zp<<"\n====\n";
+    for(int ix = -1; ix<2; ix++)
+    {
+        for(int iz = -1; iz<2; iz++)
+        {
+
+            xp = x +ix;
+            zp = z +zp;
+            if(m_dungeon.GetMapObjectIndex(xp,zp,0)>0||m_dungeon.GetMapTilesIndex(xp,zp,0)<0)
+            {
+                glm::vec3 intersection =IntersectionProjection(glm::vec3(2.0f * xp,0.0f,2.0f * zp), new_position, hero_radius);
+                std::cout<<"("<<intersection[0]<<" "<<intersection[2]<<") ";
+                int index = (abs(intersection[0])<abs(intersection[2])) ? 0 :2;
+                new_position[index] += intersection[index];
+            }
+        }
+        std::cout<<"\n";
+    }
+    
+    hero_position = new_position;
+
+    //for()
+
+
+
+
+    //m_dungeon.GetMapObjectIndex(x+1,z,0)>0||m_dungeon.GetMapTilesIndex(x+1,z,0)<0
+    /*float sh_x = hero_move[0];
     if(sh_x < 0)
     {
         float frac = hero_position [0] - 2.0f*x;
@@ -429,7 +489,7 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
 
     
 
-    hero_position += glm::vec3(sh_x,0,sh_z);
+    hero_position += glm::vec3(sh_x,0,sh_z);*/
 /*
     glm::vec3 new_pos = hero_position + hero_move;// + hero_radius*glm::normalize(hero_move);
 

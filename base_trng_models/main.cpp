@@ -171,9 +171,9 @@ int main(int argc, char const *argv[])
 
 
     GlGameStateArena game_state_arena(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
-    //GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
+    GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
     IGlGameState * game_state = &game_state_arena;
-    //game_state = &game_state_dungeon;
+    game_state = &game_state_dungeon;
 
 
 	while(!glfwWindowShouldClose(window))
