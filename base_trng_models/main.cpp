@@ -88,6 +88,8 @@ int main(int argc, char const *argv[])
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
 	{
@@ -179,7 +181,16 @@ int main(int argc, char const *argv[])
 	while(!glfwWindowShouldClose(window))
 	{
 		GLuint current_shader;
-        game_state->Process(inputs);
+		double xpos, ypos;
+
+		
+		glfwGetCursorPos(window, &xpos, &ypos);
+		xpos = (xpos * 2.0f - width)/width;
+		ypos = (ypos * 2.0f - height)/height;
+		int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+        inputs[GLFW_MOUSE_BUTTON_LEFT] = (state != GLFW_RELEASE) ?  true : false;
+        
+		game_state->Process(inputs, xpos, ypos);
         game_state->Draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();

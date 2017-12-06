@@ -522,34 +522,13 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
     
 
     hero_position += glm::vec3(sh_x,0,sh_z);*/
-/*
-    glm::vec3 new_pos = hero_position + hero_move;// + hero_radius*glm::normalize(hero_move);
 
-    int xn = static_cast<int>(new_pos[0]*0.5f);
-    int zn = static_cast<int>(new_pos[2]*0.5f);
-
-    //hero_position += hero_move;
-    std::cout<<"\n" <<x<<" "<<z<<" "<<xn<<" "<<zn<<" "<<" \n";
-    std::cout<<"\n" <<hero_position[0]<<" "<<hero_position[2]<<" "<<hero_position[1]<<" "<<" \n";
-    if(m_dungeon.GetMapObjectIndex(xn,zn,0)>0||m_dungeon.GetMapTilesIndex(xn,zn,0)<0)
-    {
-        float zp = zn + z;
-        zp-= hero_radius * (zn - z);
-        new_pos[2] = zp;
-    }
-    std::cout<<"\n" <<m_dungeon.GetMapTilesIndex(xn,zn,0)<<" "<<m_dungeon.GetMapTilesIndex(xn,z,0)<<" \n";
-    if(m_dungeon.GetMapObjectIndex(xn,z,0)>0||m_dungeon.GetMapTilesIndex(xn,z,0)<0)
-    {
-        float xp = xn + x;
-        xp-= hero_radius * (xn - x);
-        new_pos[0] = xp;
-    }
-
-    hero_position = new_pos;*/
 }
-IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
+IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
 {
-
+    static float camera_rotation_angle = 0.0f;
+    static float hero_rotation_angle = 0.0f;
+    static float old_joy_x = 0.0f;
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
     GLuint current_shader;
 
@@ -559,11 +538,43 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
             if((time_now - time)>(1.0/30.0))
                 {
                     static float distance = 12.f;
+                    bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
+                    //key_angle = 0.0f;
 
-                    if(inputs[GLFW_KEY_RIGHT]) key_angle -=5.0f;
-                    if(inputs[GLFW_KEY_LEFT]) key_angle +=5.0f;
+                    if(inputs[GLFW_KEY_RIGHT])
+                    {
+                        key_angle =270.0f;
+                        if(inputs[GLFW_KEY_UP])
+                        {
+                            key_angle =305.0f;
+                        }
+                        if(inputs[GLFW_KEY_DOWN])
+                        {
+                            key_angle =215.0f;                            
+                        }
+                    }
+                    else
+                    if(inputs[GLFW_KEY_LEFT])
+                    {
+                        key_angle =90.0f;
+                        if(inputs[GLFW_KEY_UP])
+                        {
+                            key_angle =45.0f;
+                        }
+                        if(inputs[GLFW_KEY_DOWN])
+                        {
+                            key_angle =135.0f;                            
+                        }
+                    } 
+                    else
+                    if(inputs[GLFW_KEY_DOWN])
+                    {
+                            key_angle =180.0f;                            
+                    }
 
-                    if(inputs[GLFW_KEY_UP]&&!inputs[GLFW_KEY_SPACE])
+                    bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
+
+                    if(moving&&!attack)
                     {
                         hero.UseSequence("walk");//light_angle +=2.0f;
                         //MoveHero(glm::vec3(0.0f,0.1f,0.0f));
@@ -571,7 +582,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
                         MoveHero(glm::vec3(move_h));
                         //hero_position += glm::vec3(move_h);//move.xyz();//glm::vec3(move);
                     }else
-                    if(inputs[GLFW_KEY_SPACE])
+                    if(attack)
                     {
                         hero.UseSequence("strike");
                     }
@@ -585,23 +596,39 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs)
                     if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
                     if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
 
-                    if(distance<1.0f)distance=1.0f;
+                    if(distance<5.0f)distance=5.0f;
                     if(distance>14.0f)distance=14.0f;
 
                     if(light_angle<10.0f)light_angle=10.0f;
                     if(light_angle>170.0f)light_angle=170.0f;
 
+                    float joy_diff = joy_x - old_joy_x;
+                    if(std::abs(joy_diff) <  0.01f)
+                    {
+                        joy_diff = 0.0f;
+                    }
 
 
+                    old_joy_x = joy_x;
+                    camera_rotation_angle -= joy_diff * 12.0f;
+
+                    if(camera_rotation_angle > 360.0f)
+                    {
+                        camera_rotation_angle -=  360.0f;
+                    }
                     //Camera.SetCameraLocation(glm::vec3(distance, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                    Camera.SetCameraLocation(glm::vec3(distance, distance, -distance),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    glm::vec3 camera_position = glm::vec3(distance * glm::sin(glm::radians(camera_rotation_angle)), distance,  distance * glm::cos(glm::radians(camera_rotation_angle)));
+
+                    Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                     light_radius = 10;
                     glm::vec3 light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
                     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                     glm::vec3  light_dir_vector = glm::normalize(light_position);
                     time = time_now;
                     //hero.model_matrix = glm::translate(hero.model_matrix, glm::vec3(0.0f, 0.0f, 1.0f));
-                    hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(key_angle), glm::vec3(0.0f, 0.0f, 1.0f));
+                    hero.model_matrix = glm::mat4();
+                    hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                    hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(key_angle+camera_rotation_angle/*key_angle*/), glm::vec3(0.0f, 0.0f, 1.0f));
 
 
                     key_angle = 0;

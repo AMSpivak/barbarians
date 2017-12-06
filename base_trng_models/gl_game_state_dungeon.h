@@ -25,7 +25,7 @@ public:
 		glDeleteTextures(1,&fx_texture);
     }
     void Draw();
-    IGlGameState * Process(std::map <int, bool> &inputs);
+    IGlGameState * Process(std::map <int, bool> &inputs, float joy_x, float joy_y);
     void SwitchIn(){}
     void SwitchOut(){}
 private:

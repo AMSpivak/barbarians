@@ -234,7 +234,7 @@ void GlGameStateArena::Draw()
 
 
 }
-IGlGameState *  GlGameStateArena::Process(std::map <int, bool> &inputs)
+IGlGameState *  GlGameStateArena::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
 {
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
