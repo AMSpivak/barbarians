@@ -49,6 +49,8 @@ private:
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
     void MoveHero(const glm::vec3 & hero_move);
+    void FitObjects(int steps, float accuracy);
+    
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
 };
 
