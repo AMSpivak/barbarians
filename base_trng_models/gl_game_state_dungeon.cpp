@@ -375,6 +375,7 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
 {
     glm::vec3 intersection = position_circle - position_cube;
     glm::vec3 return_value = glm::vec3(0.0f,0.0f,0.0f);
+    float minimum = std::numeric_limits<float>::min();
     
     
     float intersect_x = CollisionOnAxe(position_cube[0] -1.0f,
@@ -382,7 +383,7 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
                                         position_circle[0]  - radius,
                                         position_circle[0]  + radius
                                         );
-    if(intersect_x < 0.0001f) return glm::vec3(0.0f,0.0f,0.0f);
+    if(intersect_x < minimum) return glm::vec3(0.0f,0.0f,0.0f);
     float intersect = intersect_x;
 
     return_value = glm::vec3(intersection[0] > 0 ? intersect_x : -intersect_x,0.0f,0.0f);
@@ -392,7 +393,7 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
                                         position_circle[2]  - radius,
                                         position_circle[2]  + radius
                                         );
-    if(intersect_z < 0.0001f) return glm::vec3(0.0f,0.0f,0.0f);
+    if(intersect_z < minimum) return glm::vec3(0.0f,0.0f,0.0f);
     if(intersect_z<intersect)
     {
         intersect = intersect_z;
@@ -410,7 +411,7 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
                                         pos2_axe  + radius
                                         );
 
-    if(intersect_xz < 0.0001f) return glm::vec3(0.0f,0.0f,0.0f);
+    if(intersect_xz < minimum) return glm::vec3(0.0f,0.0f,0.0f);
     if(intersect_xz<intersect)
     {
         if(pos2_axe < 0 ) 
