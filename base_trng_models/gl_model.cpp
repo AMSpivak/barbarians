@@ -112,7 +112,7 @@ void glModel::LoadAll(std::string FileName)
 	modelfile.close();
 
 	LoadModel(jal_name);
-	diffuse_texture = GetResourceManager()->m_texture_atlas.AssignTexture(png_name);
+	diffuse_texture = GetResourceManager()->m_texture_atlas.Assign(png_name);
 	LoadModelBones(jub_name);
 
 
@@ -145,8 +145,8 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
 	modelfile.close();
 
 	LoadModel(jal_name);
-	diffuse_texture = GetResourceManager()->m_texture_atlas.AssignTexture(png_name);
-	utility_texture = GetResourceManager()->m_texture_atlas.AssignTexture(png_utility_name);
+	diffuse_texture = GetResourceManager()->m_texture_atlas.Assign(png_name);
+	utility_texture = GetResourceManager()->m_texture_atlas.Assign(png_utility_name);
 	
 	//LoadTexture(png_name, diffuse_texture);
     //LoadTexture(png_utility_name, utility_texture);

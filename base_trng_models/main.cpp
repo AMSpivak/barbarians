@@ -103,7 +103,7 @@ int main(int argc, char const *argv[])
 
 	
 
-	GLResourcesManager resources_atlas("textures/");
+	GLResourcesManager resources_atlas("material/textures/");
 
 	SetResourceManager(&resources_atlas);
 

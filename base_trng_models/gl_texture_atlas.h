@@ -2,21 +2,18 @@
 #define GL_TEXTURE_ATLAS
 
 
-#include <GL/glew.h>
-#include <map>
-#include <string>
-#include <memory>
+#include "gl_atlas.h"
 
-class GLTextureAtlas
+
+class GLTextureAtlas: public GLAtlas
 {
+
 private:
-    std::string m_resourse_folder;
-    std::map<std::string,std::shared_ptr<GLuint>> m_texture_map;
+    void FillResource(std::string filename,GLuint * resource);
+    void EmptyResource(GLuint * resource);
 public:
     GLTextureAtlas(const std::string & ResourseFolder);
-    ~GLTextureAtlas();
-    std::shared_ptr<GLuint> AssignTexture(const std::string & FileName);
-
+    
 };
 
 

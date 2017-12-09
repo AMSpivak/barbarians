@@ -52,9 +52,10 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     float f_near = 1.f;
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
-
-    LoadTexture("material/dungeon_bck.png",sky_texture);
-    LoadTexture("material/fireball.png",fx_texture);
+    sky_texture = resources_manager.m_texture_atlas.Assign("dungeon_bck.png");
+    fx_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
+    /*LoadTexture("material/dungeon_bck.png",sky_texture);
+    LoadTexture("material/fireball.png",fx_texture);*/
     
     time = glfwGetTime();/**/
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
@@ -329,7 +330,7 @@ void GlGameStateDungeon::Draw()
             glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, sky_texture);
+            glBindTexture(GL_TEXTURE_2D, *sky_texture.get());
 
             renderQuad();
         }
@@ -361,7 +362,7 @@ void GlGameStateDungeon::Draw()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glClear(GL_DEPTH_BUFFER_BIT);
         GLuint sprite_shader = 0;
-        DrawFxSprite(sprite_shader,fx_texture);
+        DrawFxSprite(sprite_shader,*fx_texture.get());
         glDisable(GL_BLEND);
 
 }

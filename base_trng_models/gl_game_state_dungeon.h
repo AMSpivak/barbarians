@@ -21,8 +21,7 @@ public:
 
     ~GlGameStateDungeon()
     {
-        glDeleteTextures(1,&sky_texture);
-		glDeleteTextures(1,&fx_texture);
+        
     }
     void Draw();
     IGlGameState * Process(std::map <int, bool> &inputs, float joy_x, float joy_y);
@@ -33,7 +32,7 @@ private:
     std::vector <std::shared_ptr<Animation> > Animations;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
-    GLuint sky_texture, fx_texture;
+    std::shared_ptr<GLuint> sky_texture, fx_texture;
     GlDungeon m_dungeon;
 
     glLight Light;

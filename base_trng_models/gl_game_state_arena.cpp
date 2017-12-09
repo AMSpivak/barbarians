@@ -37,7 +37,7 @@ GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
     float f_near = 1.f;
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
-    sky_texture = m_resources_manager.m_texture_atlas.AssignTexture("material/sky.png");
+    sky_texture = m_resources_manager.m_texture_atlas.Assign("material/sky.png");
     //LoadTexture("material/sky.png",sky_texture);
     time = glfwGetTime();/**/
 }
