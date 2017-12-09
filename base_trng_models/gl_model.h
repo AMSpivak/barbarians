@@ -26,11 +26,11 @@ public:
 	int parent_bone;
 
 	glm::mat4 model;
-	GLuint diffuse_texture;
-    GLuint utility_texture;
+	std::shared_ptr<GLuint> diffuse_texture;
+    std::shared_ptr<GLuint> utility_texture;
 	std::vector <Bone> bones;
 
-	glModel()
+	glModel(GLResourcesManager &resources_manager)
 	{
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
@@ -66,8 +66,8 @@ public:
 
 	~glModel()
 	{
-        glDeleteTextures(1,&diffuse_texture);
-		glDeleteTextures(1,&utility_texture);
+        //glDeleteTextures(1,&diffuse_texture);
+		//glDeleteTextures(1,&utility_texture);
 		glDeleteVertexArrays(1, &VAO);
 		glDeleteBuffers(1, &VBO);
 		glDeleteBuffers(1, &VBO_BONES);

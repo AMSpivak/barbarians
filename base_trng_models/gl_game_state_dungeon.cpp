@@ -211,14 +211,9 @@ void GlGameStateDungeon::Draw()
 
         DrawDungeon(current_shader);
 
-        //model_matrix = hero.model_matrix;
-        //pos_matrix = glm::mat4();
-        //pos_matrix = glm::translate(pos_matrix, hero_position);
 
-        //hero.model_matrix = pos_matrix * model_matrix;
-        //hero.Process();
         hero.Draw(current_shader);
-        //hero.model_matrix = model_matrix;
+     
 
 
 

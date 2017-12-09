@@ -11,4 +11,7 @@ GLResourcesManager(const std::string & textures_folder):m_texture_atlas(textures
 ~GLResourcesManager(){}
 };
 
+GLResourcesManager * GetResourceManager();
+void SetResourceManager(GLResourcesManager * resource_manager);
+
 #endif

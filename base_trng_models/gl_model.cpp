@@ -65,11 +65,11 @@ void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, diffuse_texture);
+	glBindTexture(GL_TEXTURE_2D, *diffuse_texture.get());
 
 	glUniform1i(glGetUniformLocation(shaderProgram, "UtilityTexture"), 1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, utility_texture);
+	glBindTexture(GL_TEXTURE_2D, *utility_texture.get());
     
 
 	glUniformMatrix4fv(boneLoc, bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));
@@ -106,13 +106,13 @@ void glModel::LoadAll(std::string FileName)
 	getline(modelfile, tmp_str);
 	jub_name = path + tmp_str;
 	getline(modelfile, tmp_str);
-	png_name = path + tmp_str;
+	png_name = /*path + */tmp_str;
 	modelfile >> parent_idx >> parent_bone;
 	std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n";
 	modelfile.close();
 
 	LoadModel(jal_name);
-	LoadTexture(png_name, diffuse_texture);
+	diffuse_texture = GetResourceManager()->m_texture_atlas.AssignTexture(png_name);
 	LoadModelBones(jub_name);
 
 
@@ -136,17 +136,20 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
 	getline(modelfile, tmp_str);
 	jub_name = path + tmp_str;
 	getline(modelfile, tmp_str);
-	png_name = path + tmp_str;
+	png_name = /*path + */tmp_str;
     getline(modelfile, tmp_str);
-    png_utility_name = path + tmp_str;
+    png_utility_name = /*path + */tmp_str;
 	modelfile >> parent_idx >> parent_bone>>frames_name;
-    std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<png_utility_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n"<<frames_name<<"\n";
+    //std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<png_utility_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n"<<frames_name<<"\n";
 
 	modelfile.close();
 
 	LoadModel(jal_name);
-	LoadTexture(png_name, diffuse_texture);
-    LoadTexture(png_utility_name, utility_texture);
+	diffuse_texture = GetResourceManager()->m_texture_atlas.AssignTexture(png_name);
+	utility_texture = GetResourceManager()->m_texture_atlas.AssignTexture(png_utility_name);
+	
+	//LoadTexture(png_name, diffuse_texture);
+    //LoadTexture(png_utility_name, utility_texture);
 	LoadModelBones(jub_name);
 	if(frames_name.compare("")) AttachAnimation(animations,path + frames_name);
 
