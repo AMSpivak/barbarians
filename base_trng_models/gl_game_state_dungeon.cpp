@@ -470,32 +470,52 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                 {
                     static float distance = 12.f;
                     bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
+                    
                     //key_angle = 0.0f;
+                    int joy_axes_count;
+                    const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);       
+                    if(joy_axes!=nullptr)
+                    {
+                        if(std::abs(joy_axes[0])+std::abs(joy_axes[1])>0.6f)
+                        {
+                            moving = true;
+                        }
+                        
+                        
+                    }
 
                     if(moving)
                     {
                         glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
 
                         glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
-                        
-                        if(inputs[GLFW_KEY_UP])
-                        {
-                            x_basis[2]=1.0f;
-                        }
-                        else
-                        if(inputs[GLFW_KEY_DOWN])
-                        {
-                            x_basis[2]=-1.0f;                            
-                        }
 
-                        if(inputs[GLFW_KEY_LEFT])
+                        if(joy_axes!=nullptr)
                         {
-                            x_basis[0]=1.0f;
+                            x_basis[0]= -joy_axes[0];
+                            x_basis[2]= -joy_axes[1];
                         }
                         else
-                        if(inputs[GLFW_KEY_RIGHT])
                         {
-                            x_basis[0]=-1.0f;                          
+                            if(inputs[GLFW_KEY_UP])
+                            {
+                                x_basis[2]=1.0f;
+                            }
+                            else
+                            if(inputs[GLFW_KEY_DOWN])
+                            {
+                                x_basis[2]=-1.0f;                            
+                            }
+
+                            if(inputs[GLFW_KEY_LEFT])
+                            {
+                                x_basis[0]=1.0f;
+                            }
+                            else
+                            if(inputs[GLFW_KEY_RIGHT])
+                            {
+                                x_basis[0]=-1.0f;                          
+                            }
                         }
                         //x_basis = glm::normalize(x_basis);
                         x_basis = glm::normalize(x_basis);
@@ -527,67 +547,23 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         hero.model_matrix = glm::mat4();
                         hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
                         hero.model_matrix = rm * hero.model_matrix;
-                        /*
-                        if(inputs[GLFW_KEY_RIGHT])
-                        {
-                            key_angle =270.0f;
-                            if(inputs[GLFW_KEY_UP])
-                            {
-                                key_angle =315.0f;
-                            }
-                            if(inputs[GLFW_KEY_DOWN])
-                            {
-                                key_angle =215.0f;                            
-                            }
-                        }
-                        else
-                        if(inputs[GLFW_KEY_LEFT])
-                        {
-                            key_angle =90.0f;
-                            if(inputs[GLFW_KEY_UP])
-                            {
-                                key_angle =45.0f;
-                            }
-                            if(inputs[GLFW_KEY_DOWN])
-                            {
-                                key_angle =135.0f;                            
-                            }
-                        } 
-                        else
-                        if(inputs[GLFW_KEY_DOWN])
-                        {
-                                key_angle =180.0f;                            
-                        }
-                        else
-                        if(inputs[GLFW_KEY_UP])   
-                        {
-                                key_angle =0.0f;                            
-                        }
-                        key_angle += camera_rotation_angle;
-
-
-
-                        float angle_change = key_angle - hero_rotation_angle;
-                        if(std::abs(angle_change)> 180.0f)
-                        {
-                            angle_change = -()
-                           // key_angle -= 360.0f;
-                        }
-
-                        hero_rotation_angle += angle_change*0.2f;                            
-
-                        if(hero_rotation_angle >360.0f)
-                            hero_rotation_angle -= 360.0f;
-                        if(hero_rotation_angle < 0.0f)
-                            hero_rotation_angle += 360.0f;*/
+                        
 
 
                     }
                     bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
 
+                    int buttons_count;
+                    const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
                     
+                    if(buttons!= nullptr)
+                    {
+                        if(buttons_count>7)
+                        {
+                            attack = buttons[7] == GLFW_PRESS;
+                        }
+                    }
 
-                    if(inputs[GLFW_KEY_DOWN]) {}//light_angle -=2.0f;
 
                     if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
                     if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
@@ -604,7 +580,10 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         joy_diff = 0.0f;
                     }
 
-
+                    if(joy_axes_count>2&&joy_axes!=nullptr)
+                    {
+                        joy_diff = joy_axes[2];
+                    }
 
                     old_joy_x = joy_x;
                     camera_rotation_angle -= joy_diff * 12.0f;
