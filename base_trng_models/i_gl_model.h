@@ -17,12 +17,18 @@ public:
 	int parent_attach_point;
 
     glm::mat4 model_matrix;
+    float mass_inv;
+    float radius;
+    glm::vec3 position;
+    IGlModel():model_matrix(),mass_inv(0),radius(1.0f), position(0.0f,0.0f,0.0f)
+    {
 
-    IGlModel():model_matrix()
-    {}
+    }
     virtual ~IGlModel(){}
     virtual void Draw(GLuint shader) = 0;
     virtual void Process() = 0;
+    virtual int AddAxes(std::vector<glm::vec3> &axes) = 0;
+    virtual std::pair<float, float> ProjectOnAxe(glm::vec3 axe) = 0;
 };
 
 

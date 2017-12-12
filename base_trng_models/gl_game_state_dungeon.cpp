@@ -34,6 +34,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/wall/wall.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/wallcross/wallcross.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/wally/wall.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/barrel/barrel.mdl", Animations));
+    
     //Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
     int models_count = Models.size();
     for(auto tmpModel : Models)
@@ -45,7 +47,6 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
 
-    //light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle)));
     light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle))); 
     light_dir_vector = glm::normalize(light_position);
     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -54,19 +55,12 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
     sky_texture = resources_manager.m_texture_atlas.Assign("dungeon_bck.png");
     fx_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
-    /*LoadTexture("material/dungeon_bck.png",sky_texture);
-    LoadTexture("material/fireball.png",fx_texture);*/
+
     
     time = glfwGetTime();/**/
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
-/*
-    m_dungeon_width = 5;
-    m_dungeon_height = 5;
-    m_dungeon_floors = 1;
-    m_dungeon_map_objects.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);
-    m_dungeon_map_objects[1] = 1;
-    m_dungeon_map_tiles.resize(m_dungeon_width*m_dungeon_height*m_dungeon_floors,0);*/
+
     hero_position = glm::vec3(10.0f,0.0f,10.0f);
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
@@ -106,7 +100,16 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
             }
             pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
         }
-    }/**/
+    }
+                
+                model_matrix = Models[5]->model;
+                pos_matrix = glm::mat4();
+                pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f) );
+                Models[5]->model = pos_matrix * model_matrix;
+                //pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+                Models[5]->Draw(current_shader,now_frame);
+                Models[5]->model = model_matrix;
+    /**/
     //Models[index]->model = model_matrix;
     
 }
@@ -373,31 +376,30 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
     glm::vec3 return_value = glm::vec3(0.0f,0.0f,0.0f);
     float minimum = std::numeric_limits<float>::min();
     
-    
     float intersect_x = CollisionOnAxe(position_cube[0] -1.0f,
                                         position_cube[0] + 1.0f,
                                         position_circle[0]  - radius,
                                         position_circle[0]  + radius
                                         );
+
     if(intersect_x < minimum) return glm::vec3(0.0f,0.0f,0.0f);
     float intersect = intersect_x;
 
     return_value = glm::vec3(intersection[0] > 0 ? intersect_x : -intersect_x,0.0f,0.0f);
 
-    float intersect_z = CollisionOnAxe(position_cube[2] -1.0f,
+    float intersect_z = CollisionOnAxe( position_cube[2] -1.0f,
                                         position_cube[2] + 1.0f,
                                         position_circle[2]  - radius,
                                         position_circle[2]  + radius
                                         );
+
     if(intersect_z < minimum) return glm::vec3(0.0f,0.0f,0.0f);
-    if(intersect_z<intersect)
+    if(intersect_z < intersect)
     {
         intersect = intersect_z;
-
         return_value = glm::vec3(0.0f,0.0f,intersection[2] > 0 ? intersect_z : -intersect_z);
     }
     glm::vec3 axe = glm::normalize(glm::vec3(1.0f,0.0f,1.0f));
-
 
     float pos2_axe = glm::dot(position_circle - position_cube,axe);
 
@@ -416,9 +418,8 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
         return_value = glm::vec3(intersect_xz,0.0f,intersect_xz);
     }
     return return_value;
-    
-
 }
+
 void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 {
     float hero_radius =1.0f;
@@ -443,7 +444,6 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
             }
         }
     }
-
 }
 
 
@@ -457,9 +457,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     static float camera_rotation_angle = 0.0f;
     static float hero_rotation_angle = 0.0f;
     static float old_joy_x = 0.0f;
-
-
-    
+   
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
     GLuint current_shader;
 
@@ -517,7 +515,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                                 x_basis[0]=-1.0f;                          
                             }
                         }
-                        //x_basis = glm::normalize(x_basis);
+
                         x_basis = glm::normalize(x_basis);
                         
                         glm::mat4 m = glm::rotate(glm::radians(camera_rotation_angle), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -530,10 +528,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
                         float l = 0.4f * glm::length(old_dir - x_basis);
                         x_basis =(1.0f - l) * old_dir + l * x_basis;
-                        //x_basis =0.6f * old_dir + 0.4f * x_basis;
                         x_basis = glm::normalize(x_basis);
-                        
-
 
                         glm::vec3 z_basis = glm::cross(x_basis, y_basis);
 
@@ -547,9 +542,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         hero.model_matrix = glm::mat4();
                         hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
                         hero.model_matrix = rm * hero.model_matrix;
-                        
-
-
+                       
                     }
                     bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
 
@@ -606,11 +599,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                     glm::vec3  light_dir_vector = glm::normalize(light_position);
                     time = time_now;
-
-                    //hero.model_matrix = glm::mat4();
-                    //hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                    //hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(hero_rotation_angle/*key_angle*/), glm::vec3(0.0f, 0.0f, 1.0f));
-                    
+   
                     if(moving&&!attack)
                     {
                         hero.UseSequence("walk");
@@ -626,13 +615,10 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         hero.UseSequence("stance");
                     }
 
-                    //key_angle = 0;
                     now_frame++;
                     if(now_frame == 99 + 1) now_frame = 91;
                     hero.Process();
                     FitObjects(0,0.0f);
                 }
                 return this;
-/**/
-
 }

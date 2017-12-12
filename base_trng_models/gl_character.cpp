@@ -65,3 +65,16 @@ void GlCharacter::AddModel(std::string name)
 {
     Models.emplace_back(std::make_shared<glModel>(name,Animations));
 }
+
+int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
+{
+    return 0;
+}
+
+std::pair<float, float> GlCharacter::ProjectOnAxe(glm::vec3 axe)
+{
+    float position_on_axe = glm::dot(axe, position);
+
+    std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
+
+}

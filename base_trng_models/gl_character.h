@@ -18,6 +18,10 @@ public:
     void AddSequence(const std::string & name, const AnimationSequence & in_sequence);
     void UseSequence(const std::string & name);
     void RefreshMatrixes();
+
+    int AddAxes(std::vector<glm::vec3> &axes);
+    std::pair<float, float> ProjectOnAxe(glm::vec3 axe);
+
 private:
 
     size_t now_frame;
