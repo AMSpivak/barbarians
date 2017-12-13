@@ -34,7 +34,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/wall/wall.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/wallcross/wallcross.mdl", Animations));
     Models.emplace_back(std::make_shared<glModel>("material/dungeon/wally/wall.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/barrel/barrel.mdl", Animations));
+    //Models.emplace_back(std::make_shared<glModel>("material/barrel/barrel.mdl", Animations));
     
     //Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
     int models_count = Models.size();
@@ -62,6 +62,18 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     hero.UseSequence("stance");
 
     hero_position = glm::vec3(10.0f,0.0f,10.0f);
+
+
+    std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
+    dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel",barrel_ptr));
+    GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
+    barrel_model.position = glm::vec3(10.0f,0.0f,12.0f);
+    barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    barrel_model.AddModel("material/barrel/barrel.mdl");
+    AnimationSequence as_base(0,1);
+    barrel_model.AddSequence("base",as_base);
+    barrel_model.UseSequence("base");
+
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
 {
@@ -102,15 +114,19 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
         }
     }
                 
-                model_matrix = Models[5]->model;
-                pos_matrix = glm::mat4();
-                pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f) );
-                Models[5]->model = pos_matrix * model_matrix;
-                //pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-                Models[5]->Draw(current_shader,now_frame);
-                Models[5]->model = model_matrix;
-    /**/
-    //Models[index]->model = model_matrix;
+    for(auto object : dungeon_objects)
+    {  
+        auto ptr = object.second.get();
+
+        pos_matrix = glm::mat4();
+        pos_matrix = glm::translate(pos_matrix, ptr->position - hero_position);
+        model_matrix = ptr->model_matrix;
+        ptr->model_matrix = pos_matrix * model_matrix;
+        ptr->RefreshMatrixes();
+        ptr->Draw(current_shader);
+        ptr->model_matrix = model_matrix;
+    }
+               
     
 }
 
@@ -420,12 +436,13 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
     return return_value;
 }
 
-void GlGameStateDungeon::FitObjects(int steps, float accuracy)
-{
-    float hero_radius =1.0f;
 
-    int x = static_cast<int>(hero_position[0]*0.5f);
-    int z = static_cast<int>(hero_position[2]*0.5f);
+float GlGameStateDungeon::FitObjectToMap(IGlModel& object, glm::vec3 & position)
+{
+    float hero_radius = object.radius;
+
+    int x = static_cast<int>(position[0]*0.5f);
+    int z = static_cast<int>(position[2]*0.5f);
 
     int xp = x;
     int zp = z;
@@ -439,12 +456,42 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
             if(m_dungeon.GetMapObjectIndex(xp,zp,0)>0||m_dungeon.GetMapTilesIndex(xp,zp,0)<0)
             {
                 glm::vec3 tile_position = glm::vec3(2.0f * xp,0.0f,2.0f * zp);
-                glm::vec3 intersection =IntersectionProjection(tile_position, hero_position, hero_radius);
-                hero_position += intersection;
+                glm::vec3 intersection =IntersectionProjection(tile_position, position, hero_radius);
+                position += intersection;
             }
         }
     }
+
+    return 0.0f;
 }
+
+float GlGameStateDungeon::FitObjectToObject(IGlModel& object1, glm::vec3 & position1,IGlModel& object2, glm::vec3 & position2)
+{
+    std::vector <glm::vec3 > axes;
+    axes.push_back(glm::normalize(position2 - position1));
+    object1.AddAxes(axes);
+    object2.AddAxes(axes);
+    
+
+
+    
+}
+
+
+void GlGameStateDungeon::FitObjects(int steps, float accuracy)
+{
+    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
+    FitObjectToMap(hero,hero_position);
+
+    for(auto object : dungeon_objects)
+    {  
+        auto ptr = object.second.get();
+        FitObjectToMap(*ptr,ptr->position);
+        
+    }
+
+}
+
 
 
 void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)

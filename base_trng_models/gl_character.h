@@ -30,6 +30,8 @@ private:
     //std::map<std::string, GLuint> &shader_map;
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;
+    float life_value;
+    float armor_value;
     //void RefreshMatrixes();
 
 };

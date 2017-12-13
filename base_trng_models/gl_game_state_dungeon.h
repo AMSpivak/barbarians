@@ -34,6 +34,7 @@ private:
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
     std::shared_ptr<GLuint> sky_texture, fx_texture;
     GlDungeon m_dungeon;
+    std::map<std::string,std::shared_ptr<IGlModel>>  dungeon_objects;
 
     glLight Light;
     float light_angle;
@@ -50,7 +51,8 @@ private:
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
     void MoveHero(const glm::vec3 & hero_move);
     void FitObjects(int steps, float accuracy);
-    
+    float FitObjectToMap(IGlModel& object, glm::vec3 & position);
+    float FitObjectToObject(IGlModel& object1, glm::vec3 & position1,IGlModel& object2, glm::vec3 & position2);
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
 };
 

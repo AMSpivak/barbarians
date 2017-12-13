@@ -27,6 +27,7 @@ public:
     virtual ~IGlModel(){}
     virtual void Draw(GLuint shader) = 0;
     virtual void Process() = 0;
+    virtual void RefreshMatrixes() = 0;
     virtual int AddAxes(std::vector<glm::vec3> &axes) = 0;
     virtual std::pair<float, float> ProjectOnAxe(glm::vec3 axe) = 0;
 };
