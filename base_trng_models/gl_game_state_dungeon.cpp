@@ -65,7 +65,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 
     {
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
-        dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel",barrel_ptr));
+        dungeon_objects.push_back( barrel_ptr);
         GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
         barrel_model.mass_inv = 1.0f;
         barrel_model.radius = 0.5f;
@@ -79,7 +79,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 
     {
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
-        dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel2",barrel_ptr));
+        dungeon_objects.push_back( barrel_ptr);
         GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
         barrel_model.mass_inv = 1.0f;
         barrel_model.radius = 0.5f;
@@ -133,7 +133,7 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
                 
     for(auto object : dungeon_objects)
     {  
-        auto ptr = object.second.get();
+        auto ptr = object.get();
 
         pos_matrix = glm::mat4();
         pos_matrix = glm::translate(pos_matrix, ptr->position - hero_position);
@@ -548,7 +548,7 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
     {
         for(auto object : dungeon_objects)
         {  
-            auto ptr = object.second.get();
+            auto ptr = object.get();
             FitObjectToObject(*ptr,hero);
             
         }
@@ -557,18 +557,18 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 
         for(auto object : dungeon_objects)
         {  
-            auto ptr = object.second.get();
+            auto ptr = object.get();
             FitObjectToMap(*ptr,ptr->position);
             
         }
 
         for(auto object1 : dungeon_objects)
         {  
-            auto ptr1 = object1.second.get();
+            auto ptr1 = object1.get();
 
             for(auto object2 : dungeon_objects)
             {  
-                auto ptr2 = object2.second.get();
+                auto ptr2 = object2.get();
 
                 if(ptr1!=ptr2)
                     FitObjectToObject(*ptr1,*ptr2);

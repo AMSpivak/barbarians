@@ -8,6 +8,7 @@
 #include "gl_model.h"
 #include "gl_character.h"
 #include "gl_dungeon.h"
+#include <list>
 
 class GlGameStateDungeon: public IGlGameState
 {
@@ -34,7 +35,7 @@ private:
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
     std::shared_ptr<GLuint> sky_texture, fx_texture;
     GlDungeon m_dungeon;
-    std::map<std::string,std::shared_ptr<IGlModel>>  dungeon_objects;
+    std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
 
     glLight Light;
     float light_angle;
