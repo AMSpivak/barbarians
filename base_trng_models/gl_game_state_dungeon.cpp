@@ -67,7 +67,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
         dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel",barrel_ptr));
         GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
-        barrel_model.mass_inv = 1.0;
+        barrel_model.mass_inv = 1.0f;
+        barrel_model.radius = 0.5f;
         barrel_model.position = glm::vec3(10.0f,0.0f,12.0f);
         barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         barrel_model.AddModel("material/barrel/barrel.mdl");
@@ -80,7 +81,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
         dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel2",barrel_ptr));
         GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
-        barrel_model.mass_inv = 1.0;
+        barrel_model.mass_inv = 1.0f;
+        barrel_model.radius = 0.5f;
         barrel_model.position = glm::vec3(12.0f,0.0f,12.0f);
         barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         barrel_model.AddModel("material/barrel/barrel.mdl");
