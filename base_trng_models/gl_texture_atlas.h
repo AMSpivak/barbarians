@@ -5,7 +5,7 @@
 #include "gl_atlas.h"
 
 
-class GLTextureAtlas: public GLAtlas
+class GLTextureAtlas: public GLAtlas<GLuint>
 {
 
 private:

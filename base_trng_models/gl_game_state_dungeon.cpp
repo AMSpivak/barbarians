@@ -586,7 +586,7 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 
 void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
 {
-    hero_position += hero_move;
+    hero_position += 1.0f*hero_move;
 }
 
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)

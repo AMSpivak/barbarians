@@ -2,7 +2,7 @@
 #include "glresourses.h"
 #include <iostream>
 
-GLTextureAtlas::GLTextureAtlas(const std::string & ResourseFolder):GLAtlas(ResourseFolder)
+GLTextureAtlas::GLTextureAtlas(const std::string & ResourseFolder):GLAtlas<GLuint>(ResourseFolder)
 {}
 
 
