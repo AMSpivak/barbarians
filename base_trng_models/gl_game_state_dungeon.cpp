@@ -63,17 +63,31 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 
     hero_position = glm::vec3(10.0f,0.0f,10.0f);
 
+    {
+        std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
+        dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel",barrel_ptr));
+        GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
+        barrel_model.mass_inv = 1.0;
+        barrel_model.position = glm::vec3(10.0f,0.0f,12.0f);
+        barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        barrel_model.AddModel("material/barrel/barrel.mdl");
+        AnimationSequence as_base(0,1);
+        barrel_model.AddSequence("base",as_base);
+        barrel_model.UseSequence("base");
+    }
 
-    std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
-    dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel",barrel_ptr));
-    GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
-    barrel_model.mass_inv = 1.0;
-    barrel_model.position = glm::vec3(10.0f,0.0f,12.0f);
-    barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    barrel_model.AddModel("material/barrel/barrel.mdl");
-    AnimationSequence as_base(0,1);
-    barrel_model.AddSequence("base",as_base);
-    barrel_model.UseSequence("base");
+    {
+        std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
+        dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel2",barrel_ptr));
+        GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
+        barrel_model.mass_inv = 1.0;
+        barrel_model.position = glm::vec3(12.0f,0.0f,12.0f);
+        barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        barrel_model.AddModel("material/barrel/barrel.mdl");
+        AnimationSequence as_base(0,1);
+        barrel_model.AddSequence("base",as_base);
+        barrel_model.UseSequence("base");
+    }
 
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
@@ -543,6 +557,21 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
         {  
             auto ptr = object.second.get();
             FitObjectToMap(*ptr,ptr->position);
+            
+        }
+
+        for(auto object1 : dungeon_objects)
+        {  
+            auto ptr1 = object1.second.get();
+
+            for(auto object2 : dungeon_objects)
+            {  
+                auto ptr2 = object2.second.get();
+
+                if(ptr1!=ptr2)
+                    FitObjectToObject(*ptr1,*ptr2);
+                
+            }
             
         }
         
