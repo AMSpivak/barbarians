@@ -71,10 +71,12 @@ int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
     return 0;
 }
 
-std::pair<float, float> GlCharacter::ProjectOnAxe(glm::vec3 axe)
+std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe)
 {
     float position_on_axe = glm::dot(axe, position);
 
     std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
+
+    return ret_value;
 
 }

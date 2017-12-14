@@ -67,6 +67,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
     dungeon_objects.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Barrel",barrel_ptr));
     GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(barrel_ptr.get()));
+    barrel_model.mass_inv = 1.0;
     barrel_model.position = glm::vec3(10.0f,0.0f,12.0f);
     barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     barrel_model.AddModel("material/barrel/barrel.mdl");
@@ -465,30 +466,88 @@ float GlGameStateDungeon::FitObjectToMap(IGlModel& object, glm::vec3 & position)
     return 0.0f;
 }
 
-float GlGameStateDungeon::FitObjectToObject(IGlModel& object1, glm::vec3 & position1,IGlModel& object2, glm::vec3 & position2)
+float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
 {
-    std::vector <glm::vec3 > axes;
-    axes.push_back(glm::normalize(position2 - position1));
+    float mass_summ = object1.mass_inv + object2.mass_inv;
+
+    if(mass_summ < std::numeric_limits<float>::min())
+            return 0.0f;
+
+    std::vector < glm::vec3 > axes;
+    axes.push_back(glm::normalize(object2.position - object1.position));
     object1.AddAxes(axes);
     object2.AddAxes(axes);
+
+    glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
+    float intersection = std::numeric_limits<float>::max();
+
+    for(auto axe : axes)
+    {
+        std::pair<float,float> projection1 = object1.ProjectOnAxe(axe);
+        std::pair<float,float> projection2 = object2.ProjectOnAxe(axe);
+        /*std::cout<<"=============\n";
+        std::cout<<axe[0]<<" "<<axe[1]<<" "<<axe[2]<<"\n";
+        std::cout<<object2.position[0]<<" "<<object2.position[1]<<" "<<object2.position[2]<<"\n";
+        std::cout<<object1.position[0]<<" "<<object1.position[1]<<" "<<object1.position[2]<<"\n";
+        
+        std::cout<<projection2.second<<" "<<projection2.first<<"\n";
+        std::cout<<projection1.second<<" "<<projection1.first<<"\n";*/
+        float axe_intersection = CollisionOnAxe(projection1,projection2);
+
+        if(axe_intersection < std::numeric_limits<float>::min())
+            return 0.0f;
+
+        if(axe_intersection < intersection)
+        {
+            compensate_axe = axe;
+            intersection = axe_intersection;
+        }
+    }
+
+    float pos2_axe = glm::dot(object2.position - object1.position,compensate_axe);
+    compensate_axe[1] = 0.0f;
+    if(pos2_axe < 0.0f)
+    {
+        intersection = -intersection;
+    }
+
+    float obj1_part = object1.mass_inv/mass_summ;
+    float obj2_part = 1.0f - obj1_part;
+
+
+    object2.position += obj2_part * intersection * compensate_axe;
+    object1.position -= obj1_part * intersection * compensate_axe;
     
-
-
+    return intersection;
     
 }
 
 
 void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 {
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
-    FitObjectToMap(hero,hero_position);
+    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
+    hero.position = hero_position;
 
-    for(auto object : dungeon_objects)
-    {  
-        auto ptr = object.second.get();
-        FitObjectToMap(*ptr,ptr->position);
+    for(int i =0; i< steps; i++)
+    {
+        for(auto object : dungeon_objects)
+        {  
+            auto ptr = object.second.get();
+            FitObjectToObject(*ptr,hero);
+            
+        }
+
+        FitObjectToMap(hero,hero.position);
+
+        for(auto object : dungeon_objects)
+        {  
+            auto ptr = object.second.get();
+            FitObjectToMap(*ptr,ptr->position);
+            
+        }
         
     }
+    hero_position = hero.position;
 
 }
 
@@ -665,7 +724,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     now_frame++;
                     if(now_frame == 99 + 1) now_frame = 91;
                     hero.Process();
-                    FitObjects(0,0.0f);
+                    FitObjects(10,0.0f);
                 }
                 return this;
 }

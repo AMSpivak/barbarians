@@ -52,7 +52,7 @@ private:
     void MoveHero(const glm::vec3 & hero_move);
     void FitObjects(int steps, float accuracy);
     float FitObjectToMap(IGlModel& object, glm::vec3 & position);
-    float FitObjectToObject(IGlModel& object1, glm::vec3 & position1,IGlModel& object2, glm::vec3 & position2);
+    float FitObjectToObject(IGlModel& object1,IGlModel& object2);
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
 };
 

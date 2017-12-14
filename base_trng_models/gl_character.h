@@ -20,7 +20,7 @@ public:
     void RefreshMatrixes();
 
     int AddAxes(std::vector<glm::vec3> &axes);
-    std::pair<float, float> ProjectOnAxe(glm::vec3 axe);
+    std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe);
 
 private:
 
