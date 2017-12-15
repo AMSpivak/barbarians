@@ -1,0 +1,1 @@
+#include "map_event_hero_strikes.h"

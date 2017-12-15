@@ -46,8 +46,9 @@ void GlCharacter::RefreshMatrixes()
     }
 }
 
-void GlCharacter::Process()
+int GlCharacter::Process()
 {
+    if(life_value <=0.0f) reurn 1;
     if(current_animation == nullptr)
     {
         now_frame = 0;
@@ -60,6 +61,7 @@ void GlCharacter::Process()
     }
 
     RefreshMatrixes();
+    return 0;
 }
 void GlCharacter::AddModel(std::string name)
 {

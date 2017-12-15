@@ -13,7 +13,7 @@ public:
     GlCharacter();
     ~GlCharacter();
     void Draw(GLuint shader) ;
-    void Process();
+    int Process();
     void AddModel(std::string name);
     void AddSequence(const std::string & name, const AnimationSequence & in_sequence);
     void UseSequence(const std::string & name);
@@ -30,8 +30,7 @@ private:
     //std::map<std::string, GLuint> &shader_map;
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;
-    float life_value;
-    float armor_value;
+
     //void RefreshMatrixes();
 
 };
