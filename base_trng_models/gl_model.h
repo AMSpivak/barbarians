@@ -7,13 +7,15 @@
 #include <memory>
 #include "glresourses.h"
 #include <iostream>
+#include "i_gl_jal_struct.h"
 
 #include "gl_resources_manager.h"
 
 class glModel
 {
 
-	GLuint VBO, VBO_BONES, VBO_BONES_IDX, VAO;
+	IGlJalStruct jal_mesh;
+	//GLuint VBO, VBO_BONES, VBO_BONES_IDX, VAO;
 	int vertexcount;
 	int bonescount;
 	std::shared_ptr<Animation> animation;
@@ -30,27 +32,27 @@ public:
 
 	glModel(GLResourcesManager &resources_manager)
 	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &VBO_BONES);
-		glGenBuffers(1, &VBO_BONES_IDX);
+		glGenVertexArrays(1, &jal_mesh.VAO);
+		glGenBuffers(1, &jal_mesh.VBO);
+		glGenBuffers(1, &jal_mesh.VBO_BONES);
+		glGenBuffers(1, &jal_mesh.VBO_BONES_IDX);
 	}
 
 	glModel(std::string FileName)
 	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &VBO_BONES);
-		glGenBuffers(1, &VBO_BONES_IDX);
+		glGenVertexArrays(1, &jal_mesh.VAO);
+		glGenBuffers(1, &jal_mesh.VBO);
+		glGenBuffers(1, &jal_mesh.VBO_BONES);
+		glGenBuffers(1, &jal_mesh.VBO_BONES_IDX);
 		LoadAll(FileName);
 	}
 
 	glModel(std::string FileName,std::vector <std::shared_ptr<Animation> > &animations)
 	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &VBO_BONES);
-		glGenBuffers(1, &VBO_BONES_IDX);
+		glGenVertexArrays(1, &jal_mesh.VAO);
+		glGenBuffers(1, &jal_mesh.VBO);
+		glGenBuffers(1, &jal_mesh.VBO_BONES);
+		glGenBuffers(1, &jal_mesh.VBO_BONES_IDX);
 		LoadAll(FileName,animations);
 	}
 
@@ -64,12 +66,11 @@ public:
 
 	~glModel()
 	{
-        //glDeleteTextures(1,&diffuse_texture);
-		//glDeleteTextures(1,&utility_texture);
-		glDeleteVertexArrays(1, &VAO);
-		glDeleteBuffers(1, &VBO);
-		glDeleteBuffers(1, &VBO_BONES);
-		glDeleteBuffers(1, &VBO_BONES_IDX);
+
+		glDeleteVertexArrays(1, &jal_mesh.VAO);
+		glDeleteBuffers(1, &jal_mesh.VBO);
+		glDeleteBuffers(1, &jal_mesh.VBO_BONES);
+		glDeleteBuffers(1, &jal_mesh.VBO_BONES_IDX);
 	}
 
 

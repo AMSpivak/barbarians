@@ -48,7 +48,7 @@ void GlCharacter::RefreshMatrixes()
 
 int GlCharacter::Process()
 {
-    if(life_value <=0.0f) reurn 1;
+    if(GetLifeValue() <=0.0f) return 1;
     if(current_animation == nullptr)
     {
         now_frame = 0;

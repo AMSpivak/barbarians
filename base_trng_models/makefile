@@ -5,7 +5,7 @@ ifeq ($(OS),Windows_NT)
 else
 	LDFLAGS=  -lGLEW -lSOIL -lGL `pkg-config --cflags glfw3` `pkg-config --static --libs glfw3`
 endif
-SOURCES= main.cpp map_event_hero_strikes.cpp gl_texture_atlas.cpp gl_resources_manager.cpp glresourses.cpp gl_render_target.cpp glscene.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
+SOURCES= main.cpp map_event_hero_strikes.cpp gl_jal_mesh_atlas.cpp gl_texture_atlas.cpp gl_resources_manager.cpp glresourses.cpp gl_render_target.cpp glscene.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=game
 

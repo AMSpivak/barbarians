@@ -4,11 +4,11 @@
 
 void glModel::LoadModel(std::string FileName)
 {
-	LoadVertexArray(FileName, VBO, VBO_BONES, VBO_BONES_IDX, vertexcount);
+	LoadVertexArray(FileName, jal_mesh.VBO, jal_mesh.VBO_BONES, jal_mesh.VBO_BONES_IDX, jal_mesh.vertexcount);
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(jal_mesh.VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, jal_mesh.VBO);
 
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
@@ -20,12 +20,12 @@ void glModel::LoadModel(std::string FileName)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_BONES_IDX);
+	glBindBuffer(GL_ARRAY_BUFFER, jal_mesh.VBO_BONES_IDX);
     //glBufferData(GL_ARRAY_BUFFER, Model->indexNum*4*sizeof(GLint), VertexBoneArray, GL_STATIC_DRAW);
 
     glVertexAttribIPointer(3, 4, GL_INT, 4 * sizeof(GL_INT), (GLvoid*)0);
     glEnableVertexAttribArray(3);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_BONES);
+	glBindBuffer(GL_ARRAY_BUFFER, jal_mesh.VBO_BONES);
     //glBufferData(GL_ARRAY_BUFFER, Model->indexNum*4*sizeof(GLfloat), VertexWeigthArray, GL_STATIC_DRAW);
 
     glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
@@ -47,10 +47,10 @@ void glModel::LoadModelBones(std::string FileName)
 
 void glModel::Draw()
 {
-	if(vertexcount > 2)
+	if(jal_mesh.vertexcount > 2)
 	{
-	    glBindVertexArray(VAO);
-	    glDrawArrays(GL_TRIANGLES, 0, vertexcount);
+	    glBindVertexArray(jal_mesh.VAO);
+	    glDrawArrays(GL_TRIANGLES, 0, jal_mesh.vertexcount);
 	    glBindVertexArray(0);
 	}
 }

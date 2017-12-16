@@ -25,6 +25,14 @@ public:
     {
 
     }
+    float GetLifeValue()
+    {
+        return life_value;
+    }
+    void SetLifeValue(float value)
+    {
+        life_value= value;
+    }
     void Damage(float damage)
     {
         life_value -= damage * armor_value;

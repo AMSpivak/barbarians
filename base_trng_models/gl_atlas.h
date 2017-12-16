@@ -25,10 +25,10 @@ public:
 
     ~GLAtlas()
     {
-        for(auto textyre_ptr : m_map)
+        for(auto resource_ptr : m_map)
         {
-            std::cout <<"Delete texture: "<<textyre_ptr.first<<"\n";
-            EmptyResource(textyre_ptr.second.get());
+            std::cout <<"Delete resource: "<<resource_ptr.first<<"\n";
+            EmptyResource(resource_ptr.second.get());
             //glDeleteTextures(1,textyre_ptr.second.get());
         }
     }
