@@ -103,7 +103,7 @@ int main(int argc, char const *argv[])
 
 	
 
-	GLResourcesManager resources_atlas("material/textures/");
+	GLResourcesManager resources_atlas("material/textures/","material/meshes/");
 
 	SetResourceManager(&resources_atlas);
 
@@ -213,16 +213,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	/*if (action == GLFW_RELEASE)
 		return;*/
 
-	if (key == GLFW_KEY_LEFT )
+	if (key == GLFW_KEY_LEFT || key == GLFW_KEY_A )
         inputs[GLFW_KEY_LEFT] = (action != GLFW_RELEASE) ?  true : false;
 
-	if (key == GLFW_KEY_RIGHT )
+	if (key == GLFW_KEY_RIGHT || key == GLFW_KEY_D )
 		inputs[GLFW_KEY_RIGHT] = (action != GLFW_RELEASE) ?  true : false;
 
-	if (key == GLFW_KEY_UP )
+	if (key == GLFW_KEY_UP || key == GLFW_KEY_W )
         inputs[GLFW_KEY_UP] = (action != GLFW_RELEASE) ?  true : false;
 
-	if (key == GLFW_KEY_DOWN )
+	if (key == GLFW_KEY_DOWN || key == GLFW_KEY_S)
 		inputs[GLFW_KEY_DOWN] = (action != GLFW_RELEASE) ?  true : false;
 
     if (key == GLFW_KEY_SPACE )

@@ -14,11 +14,12 @@
 class glModel
 {
 
-	IGlJalStruct jal_mesh;
-	//GLuint VBO, VBO_BONES, VBO_BONES_IDX, VAO;
+	std::shared_ptr<IGlJalStruct> jal_mesh;
+
 	int vertexcount;
 	int bonescount;
 	std::shared_ptr<Animation> animation;
+	std::string name;
 	//GLResourcesManager &m_resources_manager;
 
 public:
@@ -31,28 +32,15 @@ public:
 	std::vector <Bone> bones;
 
 	glModel(GLResourcesManager &resources_manager)
-	{
-		glGenVertexArrays(1, &jal_mesh.VAO);
-		glGenBuffers(1, &jal_mesh.VBO);
-		glGenBuffers(1, &jal_mesh.VBO_BONES);
-		glGenBuffers(1, &jal_mesh.VBO_BONES_IDX);
-	}
+	{}
 
 	glModel(std::string FileName)
 	{
-		glGenVertexArrays(1, &jal_mesh.VAO);
-		glGenBuffers(1, &jal_mesh.VBO);
-		glGenBuffers(1, &jal_mesh.VBO_BONES);
-		glGenBuffers(1, &jal_mesh.VBO_BONES_IDX);
 		LoadAll(FileName);
 	}
 
 	glModel(std::string FileName,std::vector <std::shared_ptr<Animation> > &animations)
 	{
-		glGenVertexArrays(1, &jal_mesh.VAO);
-		glGenBuffers(1, &jal_mesh.VBO);
-		glGenBuffers(1, &jal_mesh.VBO_BONES);
-		glGenBuffers(1, &jal_mesh.VBO_BONES_IDX);
 		LoadAll(FileName,animations);
 	}
 
@@ -65,13 +53,7 @@ public:
 
 
 	~glModel()
-	{
-
-		glDeleteVertexArrays(1, &jal_mesh.VAO);
-		glDeleteBuffers(1, &jal_mesh.VBO);
-		glDeleteBuffers(1, &jal_mesh.VBO_BONES);
-		glDeleteBuffers(1, &jal_mesh.VBO_BONES_IDX);
-	}
+	{}
 
 
 

@@ -38,7 +38,7 @@ public:
         typename std::map<std::string,std::shared_ptr<T>>::iterator  it = m_map.find(FileName);
         if( it != m_map.end() )
         {
-            std::cout<<"repeat\n";
+            std::cout<<"repeat\n"<<FileName<<"\n";
             return it->second;
         }
         //GLuint * texture = new;

@@ -4,6 +4,7 @@
 
 void glModel::LoadModel(std::string FileName)
 {
+	/*
 	LoadVertexArray(FileName, jal_mesh.VBO, jal_mesh.VBO_BONES, jal_mesh.VBO_BONES_IDX, jal_mesh.vertexcount);
 
 	glBindVertexArray(jal_mesh.VAO);
@@ -36,7 +37,7 @@ void glModel::LoadModel(std::string FileName)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
 
-    glBindVertexArray(0);
+    glBindVertexArray(0);*/
 }
 
 void glModel::LoadModelBones(std::string FileName)
@@ -47,10 +48,13 @@ void glModel::LoadModelBones(std::string FileName)
 
 void glModel::Draw()
 {
-	if(jal_mesh.vertexcount > 2)
+
+	IGlJalStruct * mesh_ptr = jal_mesh.get();
+	
+	if(mesh_ptr->vertexcount > 2)
 	{
-	    glBindVertexArray(jal_mesh.VAO);
-	    glDrawArrays(GL_TRIANGLES, 0, jal_mesh.vertexcount);
+	    glBindVertexArray(mesh_ptr->VAO);
+	    glDrawArrays(GL_TRIANGLES, 0, mesh_ptr->vertexcount);
 	    glBindVertexArray(0);
 	}
 }
@@ -102,7 +106,7 @@ void glModel::LoadAll(std::string FileName)
 	std::string frames_name = "";
 
 	getline(modelfile, tmp_str);
-	jal_name = path + tmp_str;
+	jal_name = /*path + */tmp_str;
 	getline(modelfile, tmp_str);
 	jub_name = path + tmp_str;
 	getline(modelfile, tmp_str);
@@ -110,9 +114,11 @@ void glModel::LoadAll(std::string FileName)
 	modelfile >> parent_idx >> parent_bone;
 	std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n";
 	modelfile.close();
-
-	LoadModel(jal_name);
-	diffuse_texture = GetResourceManager()->m_texture_atlas.Assign(png_name);
+	GLResourcesManager * resources = GetResourceManager();
+	//LoadModel(jal_name);
+	name = jal_name;	
+	jal_mesh = resources->m_mesh_atlas.Assign(jal_name);
+	diffuse_texture = resources->m_texture_atlas.Assign(png_name);
 	LoadModelBones(jub_name);
 
 
@@ -132,7 +138,7 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
 	std::string frames_name = "";
 
 	getline(modelfile, tmp_str);
-	jal_name = path + tmp_str;
+	jal_name = /*path + */tmp_str;
 	getline(modelfile, tmp_str);
 	jub_name = path + tmp_str;
 	getline(modelfile, tmp_str);
@@ -143,10 +149,13 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
     //std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<png_utility_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n"<<frames_name<<"\n";
 
 	modelfile.close();
+	name = jal_name;
 
-	LoadModel(jal_name);
-	diffuse_texture = GetResourceManager()->m_texture_atlas.Assign(png_name);
-	utility_texture = GetResourceManager()->m_texture_atlas.Assign(png_utility_name);
+	GLResourcesManager * resources = GetResourceManager();
+	//LoadModel(jal_name);
+	jal_mesh = resources->m_mesh_atlas.Assign(jal_name);
+	diffuse_texture = resources->m_texture_atlas.Assign(png_name);
+	utility_texture = resources->m_texture_atlas.Assign(png_utility_name);
 	
 	//LoadTexture(png_name, diffuse_texture);
     //LoadTexture(png_utility_name, utility_texture);
