@@ -2,47 +2,12 @@
 #include <fstream>
 #include <iostream>
 
-void glModel::LoadModel(std::string FileName)
-{
-	/*
-	LoadVertexArray(FileName, jal_mesh.VBO, jal_mesh.VBO_BONES, jal_mesh.VBO_BONES_IDX, jal_mesh.vertexcount);
 
-	glBindVertexArray(jal_mesh.VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, jal_mesh.VBO);
-
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-    // TexCoord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ARRAY_BUFFER, jal_mesh.VBO_BONES_IDX);
-    //glBufferData(GL_ARRAY_BUFFER, Model->indexNum*4*sizeof(GLint), VertexBoneArray, GL_STATIC_DRAW);
-
-    glVertexAttribIPointer(3, 4, GL_INT, 4 * sizeof(GL_INT), (GLvoid*)0);
-    glEnableVertexAttribArray(3);
-	glBindBuffer(GL_ARRAY_BUFFER, jal_mesh.VBO_BONES);
-    //glBufferData(GL_ARRAY_BUFFER, Model->indexNum*4*sizeof(GLfloat), VertexWeigthArray, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(4);
-
-
-
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
-
-    glBindVertexArray(0);*/
-}
 
 void glModel::LoadModelBones(std::string FileName)
 {
-	LoadBonesArray(FileName,bones,bonescount);
+	IGlJubStruct * bone_ptr = jub_bones.get();
+	LoadBonesArray(FileName,bone_ptr->bones,bone_ptr->bonescount);
 
 }
 
@@ -76,7 +41,7 @@ void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 	glBindTexture(GL_TEXTURE_2D, *utility_texture.get());
     
 
-	glUniformMatrix4fv(boneLoc, bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));
+	glUniformMatrix4fv(boneLoc, jub_bones.get()->bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));
     Draw();
 }
 
@@ -88,7 +53,7 @@ void glModel::Draw(GLuint shaderProgram, int now_frame)
 void glModel::AttachAnimation(std::vector <std::shared_ptr<Animation> > &animations, std::string Filename)
 {
 	animations.emplace_back(std::make_shared<Animation>());
-	animations.back()->LoadAnimation(Filename,bones);
+	animations.back()->LoadAnimation(Filename,jub_bones.get()->bones);
 	animation = animations.back();
 }
 

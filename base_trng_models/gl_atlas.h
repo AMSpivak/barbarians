@@ -52,6 +52,24 @@ public:
 
     }
 
+    void Clean()
+    {
+        typename std::map<std::string,std::shared_ptr<T>>::iterator cur = m_map.begin();
+        typename std::map<std::string,std::shared_ptr<T>>::iterator end = m_map.end();
+
+        while (cur != end)
+        {
+            if ((*cur).second.unique())
+            {
+                m_map.erase(cur++); 
+            }  
+            else
+            {
+                ++cur;
+            }
+        }
+    }
+
 
 
 };

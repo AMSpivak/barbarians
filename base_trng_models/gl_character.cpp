@@ -34,11 +34,12 @@ void GlCharacter::RefreshMatrixes()
     for(int i = 0; i < models_count; i++)
     if(Models[i]->parent_idx != -1)
     {
+        IGlJubStruct * bone_ptr = Models[Models[i]->parent_idx]->jub_bones.get();
         Models[i]-> model = Models[Models[i]->parent_idx]->model *
-         Animations[Models[i]->parent_idx]->frames[now_frame].bones[Models[i]->parent_bone] *
-          Models[Models[i]->parent_idx]->bones[Models[i]->parent_bone].matrix *
-          glm::inverse(Models[i]-> bones[0].matrix)
-          ;
+            Animations[Models[i]->parent_idx]->frames[now_frame].bones[Models[i]->parent_bone] *
+           bone_ptr->bones[Models[i]->parent_bone].matrix *
+            glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix)
+            ;
     }
     else
     {

@@ -8,6 +8,8 @@
 #include "glresourses.h"
 #include <iostream>
 #include "i_gl_jal_struct.h"
+#include "i_gl_jub_struct.h"
+
 
 #include "gl_resources_manager.h"
 
@@ -16,8 +18,6 @@ class glModel
 
 	std::shared_ptr<IGlJalStruct> jal_mesh;
 
-	int vertexcount;
-	int bonescount;
 	std::shared_ptr<Animation> animation;
 	std::string name;
 	//GLResourcesManager &m_resources_manager;
@@ -29,7 +29,7 @@ public:
 	glm::mat4 model;
 	std::shared_ptr<GLuint> diffuse_texture;
     std::shared_ptr<GLuint> utility_texture;
-	std::vector <Bone> bones;
+	std::shared_ptr<IGlJubStruct> jub_bones;
 
 	glModel(GLResourcesManager &resources_manager)
 	{}
@@ -58,7 +58,7 @@ public:
 
 
 
-	void LoadModel(std::string FileName);
+
 	void LoadModelBones(std::string FileName);
 	void LoadAll(std::string FileName);
 	void LoadAll(std::string FileName,std::vector <std::shared_ptr<Animation> > &animations);
