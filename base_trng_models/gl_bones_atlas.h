@@ -1,20 +1,22 @@
 #ifndef GL_BONES_ATLAS
 #define GL_BONES_ATLAS
 
-#include "glresourses.h"
+#include "i_gl_jub_struct.h"
 #include "gl_atlas.h"
 
 
-class GLBonesAtlas: public GLAtlas<Animation>
+class GLBonesAtlas: public GLAtlas<IGlJubStruct>
 {
 
 private:
-    void FillResource(std::string filename,IGlJalStruct * resource)
-    { }
+    void FillResource(std::string filename,IGlJubStruct * resource)
+    { 
+        LoadBonesArray(filename,resource->bones,resource->bonescount);
+    }
 
-    void EmptyResource(IGlJalStruct * resource){}
+    void EmptyResource(IGlJubStruct * resource){}
 public:
-    GLAnimationAtlas(const std::string & ResourseFolder):GLAtlas<Animation>(ResourseFolder)
+    GLBonesAtlas(const std::string & ResourseFolder):GLAtlas<IGlJubStruct>(ResourseFolder)
     {}
 
     

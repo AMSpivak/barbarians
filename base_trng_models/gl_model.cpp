@@ -84,7 +84,9 @@ void glModel::LoadAll(std::string FileName)
 	name = jal_name;	
 	jal_mesh = resources->m_mesh_atlas.Assign(jal_name);
 	diffuse_texture = resources->m_texture_atlas.Assign(png_name);
-	LoadModelBones(jub_name);
+	jub_bones = resources->m_bones_atlas.Assign(jub_name);
+	
+	//LoadModelBones(jub_name);
 
 
 }
@@ -121,10 +123,10 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
 	jal_mesh = resources->m_mesh_atlas.Assign(jal_name);
 	diffuse_texture = resources->m_texture_atlas.Assign(png_name);
 	utility_texture = resources->m_texture_atlas.Assign(png_utility_name);
-	
+	jub_bones = resources->m_bones_atlas.Assign(jub_name);
 	//LoadTexture(png_name, diffuse_texture);
     //LoadTexture(png_utility_name, utility_texture);
-	LoadModelBones(jub_name);
+	//LoadModelBones(jub_name);
 	if(frames_name.compare("")) AttachAnimation(animations,path + frames_name);
 
 
