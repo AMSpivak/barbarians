@@ -1,6 +1,10 @@
 #ifndef COLLISION
 #define COLLISION
 #include <utility>
+#include <vector>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 inline float CollisionOnAxe(float start1,float end1,float start2,float end2)
 {
@@ -27,6 +31,8 @@ inline float CollisionOnAxe(std::pair<float,float> projection1,std::pair<float,f
 
     return start < end ? end - start : 0;   
 }
+
+std::pair<float, float> ProjectEdgesOnAxe( const glm::mat4 &model_matrix,std::vector<std::pair<glm::vec3, glm::vec3>> &edges,const glm::vec3 &position,const glm::vec3 & axe);
 
 
 

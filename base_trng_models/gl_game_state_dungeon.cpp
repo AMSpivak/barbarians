@@ -501,14 +501,7 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     {
         std::pair<float,float> projection1 = object1.ProjectOnAxe(axe);
         std::pair<float,float> projection2 = object2.ProjectOnAxe(axe);
-        /*std::cout<<"=============\n";
-        std::cout<<axe[0]<<" "<<axe[1]<<" "<<axe[2]<<"\n";
-        std::cout<<object2.position[0]<<" "<<object2.position[1]<<" "<<object2.position[2]<<"\n";
-        std::cout<<object1.position[0]<<" "<<object1.position[1]<<" "<<object1.position[2]<<"\n";
-        
-        std::cout<<projection2.second<<" "<<projection2.first<<"\n";
-        std::cout<<projection1.second<<" "<<projection1.first<<"\n";*/
-        float axe_intersection = CollisionOnAxe(projection1,projection2);
+       float axe_intersection = CollisionOnAxe(projection1,projection2);
 
         if(axe_intersection < std::numeric_limits<float>::min())
             return 0.0f;
