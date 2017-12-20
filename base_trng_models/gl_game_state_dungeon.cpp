@@ -12,6 +12,7 @@
 #include "glm/gtx/rotate_vector.hpp"
 #include "glscene.h"
 #include "gl_game_state_dungeon.h"
+#include "map_event_hero_strikes.h"
 #include "collision.h"
 
 GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
@@ -531,6 +532,34 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     
 }
 
+InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event)
+{
+    std::vector < glm::vec3 > axes;
+    axes.push_back(glm::normalize(object.position - object.position));
+    object.AddAxes(axes);
+    event.AddAxes(axes);
+
+    glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
+    float intersection = std::numeric_limits<float>::max();
+
+    for(auto axe : axes)
+    {
+        std::pair<float,float> projection1 = object.ProjectOnAxe(axe);
+        std::pair<float,float> projection2 = event.ProjectOnAxe(axe);
+       float axe_intersection = CollisionOnAxe(projection1,projection2);
+
+        if(axe_intersection < std::numeric_limits<float>::min())
+            return InteractionResult::Nothing;
+
+        if(axe_intersection < intersection)
+        {
+            compensate_axe = axe;
+            intersection = axe_intersection;
+        }
+    }
+    
+    return event.Interact(object);
+}
 
 void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 {
@@ -739,6 +768,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     if(attack)
                     {
                         hero.UseSequence("strike");
+                        std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike());
+                        IMapEventHeroStrike & event = *(e_ptr.get());
+                        map_events.push_back(e_ptr);
                     }
                     else
                     {
@@ -750,5 +782,22 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     hero.Process();
                     FitObjects(10,0.0f);
                 }
+
+
+                std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
+                std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
+
+                while (cur != end)
+                {
+                    if (cur->get()->Process() == EventProcessResult::Kill)
+                    {
+                        map_events.erase(cur++); 
+                    }  
+                    else
+                    {
+                        ++cur;
+                    }
+                }
+
                 return this;
 }

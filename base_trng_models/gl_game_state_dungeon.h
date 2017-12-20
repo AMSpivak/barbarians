@@ -8,6 +8,7 @@
 #include "gl_model.h"
 #include "gl_character.h"
 #include "gl_dungeon.h"
+#include "i_map_event.h"
 #include <list>
 
 class GlGameStateDungeon: public IGlGameState
@@ -36,6 +37,8 @@ private:
     std::shared_ptr<GLuint> sky_texture, fx_texture;
     GlDungeon m_dungeon;
     std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
+    std::list<std::shared_ptr<IMapEvent>> map_events;
+    
 
     glLight Light;
     float light_angle;
@@ -54,6 +57,8 @@ private:
     void FitObjects(int steps, float accuracy);
     float FitObjectToMap(IGlModel& object, glm::vec3 & position);
     float FitObjectToObject(IGlModel& object1,IGlModel& object2);
+    InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event);
+
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
 };
 

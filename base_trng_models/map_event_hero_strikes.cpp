@@ -28,7 +28,23 @@ int IMapEventHeroStrike::AddAxes(std::vector<glm::vec3> &axes)
     return 2 * m_edges.size();
 }
 
+
+
 std::pair<float, float> IMapEventHeroStrike::ProjectOnAxe(const glm::vec3 & axe)
 {
     return ProjectEdgesOnAxe(model_matrix,m_edges,position,axe);
+}
+
+EventProcessResult IMapEventHeroStrike::Process()
+{
+    //std::cout<<"Stop event\n";
+    return EventProcessResult::Kill;
+}
+
+InteractionResult IMapEventHeroStrike::Interact(IGlModel &model)
+{
+    model.SetLifeValue(model.GetLifeValue() - 0.1f);
+    if(model.GetLifeValue()< 0)
+        return InteractionResult::Kill;
+    return InteractionResult::Damage;
 }
