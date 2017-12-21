@@ -152,11 +152,9 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
     
 }
 
-void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target )
+void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target)
 {
-    
-
-        glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
         //current_shader = m_shader_map["deffered_simple"];
         glUseProgram(current_shader);
 
@@ -180,6 +178,13 @@ void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 
         renderQuad();
+}
+
+void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target )
+{
+    DrawSimpleLight(light_pos_vector,light_color_vector,current_shader,render_target );
+/*
+        */
 }
 
 void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
@@ -208,6 +213,9 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
     renderQuad();
     glEnable(GL_CULL_FACE);
 }
+
+
+
 void GlGameStateDungeon::Draw()
 {
 
@@ -313,10 +321,11 @@ void GlGameStateDungeon::Draw()
 		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
 		renderQuad();
-/*
-        glClear(GL_DEPTH_BUFFER_BIT);
+
         current_shader = m_shader_map["deffered_simple"];
-        glUseProgram(current_shader);
+        DrawLight(glm::vec4(hero_position[0]- hero_position[0],2.0f,hero_position[2] - hero_position[2],5.5f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
+        
+       /* glUseProgram(current_shader);
 
 		glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
@@ -339,8 +348,7 @@ void GlGameStateDungeon::Draw()
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
 
         renderQuad();*/
-        //glDisable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
 
 
