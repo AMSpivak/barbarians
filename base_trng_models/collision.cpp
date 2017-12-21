@@ -19,8 +19,9 @@ std::pair<float, float> ProjectEdgesOnAxe( const glm::mat4 &model_matrix,std::ve
 
         if(val > max) max = val;
 
-        return std::pair<float, float>(min, max);
+        
 
     }
+    return std::pair<float, float>(min, max);
     
 }

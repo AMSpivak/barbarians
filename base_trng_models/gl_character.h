@@ -17,6 +17,7 @@ public:
     void AddModel(std::string name);
     void AddSequence(const std::string & name, const AnimationSequence & in_sequence);
     void UseSequence(const std::string & name);
+    void Damage(float damage);
     void RefreshMatrixes();
 
     int AddAxes(std::vector<glm::vec3> &axes);

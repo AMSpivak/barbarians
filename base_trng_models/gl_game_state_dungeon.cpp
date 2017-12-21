@@ -75,6 +75,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
         barrel_model.AddModel("material/barrel/barrel.mdl");
         AnimationSequence as_base(0,1);
         barrel_model.AddSequence("base",as_base);
+        AnimationSequence as_damage(2,3);
+        barrel_model.AddSequence("damage",as_damage);
         barrel_model.UseSequence("base");
     }
 
@@ -88,6 +90,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
         barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         barrel_model.AddModel("material/barrel/barrel.mdl");
         AnimationSequence as_base(0,1);
+        AnimationSequence as_damage(2,3);
+        barrel_model.AddSequence("damage",as_damage);
         barrel_model.AddSequence("base",as_base);
         barrel_model.UseSequence("base");
     }
@@ -535,19 +539,22 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
 InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event)
 {
     std::vector < glm::vec3 > axes;
-    axes.push_back(glm::normalize(object.position - object.position));
+    axes.push_back(glm::normalize(object.position - event.position));
     object.AddAxes(axes);
     event.AddAxes(axes);
 
     glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
     float intersection = std::numeric_limits<float>::max();
-
+    //std::cout<<"----\n";
     for(auto axe : axes)
     {
         std::pair<float,float> projection1 = object.ProjectOnAxe(axe);
         std::pair<float,float> projection2 = event.ProjectOnAxe(axe);
-       float axe_intersection = CollisionOnAxe(projection1,projection2);
-
+        float axe_intersection = CollisionOnAxe(projection1,projection2);
+        //std::cout<<axe[0]<<" "<<axe[1]<<" "<<axe[2]<<"\n";
+        //std::cout<<projection1.first<<" "<<projection1.second<<"\n";
+        //std::cout<<projection2.first<<" "<<projection2.second<<"\n";
+        
         if(axe_intersection < std::numeric_limits<float>::min())
             return InteractionResult::Nothing;
 
@@ -770,6 +777,12 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         hero.UseSequence("strike");
                         std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike());
                         IMapEventHeroStrike & event = *(e_ptr.get());
+                        event.model_matrix = hero.model_matrix;
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.5f,0.0f),glm::vec3(1.0f,1.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(1.0f,1.5f,0.0f),glm::vec3(-1.0f,1.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,1.5f,0.0f),glm::vec3(-0.5f,0.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.5f,0.0f),glm::vec3(0.5f,0.5f,0.0f)));
+                        event.position = hero.position;
                         map_events.push_back(e_ptr);
                     }
                     else
@@ -784,9 +797,46 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                 }
 
 
+                std::list<std::shared_ptr<IGlModel>>::iterator cur_obj = dungeon_objects.begin();
+                std::list<std::shared_ptr<IGlModel>>::iterator end_obj = dungeon_objects.end();
+                
                 std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
                 std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
+                
+                while (cur_obj != end_obj)
+                {
+                    IGlModel * o_ptr = cur_obj->get();
 
+                    while (cur != end)
+                    {
+                        IMapEvent * e_ptr = cur->get();
+
+                        if(ReactObjectToEvent(*o_ptr,*e_ptr) ==InteractionResult::Nothing)
+                        {
+                            //o_ptr->UseSequence("base")
+                            std::cout<<"miss\n";
+                        }
+                        else
+                        {
+                            //o_ptr->UseSequence("damage")                          
+                            std::cout<<"hit\n";                            
+                        }
+                        ++cur;
+                        
+                    }
+                    cur = map_events.begin();
+
+                    if (cur_obj->get()->GetLifeValue() < 0.0f)
+                    {
+                        dungeon_objects.erase(cur_obj++); 
+                    }  
+                    else
+                    {
+                        ++cur_obj;
+                    }
+                    
+                }
+                
                 while (cur != end)
                 {
                     if (cur->get()->Process() == EventProcessResult::Kill)

@@ -64,6 +64,13 @@ int GlCharacter::Process()
     RefreshMatrixes();
     return 0;
 }
+
+void GlCharacter::Damage(float damage)
+{
+    UseSequence("damage");
+    IGlModel::Damage(damage);
+}
+
 void GlCharacter::AddModel(std::string name)
 {
     Models.emplace_back(std::make_shared<glModel>(name,Animations));

@@ -35,7 +35,7 @@ public:
     }
     void Damage(float damage)
     {
-        life_value -= damage * armor_value;
+        life_value -= damage;// * armor_value;
     }
 
     virtual ~IGlModel(){}
