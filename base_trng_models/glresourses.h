@@ -48,6 +48,7 @@ void EmptyShaders(GLuint * shaders, int shaders_count);
 void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint &VBO_BONES_IDX, int &vertex_count);
 void LoadBonesArray(std::string FileName,std::vector <Bone> &bones,int &bones_count);
 void LoadTexture(std::string FileName,GLuint &texture);
+void LoadCubemap(const std::string FileName,GLuint &texture);
 
 void renderQuad();
 

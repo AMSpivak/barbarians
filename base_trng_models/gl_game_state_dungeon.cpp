@@ -55,6 +55,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
     sky_texture = resources_manager.m_texture_atlas.Assign("dungeon_bck.png");
+    skybox = resources_manager.m_texture_atlas.Assign("skybox/violent.cub");
     fx_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
 
     
@@ -182,9 +183,7 @@ void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_co
 
 void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target )
 {
-    DrawSimpleLight(light_pos_vector,light_color_vector,current_shader,render_target );
-/*
-        */
+    //DrawSimpleLight(light_pos_vector,light_color_vector,current_shader,render_target );
 }
 
 void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
@@ -365,8 +364,8 @@ void GlGameStateDungeon::Draw()
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        {
-            current_shader = m_shader_map["sprite"];
+        {// sky
+            /*current_shader = m_shader_map["sprite"];
     		glUseProgram(current_shader);
 
             glm::mat4 model_m = glm::mat4(1.0f);
@@ -382,6 +381,18 @@ void GlGameStateDungeon::Draw()
             glBindTexture(GL_TEXTURE_2D, *sky_texture.get());
 
             renderQuad();
+            */
+            current_shader = m_shader_map["skybox"];
+    		glUseProgram(current_shader);
+            glm::mat4 model_m = glm::inverse(Camera.CameraMatrix());
+            cameraLoc  = glGetUniformLocation(current_shader, "camera");
+		    //glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
+		    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(model_m));
+            
+            glBindTexture(GL_TEXTURE_CUBE_MAP, *skybox.get());
+            renderQuad();
+            
+
         }
         glClear(GL_DEPTH_BUFFER_BIT);
 		current_shader = m_shader_map["sobel"];

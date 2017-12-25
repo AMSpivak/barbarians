@@ -252,6 +252,11 @@ void EmptyShaders(GLuint * shaders, int shaders_count)
 
 void LoadTexture(std::string FileName,GLuint &texture)
 {
+	if(FileName.substr(FileName.find_last_of(".")+1) == "cub")
+	{
+		LoadCubemap(FileName,texture);
+		return;
+	}
 	glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture); // All upcoming GL_TEXTURE_2D operations now have effect on this texture object
@@ -268,6 +273,68 @@ void LoadTexture(std::string FileName,GLuint &texture)
     glGenerateMipmap(GL_TEXTURE_2D);
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void LoadCubemap(const std::string FileName,GLuint &texture)
+{
+	size_t pos = FileName.rfind("/");
+	
+	std::ifstream modelfile;
+	modelfile.open(FileName);
+
+	std::string path = pos == std::string::npos ? "" : FileName;
+	if(pos != std::string::npos)
+	{
+		path.erase(pos+1,std::string::npos);
+	}
+	std::string tmp_string = "";
+	std::vector<std::string> faces;
+	std::ifstream texture_descriptor_file;
+	texture_descriptor_file.open(FileName);
+	while(faces.size()<6 && !texture_descriptor_file.eof())
+	{
+		getline(texture_descriptor_file, tmp_string);
+		faces.push_back(tmp_string);
+	}
+	if(faces.size()<6)
+	{
+		std::cout << "Wrong cubemap descriptor: " <<FileName;
+	}
+
+	texture_descriptor_file.close();
+
+
+	glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture); 
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+
+    int tex_width, tex_height;
+
+ 	for (unsigned int i = 0; i < faces.size(); i++)
+    {
+		std::string file = path+faces[i];
+        unsigned char *data = SOIL_load_image(file.c_str(), &tex_width, &tex_height, 0, SOIL_LOAD_RGBA);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+                         0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data
+            );
+            SOIL_free_image_data(data);
+        }
+        else
+        {
+            std::cout << "Cubemap texture failed to load at path: " << file << std::endl;
+            SOIL_free_image_data(data);
+        }
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void Animation::LoadAnimation(std::string FileName, std::vector <Bone> &bones)
