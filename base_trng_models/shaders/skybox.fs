@@ -9,7 +9,7 @@ void main()
 {
 	
 	vec4 Color = texture(skybox, TexCoords);
-	FragColor = vec4(TexCoords.xyz,1.0);
-	//FragColor = vec4(Color.xyz,1.0);
+	//FragColor = vec4(TexCoords.xyz,1.0);
+	FragColor = vec4(Color.xyz,1.0);
 
 }

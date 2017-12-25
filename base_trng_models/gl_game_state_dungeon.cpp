@@ -388,7 +388,7 @@ void GlGameStateDungeon::Draw()
             cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		    //glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 		    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(model_m));
-            
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, *skybox.get());
             renderQuad();
             

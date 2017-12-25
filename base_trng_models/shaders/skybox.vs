@@ -9,7 +9,7 @@ uniform mat4 camera;
 
 void main()
 {
-    vec4 TexCoords4 = camera * vec4(aPos, 1.0);
+    vec4 TexCoords4 = camera * vec4(aPos.xy, 1.0, 1.0);
     //vec4 TexCoords4 = vec4(aPos, 1.0);
     gl_Position = vec4(aPos, 1.0);
     TexCoords = normalize(TexCoords4.xyz);
