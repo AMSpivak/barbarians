@@ -57,6 +57,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     sky_texture = resources_manager.m_texture_atlas.Assign("dungeon_bck.png");
     skybox = resources_manager.m_texture_atlas.Assign("skybox/violent.cub");
     fx_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
+    debug_texture = resources_manager.m_texture_atlas.Assign("debug.png");
 
     
     time = glfwGetTime();/**/
@@ -214,6 +215,54 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 }
 
 
+void GlGameStateDungeon::Draw2D(GLuint depth_map)
+{
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glClear(GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        
+        //GLuint sprite_shader = 0;
+        //DrawFxSprite(sprite_shader,*fx_texture.get());
+        glm::mat4 camera = Camera.CameraMatrix();
+        glm::mat4 projection = Camera.CameraProjectionMatrix();
+        glm::vec3 vector3d(0.0f,0.0f,0.0f);
+        vector3d-= hero_position;
+        glm::vec4 BillboardPos_worldspace(vector3d.x,vector3d.y,vector3d.z, 1.0f);
+        glm::vec4 BillboardPos_worldscale(1.0f,1.0f,0.5, 1.0f);
+        glm::vec4 BillboardPos_screenscale = projection * BillboardPos_worldscale;
+        
+        glm::vec4 BillboardPos_screenspace = camera * BillboardPos_worldspace;
+        BillboardPos_screenspace /= BillboardPos_screenspace.w;
+        float z = BillboardPos_screenspace.z *0.5f + 0.5f;
+        
+        float radius = 0.1f;
+        float radius_screen_x = radius * BillboardPos_screenscale.x;
+        float radius_screen_y = radius * BillboardPos_screenscale.y;
+
+        if (BillboardPos_screenspace.z <= 0.0f){
+            // Object is behind the camera, don't display it.
+        }
+        else
+        {
+            float scaler =1.0f/BillboardPos_screenspace.z;
+            std::cout<<z<<" "<<scaler<<"\n";
+            radius_screen_x *= scaler;
+            radius_screen_y *= scaler;
+            renderSpriteDepth(m_shader_map["sprite2d"],depth_map, -z,
+                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
+                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
+                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
+                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
+                    glm::vec4(1.0,1.0,1.0,1.0), fx_texture.get());
+        }
+        
+
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+}
 
 void GlGameStateDungeon::Draw()
 {
@@ -263,12 +312,6 @@ void GlGameStateDungeon::Draw()
 
         hero.Draw(current_shader);
      
-
-
-
-
-
-
 		final_render_target.set();
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -324,30 +367,6 @@ void GlGameStateDungeon::Draw()
         current_shader = m_shader_map["deffered_simple"];
         DrawLight(glm::vec4(hero_position[0]- hero_position[0],2.0f,hero_position[2] - hero_position[2],5.5f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
         
-       /* glUseProgram(current_shader);
-
-		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
-
-        glm::vec4 light_pos_vector = glm::vec4(0.0f,-0.5f,0.0f,15.0f);
-
-		GLuint light_pos  = glGetUniformLocation(current_shader, "LightLocation");
-		glUniform4fv(light_pos, 1, glm::value_ptr(light_pos_vector));
-
-        glm::vec3 light_color_vector2 = glm::vec3(9.0f,5.5f,0.2f);
-        light_color  = glGetUniformLocation(current_shader, "LightColor");
-        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
-
-        renderQuad();*/
-
 
 
 
@@ -365,23 +384,7 @@ void GlGameStateDungeon::Draw()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         {// sky
-            /*current_shader = m_shader_map["sprite"];
-    		glUseProgram(current_shader);
-
-            glm::mat4 model_m = glm::mat4(1.0f);
-            model_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
-            glm::mat4 camera_m = glm::mat4(1.0f);
-            cameraLoc  = glGetUniformLocation(current_shader, "camera");
-    		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
-
-            GLuint model_matrix  = glGetUniformLocation(current_shader, "model");
-            glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, *sky_texture.get());
-
-            renderQuad();
-            */
+            
             current_shader = m_shader_map["skybox"];
     		glUseProgram(current_shader);
             glm::mat4 model_m = glm::inverse(Camera.CameraMatrix());
@@ -418,12 +421,7 @@ void GlGameStateDungeon::Draw()
 
         renderQuad();/**/
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        GLuint sprite_shader = 0;
-        DrawFxSprite(sprite_shader,*fx_texture.get());
-        glDisable(GL_BLEND);
+        Draw2D(render_target.depthMap);
 
 }
 

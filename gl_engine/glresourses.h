@@ -52,4 +52,18 @@ void LoadCubemap(const std::string FileName,GLuint &texture);
 
 void renderQuad();
 
+void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3);
+
+void renderSprite(GLuint current_shader,
+	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
+	const glm::vec4 & corrector_v,
+	const GLuint * texture 
+);
+
+void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_depth,
+	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
+	const glm::vec4 & corrector_v,
+	const GLuint * texture 
+);
+
 #endif

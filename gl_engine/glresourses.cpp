@@ -3,6 +3,183 @@
 #include <iostream>
 #include <fstream>
 
+
+void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3)
+{
+	float mScale_Matrix[16] = {0};
+
+	//Matrix.setIdentityM(mScale_Matrix,0);
+	mScale_Matrix[0]=x0;
+	mScale_Matrix[1]=y0;
+	mScale_Matrix[2]=0.0f;
+	mScale_Matrix[3]=1.0f;
+	mScale_Matrix[4]=x1;
+	mScale_Matrix[5]=y1;
+	mScale_Matrix[6]=0.0f;
+	mScale_Matrix[7]=1.0f;
+	mScale_Matrix[8]=x3;
+	mScale_Matrix[9]=y3;
+	mScale_Matrix[10]=0.0f;
+	mScale_Matrix[11]=1.0f;
+	mScale_Matrix[12]=x2;
+	mScale_Matrix[13]=y2;
+	mScale_Matrix[14]=0.0f;
+	mScale_Matrix[15]=1.0f;
+
+	matrix = glm::make_mat4(mScale_Matrix);
+
+}
+
+
+void renderSprite(GLuint current_shader,
+	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
+	const glm::vec4 & corrector_v,
+	const GLuint * texture 
+)
+{
+
+
+    static unsigned int quadVAO = 0;
+    static unsigned int quadVBO;
+
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+             // R, G, B, A
+
+			 1.0f, 0.0f, 0.0f, 0.0f,
+			 0.0f, 1.0f,
+
+			 0.0f, 1.0f, 0.0f, 0.0f,
+			 1.0f, 1.0f,
+
+			 0.0f, 0.0f, 1.0f, 0.0f,
+			 0.0f, 0.0f,
+
+			 0.0f, 0.0f, 0.0f, 1.0f,
+			 1.0f, 0.0f
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
+	}
+	
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(current_shader);
+
+	glm::mat4 texture_m = glm::mat4(1.0f);
+	//texture_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
+	glm::mat4 position_m = glm::mat4(1.0f);
+	Fit_Matrix(position_m,
+		x0,y0,x1,y1,x2,y2,x3,y3
+	);
+	GLuint position_u  = glGetUniformLocation(current_shader, "DrawMatrix");
+	glUniformMatrix4fv(position_u, 1, GL_FALSE, glm::value_ptr(position_m));
+
+	GLuint texture_u  = glGetUniformLocation(current_shader, "SpriteMatrix");
+	glUniformMatrix4fv(texture_u, 1, GL_FALSE, glm::value_ptr(texture_m));
+
+	
+	GLuint corrector_u  = glGetUniformLocation(current_shader, "corrector");
+	glUniform4fv(corrector_u, 1, glm::value_ptr(corrector_v));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, *texture);
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
+void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_depth,
+	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
+	const glm::vec4 & corrector_v,
+	const GLuint * texture 
+)
+{
+
+
+    static unsigned int quadVAO = 0;
+    static unsigned int quadVBO;
+
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+             // R, G, B, A
+
+			 1.0f, 0.0f, 0.0f, 0.0f,
+			 0.0f, 1.0f,
+
+			 0.0f, 1.0f, 0.0f, 0.0f,
+			 1.0f, 1.0f,
+
+			 0.0f, 0.0f, 1.0f, 0.0f,
+			 0.0f, 0.0f,
+
+			 0.0f, 0.0f, 0.0f, 1.0f,
+			 1.0f, 0.0f
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
+	}
+	
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(current_shader);
+
+	glm::mat4 texture_m = glm::mat4(1.0f);
+	//texture_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
+	glm::mat4 position_m = glm::mat4(1.0f);
+	Fit_Matrix(position_m,
+		x0,y0,x1,y1,x2,y2,x3,y3
+	);
+	GLuint position_u  = glGetUniformLocation(current_shader, "DrawMatrix");
+	glUniformMatrix4fv(position_u, 1, GL_FALSE, glm::value_ptr(position_m));
+
+	GLuint texture_u  = glGetUniformLocation(current_shader, "SpriteMatrix");
+	glUniformMatrix4fv(texture_u, 1, GL_FALSE, glm::value_ptr(texture_m));
+
+	
+	GLuint corrector_u  = glGetUniformLocation(current_shader, "corrector");
+	glUniform4fv(corrector_u, 1, glm::value_ptr(corrector_v));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, *texture);
+
+	glUniform1i(glGetUniformLocation(current_shader, "DepthMap"), 1);
+	glActiveTexture(GL_TEXTURE0+1);
+	glBindTexture(GL_TEXTURE_2D, depthmap);
+
+	glActiveTexture(GL_TEXTURE0);
+
+
+	GLint shader_depth = glGetUniformLocation(current_shader, "Depth");
+   	glUniform1f(shader_depth, sprite_depth);
+
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
 void renderQuad()
 {
     static unsigned int quadVAO = 0;
