@@ -1,4 +1,5 @@
 #include "glresourses.h"
+
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -178,6 +179,62 @@ void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_dept
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
+}
+
+void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * texture,
+						 float width, float height,
+						 const glm::vec3 & position, const glm::vec3 & offset, 
+						 glCamera & camera)
+{
+	glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        
+
+        const glm::mat4 m_camera = camera.CameraMatrix();
+        const glm::mat4 m_projection = camera.CameraProjectionMatrix();
+        
+
+        
+
+        glm::vec3 vector3d = position - offset;
+        glm::vec4 BillboardPos_worldspace(vector3d.x,vector3d.y,vector3d.z, 1.0f);
+        glm::vec4 BillboardPos_screenspace = m_camera * BillboardPos_worldspace;
+        BillboardPos_screenspace /= BillboardPos_screenspace.w;
+
+        
+        
+        float z = BillboardPos_screenspace.z *0.5f + 0.5f;
+        
+        
+        float radius_screen_x = width * m_projection[0].x;
+        float radius_screen_y = height * m_projection[1].y;
+
+        if (z <= 0.0f){
+            // Object is behind the camera, don't display it.
+        }
+        else
+        {
+
+            float scaler = (BillboardPos_screenspace.z + m_projection[2].z)/m_projection[3].z;
+            std::cout<<BillboardPos_screenspace.w<<" 2 "<<scaler<<"\n";
+            
+
+            radius_screen_x *= scaler;
+            radius_screen_y *= scaler;
+            renderSpriteDepth(current_shader,depthmap, z,
+                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
+                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
+                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
+                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
+                    glm::vec4(1.0,1.0,1.0,1.0), texture);
+        }
+        
+
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
 }
 
 void renderQuad()

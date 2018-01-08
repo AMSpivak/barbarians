@@ -56,8 +56,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
     sky_texture = resources_manager.m_texture_atlas.Assign("dungeon_bck.png");
     skybox = resources_manager.m_texture_atlas.Assign("skybox/violent.cub");
-    fx_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
-    debug_texture = resources_manager.m_texture_atlas.Assign("debug.png");
+    fx_texture = resources_manager.m_texture_atlas.Assign("valh.png");
+    debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
 
     
     time = glfwGetTime();/**/
@@ -217,51 +217,14 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 
 void GlGameStateDungeon::Draw2D(GLuint depth_map)
 {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glClear(GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
-        
-        //GLuint sprite_shader = 0;
-        //DrawFxSprite(sprite_shader,*fx_texture.get());
-        glm::mat4 camera = Camera.CameraMatrix();
-        glm::mat4 projection = Camera.CameraProjectionMatrix();
-        glm::vec3 vector3d(0.0f,0.0f,0.0f);
-        vector3d-= hero_position;
-        glm::vec4 BillboardPos_worldspace(vector3d.x,vector3d.y,vector3d.z, 1.0f);
-        glm::vec4 BillboardPos_worldscale(1.0f,1.0f,0.5, 1.0f);
-        glm::vec4 BillboardPos_screenscale = projection * BillboardPos_worldscale;
-        
-        glm::vec4 BillboardPos_screenspace = camera * BillboardPos_worldspace;
-        BillboardPos_screenspace /= BillboardPos_screenspace.w;
-        float z = BillboardPos_screenspace.z *0.5f + 0.5f;
-        
-        float radius = 0.1f;
-        float radius_screen_x = radius * BillboardPos_screenscale.x;
-        float radius_screen_y = radius * BillboardPos_screenscale.y;
-
-        if (BillboardPos_screenspace.z <= 0.0f){
-            // Object is behind the camera, don't display it.
-        }
-        else
-        {
-            float scaler =1.0f/BillboardPos_screenspace.z;
-            std::cout<<z<<" "<<scaler<<"\n";
-            radius_screen_x *= scaler;
-            radius_screen_y *= scaler;
-            renderSpriteDepth(m_shader_map["sprite2d"],depth_map, -z,
-                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
-                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
-                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
-                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
-                    glm::vec4(1.0,1.0,1.0,1.0), fx_texture.get());
-        }
-        
-
-        glDisable(GL_BLEND);
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
+      /*  renderBillBoardDepth(m_shader_map["sprite2d"],depth_map,fx_texture.get(),
+        1.0f,1.45f,glm::vec3(2.0f,2.0f,3.0f),hero_position,Camera);
+*/
+      for(std::shared_ptr<IMapEvent> event :map_events) 
+      {
+          IMapEvent * e_ptr = event.get();
+          e_ptr->Show(hero_position,Camera);
+      }
 }
 
 void GlGameStateDungeon::Draw()
@@ -637,6 +600,52 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
 
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
 {
+    std::list<std::shared_ptr<IGlModel>>::iterator cur_obj = dungeon_objects.begin();
+    std::list<std::shared_ptr<IGlModel>>::iterator end_obj = dungeon_objects.end();
+    
+    std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
+    std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
+    
+    while (cur_obj != end_obj)
+    {
+        IGlModel * o_ptr = cur_obj->get();
+
+        while (cur != end)
+        {
+            IMapEvent * e_ptr = cur->get();
+            InteractionResult interaction = ReactObjectToEvent(*o_ptr,*e_ptr);
+            ++cur;
+        }
+        cur = map_events.begin();
+
+        if (cur_obj->get()->GetLifeValue() < 0.0f)
+        {
+            dungeon_objects.erase(cur_obj++); 
+        }  
+        else
+        {
+            ++cur_obj;
+        }
+        
+    }
+    
+    while (cur != end)
+    {
+        if (cur->get()->Process() == EventProcessResult::Kill)
+        {
+            map_events.erase(cur++); 
+        }  
+        else
+        {
+            ++cur;
+        }
+    }
+    
+    
+    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
+    
+
+
     static float camera_rotation_angle = 0.0f;
     static float hero_rotation_angle = 0.0f;
     static float old_joy_x = 0.0f;
@@ -792,13 +801,13 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     if(attack)
                     {
                         hero.UseSequence("strike");
-                        std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike());
+                        std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
                         IMapEventHeroStrike & event = *(e_ptr.get());
                         event.model_matrix = hero.model_matrix;
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.5f,0.0f),glm::vec3(1.0f,1.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(1.0f,1.5f,0.0f),glm::vec3(-1.0f,1.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,1.5f,0.0f),glm::vec3(-0.5f,0.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.5f,0.0f),glm::vec3(0.5f,0.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
                         event.position = hero.position;
                         map_events.push_back(e_ptr);
                     }
@@ -814,57 +823,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                 }
 
 
-                std::list<std::shared_ptr<IGlModel>>::iterator cur_obj = dungeon_objects.begin();
-                std::list<std::shared_ptr<IGlModel>>::iterator end_obj = dungeon_objects.end();
                 
-                std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
-                std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
-                
-                while (cur_obj != end_obj)
-                {
-                    IGlModel * o_ptr = cur_obj->get();
-
-                    while (cur != end)
-                    {
-                        IMapEvent * e_ptr = cur->get();
-
-                        if(ReactObjectToEvent(*o_ptr,*e_ptr) ==InteractionResult::Nothing)
-                        {
-                            //o_ptr->UseSequence("base")
-                            std::cout<<"miss\n";
-                        }
-                        else
-                        {
-                            //o_ptr->UseSequence("damage")                          
-                            std::cout<<"hit\n";                            
-                        }
-                        ++cur;
-                        
-                    }
-                    cur = map_events.begin();
-
-                    if (cur_obj->get()->GetLifeValue() < 0.0f)
-                    {
-                        dungeon_objects.erase(cur_obj++); 
-                    }  
-                    else
-                    {
-                        ++cur_obj;
-                    }
-                    
-                }
-                
-                while (cur != end)
-                {
-                    if (cur->get()->Process() == EventProcessResult::Kill)
-                    {
-                        map_events.erase(cur++); 
-                    }  
-                    else
-                    {
-                        ++cur;
-                    }
-                }
 
                 return this;
 }

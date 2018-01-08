@@ -6,6 +6,25 @@ void IMapEventHeroStrike::AddEdge(const std::pair<glm::vec3, glm::vec3> edge)
     m_edges.push_back(edge);
 }
 
+void IMapEventHeroStrike::Show(const glm::vec3 & offset, glCamera & camera)
+{
+    /*renderBillBoardDepth(m_current_shader,m_depthmap,m_texture,   
+        m_width,m_height,position,offset,camera);*/
+
+    glm::vec4 norm4;
+    glm::vec3 norm;
+
+    for(auto edge :m_edges)
+    {
+        norm4 = model_matrix * glm::vec4(edge.second[0],edge.second[1],edge.second[2],1.0f);
+        norm = position + glm::vec3(norm4[0],norm4[1],norm4[2]);
+        renderBillBoardDepth(m_current_shader,m_depthmap,m_texture,   
+            m_width*0.1f,m_height,norm,offset,camera);
+    }
+
+}
+
+
 int IMapEventHeroStrike::AddAxes(std::vector<glm::vec3> &axes)
 {
     glm::vec4 norm4;

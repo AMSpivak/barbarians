@@ -8,6 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glcamera.h"
 
 struct Bone {
 	std::string name;
@@ -66,4 +67,8 @@ void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_dept
 	const GLuint * texture 
 );
 
+void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * texture,
+						 float width, float height,
+						 const glm::vec3 & position, const glm::vec3 & offset, 
+						 glCamera & camera);
 #endif
