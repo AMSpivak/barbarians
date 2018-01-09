@@ -34,7 +34,7 @@ private:
     std::vector <std::shared_ptr<Animation> > Animations;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
-    std::shared_ptr<GLuint> sky_texture, fx_texture, skybox;
+    std::shared_ptr<GLuint> sky_texture, fx_texture, skybox, debug_texture;
     GlDungeon m_dungeon;
     std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
     std::list<std::shared_ptr<IMapEvent>> map_events;
@@ -53,6 +53,7 @@ private:
     
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
+    void Draw2D(GLuint depth_map);
     void MoveHero(const glm::vec3 & hero_move);
     void FitObjects(int steps, float accuracy);
     float FitObjectToMap(IGlModel& object, glm::vec3 & position);

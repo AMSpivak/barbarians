@@ -56,7 +56,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
     sky_texture = resources_manager.m_texture_atlas.Assign("dungeon_bck.png");
     skybox = resources_manager.m_texture_atlas.Assign("skybox/violent.cub");
-    fx_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
+    fx_texture = resources_manager.m_texture_atlas.Assign("valh.png");
+    debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
 
     
     time = glfwGetTime();/**/
@@ -214,6 +215,17 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 }
 
 
+void GlGameStateDungeon::Draw2D(GLuint depth_map)
+{
+      /*  renderBillBoardDepth(m_shader_map["sprite2d"],depth_map,fx_texture.get(),
+        1.0f,1.45f,glm::vec3(2.0f,2.0f,3.0f),hero_position,Camera);
+*/
+      for(std::shared_ptr<IMapEvent> event :map_events) 
+      {
+          IMapEvent * e_ptr = event.get();
+          e_ptr->Show(hero_position,Camera);
+      }
+}
 
 void GlGameStateDungeon::Draw()
 {
@@ -263,12 +275,6 @@ void GlGameStateDungeon::Draw()
 
         hero.Draw(current_shader);
      
-
-
-
-
-
-
 		final_render_target.set();
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -324,30 +330,6 @@ void GlGameStateDungeon::Draw()
         current_shader = m_shader_map["deffered_simple"];
         DrawLight(glm::vec4(hero_position[0]- hero_position[0],2.0f,hero_position[2] - hero_position[2],5.5f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
         
-       /* glUseProgram(current_shader);
-
-		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
-
-        glm::vec4 light_pos_vector = glm::vec4(0.0f,-0.5f,0.0f,15.0f);
-
-		GLuint light_pos  = glGetUniformLocation(current_shader, "LightLocation");
-		glUniform4fv(light_pos, 1, glm::value_ptr(light_pos_vector));
-
-        glm::vec3 light_color_vector2 = glm::vec3(9.0f,5.5f,0.2f);
-        light_color  = glGetUniformLocation(current_shader, "LightColor");
-        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector2));
-
-        renderQuad();*/
-
 
 
 
@@ -365,23 +347,7 @@ void GlGameStateDungeon::Draw()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         {// sky
-            /*current_shader = m_shader_map["sprite"];
-    		glUseProgram(current_shader);
-
-            glm::mat4 model_m = glm::mat4(1.0f);
-            model_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
-            glm::mat4 camera_m = glm::mat4(1.0f);
-            cameraLoc  = glGetUniformLocation(current_shader, "camera");
-    		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera_m));
-
-            GLuint model_matrix  = glGetUniformLocation(current_shader, "model");
-            glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, *sky_texture.get());
-
-            renderQuad();
-            */
+            
             current_shader = m_shader_map["skybox"];
     		glUseProgram(current_shader);
             glm::mat4 model_m = glm::inverse(Camera.CameraMatrix());
@@ -418,12 +384,7 @@ void GlGameStateDungeon::Draw()
 
         renderQuad();/**/
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        GLuint sprite_shader = 0;
-        DrawFxSprite(sprite_shader,*fx_texture.get());
-        glDisable(GL_BLEND);
+        Draw2D(render_target.depthMap);
 
 }
 
@@ -639,6 +600,52 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
 
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
 {
+    std::list<std::shared_ptr<IGlModel>>::iterator cur_obj = dungeon_objects.begin();
+    std::list<std::shared_ptr<IGlModel>>::iterator end_obj = dungeon_objects.end();
+    
+    std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
+    std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
+    
+    while (cur_obj != end_obj)
+    {
+        IGlModel * o_ptr = cur_obj->get();
+
+        while (cur != end)
+        {
+            IMapEvent * e_ptr = cur->get();
+            InteractionResult interaction = ReactObjectToEvent(*o_ptr,*e_ptr);
+            ++cur;
+        }
+        cur = map_events.begin();
+
+        if (cur_obj->get()->GetLifeValue() < 0.0f)
+        {
+            dungeon_objects.erase(cur_obj++); 
+        }  
+        else
+        {
+            ++cur_obj;
+        }
+        
+    }
+    
+    while (cur != end)
+    {
+        if (cur->get()->Process() == EventProcessResult::Kill)
+        {
+            map_events.erase(cur++); 
+        }  
+        else
+        {
+            ++cur;
+        }
+    }
+    
+    
+    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
+    
+
+
     static float camera_rotation_angle = 0.0f;
     static float hero_rotation_angle = 0.0f;
     static float old_joy_x = 0.0f;
@@ -794,13 +801,13 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     if(attack)
                     {
                         hero.UseSequence("strike");
-                        std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike());
+                        std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
                         IMapEventHeroStrike & event = *(e_ptr.get());
                         event.model_matrix = hero.model_matrix;
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.5f,0.0f),glm::vec3(1.0f,1.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(1.0f,1.5f,0.0f),glm::vec3(-1.0f,1.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,1.5f,0.0f),glm::vec3(-0.5f,0.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.5f,0.0f),glm::vec3(0.5f,0.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
+                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
                         event.position = hero.position;
                         map_events.push_back(e_ptr);
                     }
@@ -816,57 +823,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                 }
 
 
-                std::list<std::shared_ptr<IGlModel>>::iterator cur_obj = dungeon_objects.begin();
-                std::list<std::shared_ptr<IGlModel>>::iterator end_obj = dungeon_objects.end();
                 
-                std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
-                std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
-                
-                while (cur_obj != end_obj)
-                {
-                    IGlModel * o_ptr = cur_obj->get();
-
-                    while (cur != end)
-                    {
-                        IMapEvent * e_ptr = cur->get();
-
-                        if(ReactObjectToEvent(*o_ptr,*e_ptr) ==InteractionResult::Nothing)
-                        {
-                            //o_ptr->UseSequence("base")
-                            std::cout<<"miss\n";
-                        }
-                        else
-                        {
-                            //o_ptr->UseSequence("damage")                          
-                            std::cout<<"hit\n";                            
-                        }
-                        ++cur;
-                        
-                    }
-                    cur = map_events.begin();
-
-                    if (cur_obj->get()->GetLifeValue() < 0.0f)
-                    {
-                        dungeon_objects.erase(cur_obj++); 
-                    }  
-                    else
-                    {
-                        ++cur_obj;
-                    }
-                    
-                }
-                
-                while (cur != end)
-                {
-                    if (cur->get()->Process() == EventProcessResult::Kill)
-                    {
-                        map_events.erase(cur++); 
-                    }  
-                    else
-                    {
-                        ++cur;
-                    }
-                }
 
                 return this;
 }

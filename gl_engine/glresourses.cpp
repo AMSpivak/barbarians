@@ -1,7 +1,241 @@
 #include "glresourses.h"
+
 #include <sstream>
 #include <iostream>
 #include <fstream>
+
+
+void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3)
+{
+	float mScale_Matrix[16] = {0};
+
+	//Matrix.setIdentityM(mScale_Matrix,0);
+	mScale_Matrix[0]=x0;
+	mScale_Matrix[1]=y0;
+	mScale_Matrix[2]=0.0f;
+	mScale_Matrix[3]=1.0f;
+	mScale_Matrix[4]=x1;
+	mScale_Matrix[5]=y1;
+	mScale_Matrix[6]=0.0f;
+	mScale_Matrix[7]=1.0f;
+	mScale_Matrix[8]=x3;
+	mScale_Matrix[9]=y3;
+	mScale_Matrix[10]=0.0f;
+	mScale_Matrix[11]=1.0f;
+	mScale_Matrix[12]=x2;
+	mScale_Matrix[13]=y2;
+	mScale_Matrix[14]=0.0f;
+	mScale_Matrix[15]=1.0f;
+
+	matrix = glm::make_mat4(mScale_Matrix);
+
+}
+
+
+void renderSprite(GLuint current_shader,
+	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
+	const glm::vec4 & corrector_v,
+	const GLuint * texture 
+)
+{
+
+
+    static unsigned int quadVAO = 0;
+    static unsigned int quadVBO;
+
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+             // R, G, B, A
+
+			 1.0f, 0.0f, 0.0f, 0.0f,
+			 0.0f, 1.0f,
+
+			 0.0f, 1.0f, 0.0f, 0.0f,
+			 1.0f, 1.0f,
+
+			 0.0f, 0.0f, 1.0f, 0.0f,
+			 0.0f, 0.0f,
+
+			 0.0f, 0.0f, 0.0f, 1.0f,
+			 1.0f, 0.0f
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
+	}
+	
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(current_shader);
+
+	glm::mat4 texture_m = glm::mat4(1.0f);
+	//texture_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
+	glm::mat4 position_m = glm::mat4(1.0f);
+	Fit_Matrix(position_m,
+		x0,y0,x1,y1,x2,y2,x3,y3
+	);
+	GLuint position_u  = glGetUniformLocation(current_shader, "DrawMatrix");
+	glUniformMatrix4fv(position_u, 1, GL_FALSE, glm::value_ptr(position_m));
+
+	GLuint texture_u  = glGetUniformLocation(current_shader, "SpriteMatrix");
+	glUniformMatrix4fv(texture_u, 1, GL_FALSE, glm::value_ptr(texture_m));
+
+	
+	GLuint corrector_u  = glGetUniformLocation(current_shader, "corrector");
+	glUniform4fv(corrector_u, 1, glm::value_ptr(corrector_v));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, *texture);
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
+void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_depth,
+	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
+	const glm::vec4 & corrector_v,
+	const GLuint * texture 
+)
+{
+
+
+    static unsigned int quadVAO = 0;
+    static unsigned int quadVBO;
+
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+             // R, G, B, A
+
+			 1.0f, 0.0f, 0.0f, 0.0f,
+			 0.0f, 1.0f,
+
+			 0.0f, 1.0f, 0.0f, 0.0f,
+			 1.0f, 1.0f,
+
+			 0.0f, 0.0f, 1.0f, 0.0f,
+			 0.0f, 0.0f,
+
+			 0.0f, 0.0f, 0.0f, 1.0f,
+			 1.0f, 0.0f
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float)));
+	}
+	
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(current_shader);
+
+	glm::mat4 texture_m = glm::mat4(1.0f);
+	//texture_m = glm::scale(model_m,glm::vec3(1.0f,(float)width/height,1.0f));
+	glm::mat4 position_m = glm::mat4(1.0f);
+	Fit_Matrix(position_m,
+		x0,y0,x1,y1,x2,y2,x3,y3
+	);
+	GLuint position_u  = glGetUniformLocation(current_shader, "DrawMatrix");
+	glUniformMatrix4fv(position_u, 1, GL_FALSE, glm::value_ptr(position_m));
+
+	GLuint texture_u  = glGetUniformLocation(current_shader, "SpriteMatrix");
+	glUniformMatrix4fv(texture_u, 1, GL_FALSE, glm::value_ptr(texture_m));
+
+	
+	GLuint corrector_u  = glGetUniformLocation(current_shader, "corrector");
+	glUniform4fv(corrector_u, 1, glm::value_ptr(corrector_v));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, *texture);
+
+	glUniform1i(glGetUniformLocation(current_shader, "DepthMap"), 1);
+	glActiveTexture(GL_TEXTURE0+1);
+	glBindTexture(GL_TEXTURE_2D, depthmap);
+
+	glActiveTexture(GL_TEXTURE0);
+
+
+	GLint shader_depth = glGetUniformLocation(current_shader, "Depth");
+   	glUniform1f(shader_depth, sprite_depth);
+
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
+void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * texture,
+						 float width, float height,
+						 const glm::vec3 & position, const glm::vec3 & offset, 
+						 glCamera & camera)
+{
+	glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        
+
+        const glm::mat4 m_camera = camera.CameraMatrix();
+        const glm::mat4 m_projection = camera.CameraProjectionMatrix();
+        
+
+        
+
+        glm::vec3 vector3d = position - offset;
+        glm::vec4 BillboardPos_worldspace(vector3d.x,vector3d.y,vector3d.z, 1.0f);
+        glm::vec4 BillboardPos_screenspace = m_camera * BillboardPos_worldspace;
+        BillboardPos_screenspace /= BillboardPos_screenspace.w;
+
+        
+        
+        float z = BillboardPos_screenspace.z *0.5f + 0.5f;
+        
+        
+        float radius_screen_x = width * m_projection[0].x;
+        float radius_screen_y = height * m_projection[1].y;
+
+        if (z <= 0.0f){
+            // Object is behind the camera, don't display it.
+        }
+        else
+        {
+
+            float scaler = (BillboardPos_screenspace.z + m_projection[2].z)/m_projection[3].z;
+            std::cout<<BillboardPos_screenspace.w<<" 2 "<<scaler<<"\n";
+            
+
+            radius_screen_x *= scaler;
+            radius_screen_y *= scaler;
+            renderSpriteDepth(current_shader,depthmap, z,
+                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
+                    BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
+                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
+                    BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
+                    glm::vec4(1.0,1.0,1.0,1.0), texture);
+        }
+        
+
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+}
 
 void renderQuad()
 {
