@@ -13,6 +13,7 @@
 #include "glscene.h"
 #include "gl_game_state_dungeon.h"
 #include "map_event_hero_strikes.h"
+#include "map_event_valhalla.h"
 #include "collision.h"
 
 GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
@@ -525,16 +526,13 @@ InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEv
 
     glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
     float intersection = std::numeric_limits<float>::max();
-    //std::cout<<"----\n";
+
     for(auto axe : axes)
     {
         std::pair<float,float> projection1 = object.ProjectOnAxe(axe);
         std::pair<float,float> projection2 = event.ProjectOnAxe(axe);
         float axe_intersection = CollisionOnAxe(projection1,projection2);
-        //std::cout<<axe[0]<<" "<<axe[1]<<" "<<axe[2]<<"\n";
-        //std::cout<<projection1.first<<" "<<projection1.second<<"\n";
-        //std::cout<<projection2.first<<" "<<projection2.second<<"\n";
-        
+
         if(axe_intersection < std::numeric_limits<float>::min())
             return InteractionResult::Nothing;
 
@@ -605,6 +603,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     
     std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
     std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
+
+    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
+    
     
     while (cur_obj != end_obj)
     {
@@ -620,6 +621,14 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
         if (cur_obj->get()->GetLifeValue() < 0.0f)
         {
+            std::shared_ptr<MapEventValhalla>e_ptr(new MapEventValhalla(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
+                        
+                        MapEventValhalla & event = *(e_ptr.get());
+                        
+                        event.position = cur_obj->get()->position;
+                        event.position.y = 1.5f;
+                        map_events.push_back(e_ptr);
+
             dungeon_objects.erase(cur_obj++); 
         }  
         else
@@ -642,8 +651,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     }
     
     
-    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
-    
+
 
 
     static float camera_rotation_angle = 0.0f;

@@ -182,7 +182,7 @@ void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_dept
 }
 
 void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * texture,
-						 float width, float height,
+						 float width, float height,const glm::vec4 & corrector,
 						 const glm::vec3 & position, const glm::vec3 & offset, 
 						 glCamera & camera)
 {
@@ -228,7 +228,7 @@ void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * 
                     BillboardPos_screenspace.x-radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
                     BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y+radius_screen_y,
                     BillboardPos_screenspace.x+radius_screen_x,BillboardPos_screenspace.y-radius_screen_y,
-                    glm::vec4(1.0,1.0,1.0,1.0), texture);
+                    corrector, texture);
         }
         
 

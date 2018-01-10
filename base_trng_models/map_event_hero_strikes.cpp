@@ -10,7 +10,7 @@ void IMapEventHeroStrike::Show(const glm::vec3 & offset, glCamera & camera)
 {
     /*renderBillBoardDepth(m_current_shader,m_depthmap,m_texture,   
         m_width,m_height,position,offset,camera);*/
-
+/*
     glm::vec4 norm4;
     glm::vec3 norm;
 
@@ -19,8 +19,8 @@ void IMapEventHeroStrike::Show(const glm::vec3 & offset, glCamera & camera)
         norm4 = model_matrix * glm::vec4(edge.second[0],edge.second[1],edge.second[2],1.0f);
         norm = position + glm::vec3(norm4[0],norm4[1],norm4[2]);
         renderBillBoardDepth(m_current_shader,m_depthmap,m_texture,   
-            m_width*0.1f,m_height,norm,offset,camera);
-    }
+            m_width,m_height,glm::vec4(1.0,1.0,1.0,1.0),norm,offset,camera);
+    }*/
 
 }
 
