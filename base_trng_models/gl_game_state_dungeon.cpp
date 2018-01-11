@@ -185,7 +185,19 @@ void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_co
 
 void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target )
 {
-    //DrawSimpleLight(light_pos_vector,light_color_vector,current_shader,render_target );
+        //DrawSimpleLight(light_pos_vector,light_color_vector,current_shader,render_target );
+    glm::vec4 light_position;
+    glm::vec3 light_color;
+    
+    for(std::shared_ptr<IMapEvent> event :map_events) 
+      {
+          IMapEvent * e_ptr = event.get();
+          if(e_ptr->IsLight(light_position,light_color))
+          {
+                DrawSimpleLight(light_position - light_pos_vector,light_color,current_shader,render_target );
+          }
+      }
+
 }
 
 void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
@@ -329,7 +341,7 @@ void GlGameStateDungeon::Draw()
 		renderQuad();
 
         current_shader = m_shader_map["deffered_simple"];
-        DrawLight(glm::vec4(hero_position[0]- hero_position[0],2.0f,hero_position[2] - hero_position[2],5.5f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
+        DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
         
 
 
