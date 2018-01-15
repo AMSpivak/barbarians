@@ -34,11 +34,12 @@ void GlCharacter::RefreshMatrixes()
     for(int i = 0; i < models_count; i++)
     if(Models[i]->parent_idx != -1)
     {
+        IGlJubStruct * bone_ptr = Models[Models[i]->parent_idx]->jub_bones.get();
         Models[i]-> model = Models[Models[i]->parent_idx]->model *
-         Animations[Models[i]->parent_idx]->frames[now_frame].bones[Models[i]->parent_bone] *
-          Models[Models[i]->parent_idx]->bones[Models[i]->parent_bone].matrix *
-          glm::inverse(Models[i]-> bones[0].matrix)
-          ;
+            Animations[Models[i]->parent_idx]->frames[now_frame].bones[Models[i]->parent_bone] *
+           bone_ptr->bones[Models[i]->parent_bone].matrix *
+            glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix)
+            ;
     }
     else
     {
@@ -46,8 +47,9 @@ void GlCharacter::RefreshMatrixes()
     }
 }
 
-void GlCharacter::Process()
+int GlCharacter::Process()
 {
+    if(GetLifeValue() <=0.0f) return 1;
     if(current_animation == nullptr)
     {
         now_frame = 0;
@@ -60,8 +62,31 @@ void GlCharacter::Process()
     }
 
     RefreshMatrixes();
+    return 0;
 }
+
+void GlCharacter::Damage(float damage)
+{
+    UseSequence("damage");
+    IGlModel::Damage(damage);
+}
+
 void GlCharacter::AddModel(std::string name)
 {
     Models.emplace_back(std::make_shared<glModel>(name,Animations));
+}
+
+int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
+{
+    return 0;
+}
+
+std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe)
+{
+    float position_on_axe = glm::dot(axe, position);
+
+    std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
+
+    return ret_value;
+
 }

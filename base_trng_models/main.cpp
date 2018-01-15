@@ -103,7 +103,7 @@ int main(int argc, char const *argv[])
 
 	
 
-	GLResourcesManager resources_atlas("textures/");
+	GLResourcesManager resources_atlas("material/textures/","material/meshes/","","");
 
 	SetResourceManager(&resources_atlas);
 
@@ -130,6 +130,8 @@ int main(int argc, char const *argv[])
     m_shader_map.insert ( std::pair<std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
+	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
+	m_shader_map.insert ( std::pair<std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
@@ -150,7 +152,7 @@ int main(int argc, char const *argv[])
     }
 
 	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
-
+	hero.mass_inv = 1.0;
 	hero.AddModel("material/new_brb/barb.mdl");
 	hero.AddModel("material/new_brb/head.mdl");
 	hero.AddModel("material/b_axe/axe.mdl");
@@ -198,7 +200,7 @@ int main(int argc, char const *argv[])
 		glfwPollEvents();
 	}
 
-
+	std::cout << "exit";
 
 	glfwTerminate();
 	return 0;
@@ -213,16 +215,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	/*if (action == GLFW_RELEASE)
 		return;*/
 
-	if (key == GLFW_KEY_LEFT )
+	if (key == GLFW_KEY_LEFT || key == GLFW_KEY_A )
         inputs[GLFW_KEY_LEFT] = (action != GLFW_RELEASE) ?  true : false;
 
-	if (key == GLFW_KEY_RIGHT )
+	if (key == GLFW_KEY_RIGHT || key == GLFW_KEY_D )
 		inputs[GLFW_KEY_RIGHT] = (action != GLFW_RELEASE) ?  true : false;
 
-	if (key == GLFW_KEY_UP )
+	if (key == GLFW_KEY_UP || key == GLFW_KEY_W )
         inputs[GLFW_KEY_UP] = (action != GLFW_RELEASE) ?  true : false;
 
-	if (key == GLFW_KEY_DOWN )
+	if (key == GLFW_KEY_DOWN || key == GLFW_KEY_S)
 		inputs[GLFW_KEY_DOWN] = (action != GLFW_RELEASE) ?  true : false;
 
     if (key == GLFW_KEY_SPACE )

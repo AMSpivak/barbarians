@@ -8,6 +8,8 @@
 #include "gl_model.h"
 #include "gl_character.h"
 #include "gl_dungeon.h"
+#include "i_map_event.h"
+#include <list>
 
 class GlGameStateDungeon: public IGlGameState
 {
@@ -21,8 +23,7 @@ public:
 
     ~GlGameStateDungeon()
     {
-        glDeleteTextures(1,&sky_texture);
-		glDeleteTextures(1,&fx_texture);
+        
     }
     void Draw();
     IGlGameState * Process(std::map <int, bool> &inputs, float joy_x, float joy_y);
@@ -33,8 +34,11 @@ private:
     std::vector <std::shared_ptr<Animation> > Animations;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
-    GLuint sky_texture, fx_texture;
+    std::shared_ptr<GLuint> sky_texture, fx_texture, skybox, debug_texture;
     GlDungeon m_dungeon;
+    std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
+    std::list<std::shared_ptr<IMapEvent>> map_events;
+    
 
     glLight Light;
     float light_angle;
@@ -49,9 +53,13 @@ private:
     
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
+    void Draw2D(GLuint depth_map);
     void MoveHero(const glm::vec3 & hero_move);
     void FitObjects(int steps, float accuracy);
-    
+    float FitObjectToMap(IGlModel& object, glm::vec3 & position);
+    float FitObjectToObject(IGlModel& object1,IGlModel& object2);
+    InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event);
+
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
 };
 
