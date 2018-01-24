@@ -13,6 +13,7 @@ uniform mat4 lightSpaceMatrix;
 
 uniform vec3 LightDir;
 uniform vec3 LightColor;
+uniform vec3 viewPos;
 
 float ShadowCalculation(vec4 PosLight, vec3 tNormal)
 {
@@ -52,17 +53,21 @@ void main()
     if(texColor.a < 0.1)
         discard;
 	vec3 texNormal= texture(NormalMap, TexCoords).xyz;
+	vec3 FragPos= texture(PositionMap, TexCoords).xyz;
 	float norm_l = max(dot(texNormal,LightDir),0);
+	vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
+    vec3 viewDir = normalize(viewPos - FragPos);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 2);
     //float norm_l = smoothstep(0.45,0.55,dot(texNormal,LightDir));
 
     //float norm_l = smoothstep(0.0,1.0,dot(texNormal,LightDir));
     //float norm_l = max(dot(texNormal,LightDir),0.0);
-	float shadow_res =(ShadowCalculation(vec4(texture(PositionMap, TexCoords).xyz,1.0),texNormal));
+	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
     shadow_res = smoothstep(0.0,0.99, shadow_res);
     //float res = min((shadow_res), norm_l);// * norm_l);//min(shadow_res,norm_l);
-    float res = shadow_res* norm_l;// * norm_l);//min(shadow_res,norm_l);
+    float res = shadow_res* (norm_l) + spec;// * norm_l);//min(shadow_res,norm_l);
     //res    = smoothstep(0.25,0.55,res);
-    FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
+     FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
 
     //FragColor =vec4(0.4 +0.6 *  (res) * LightColor,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
     //FragColor =  vec4((0.3 +0.7 *  (norm_l)) * texColor.xyz,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;

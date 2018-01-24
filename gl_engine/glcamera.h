@@ -11,6 +11,7 @@ class glCamera
     glm::mat4 projection;
 	glm::mat4 full_matrix;
 public:
+	glm::vec3 m_position;
 	const glm::mat4 &CameraMatrix()
 	{
 		//full_matrix =  projection * view;
@@ -31,6 +32,7 @@ public:
 
 	void SetCameraLocation(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
 	{
+		m_position = position;
 		view = glm::lookAt(position,target,up);
         full_matrix =  projection * view;
 	}

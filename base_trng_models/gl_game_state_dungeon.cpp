@@ -331,6 +331,9 @@ void GlGameStateDungeon::Draw()
 		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
 		glUniform3fv(light_dir, 1, glm::value_ptr(light_dir_vector));
 
+		GLuint view_pos  = glGetUniformLocation(current_shader, "viewPos");
+		glUniform3fv(view_pos, 1, glm::value_ptr(Camera.m_position));
+
         glm::vec3 light_color_vector = glm::vec3(1.0f,1.0f,1.0f);
         GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
