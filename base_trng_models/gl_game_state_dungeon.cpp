@@ -344,6 +344,10 @@ void GlGameStateDungeon::Draw()
 		renderQuad();
 
         current_shader = m_shader_map["deffered_simple"];
+
+        view_pos  = glGetUniformLocation(current_shader, "viewPos");
+		glUniform3fv(view_pos, 1, glm::value_ptr(Camera.m_position));
+
         DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
         
 

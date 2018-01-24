@@ -11,6 +11,7 @@ uniform sampler2D PositionMap;
 
 uniform vec4 LightLocation;
 uniform vec3 LightColor;
+uniform vec3 viewPos;
 
 void main()
 {
@@ -18,13 +19,23 @@ void main()
 	vec4 texColor = texture(DiffuseMap, TexCoords);
     if(texColor.a < 0.1)
         discard;
-    vec3 LightVec = LightLocation.xyz - texture(PositionMap, TexCoords).xyz;
+
+    vec3 FragPos= texture(PositionMap, TexCoords).xyz;
+
+	
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 LightVec = LightLocation.xyz - FragPos;
     vec3 LightDir = normalize(LightVec);
 	vec3 texNormal= texture(NormalMap, TexCoords).xyz;
+    vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
     float norm_l = max(dot(texNormal,LightDir),0);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 10);
+    
     //norm_l = smoothstep(0.45,0.55,norm_l);
     //norm_l *=  max(LightLocation.w - length(LightVec),0);//(smoothstep(LightLocation.w*0.3,LightLocation.w,length(LightDir)));
     norm_l *=  1.0 - smoothstep(rad*0.3,rad,length(LightVec));
+    norm_l += 3.0 * spec;
+    
     //norm_l = smoothstep(0.45,0.55,norm_l);
     float res = norm_l;
 
