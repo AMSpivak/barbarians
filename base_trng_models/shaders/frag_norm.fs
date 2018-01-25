@@ -15,9 +15,11 @@ void main()
 	vec4 texColor = texture(ourTexture, TexCoord);
     if(texColor.a < 0.1)
         discard;
-    vec4 pos = vec4(v_Position,texture(UtilityTexture, TexCoord).x);
+
+    vec3 utility = texture(UtilityTexture, TexCoord).xyz;
+    vec4 pos = vec4(v_Position,utility.x);
     gPosition = pos;
-    gNormal = vec4(ourColor.xyz, 1.0);
+    gNormal = vec4(ourColor.xyz, utility.y);
 	//gNormal = vec4(ourColor.xyz, 1.0);
 	gAlbedoSpec = texColor;
 }

@@ -29,7 +29,10 @@ void main()
 	vec3 texNormal= texture(NormalMap, TexCoords).xyz;
     vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
     float norm_l = max(dot(texNormal,LightDir),0);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 10);
+
+    vec3 halfwayDir = normalize(LightDir + viewDir);  
+    float spec = 3.0 * pow(max(dot(texNormal, halfwayDir), 0.0), 16.0);
+    //float spec = pow(max(dot(viewDir, reflectDir), 0.0), 10);
     
     //norm_l = smoothstep(0.45,0.55,norm_l);
     //norm_l *=  max(LightLocation.w - length(LightVec),0);//(smoothstep(LightLocation.w*0.3,LightLocation.w,length(LightDir)));

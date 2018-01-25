@@ -57,7 +57,10 @@ void main()
 	float norm_l = max(dot(texNormal,LightDir),0);
 	vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
     vec3 viewDir = normalize(viewPos - FragPos);
-    float spec = 3.0 * pow(max(dot(viewDir, reflectDir), 0.0), 10);
+
+    vec3 halfwayDir = normalize(LightDir + viewDir);  
+    float spec = 3.0 *pow(max(dot(texNormal, halfwayDir), 0.0), 16.0);
+    //float spec = 3.0 * pow(max(dot(viewDir, reflectDir), 0.0), 10);
     //float norm_l = smoothstep(0.45,0.55,dot(texNormal,LightDir));
 
     //float norm_l = smoothstep(0.0,1.0,dot(texNormal,LightDir));
