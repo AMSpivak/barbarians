@@ -360,6 +360,8 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 		ModelFile >> tmp_string;
 		//std::cout << tmp_string;
 		ModelFile >> vertex_count;
+
+		int faces_count = vertex_count;
 		vertex_count *= 3;
 		std::cout << vertex_count;
 		//std::cout << "\n";
@@ -370,35 +372,42 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 		GLfloat * vertices = new GLfloat[vertex_count*8];
 		GLfloat * bone_weight = new GLfloat[vertex_count*4];
 		GLint * bone_indexes = new GLint[vertex_count*4];
+		int i_v = 0;
 
-		for(int i_v = 0; i_v < vertex_count; i_v++)
+		for(int face_i =0; face_i<faces_count; face_i++)
 		{
-			for(int i = 0; i < 8; i++)
+			for(int i =0; i<3; i++)
 			{
-				ModelFile >> vertices[i + i_v * 8];
-			}
-
-			getline(ModelFile, tmp_string);
-
-			getline(ModelFile, tmp_string);
-
-
-			std::istringstream iss(tmp_string);
-
-			iss.width(10);
-			iss.precision(8);
-
-			for(int i = 0; i < 4; i++)
+				
+				for(int i = 0; i < 8; i++)
 				{
-					bone_indexes[i_v * 4 + i] = 0;
-					bone_weight[i + i_v * 4] = 0.0f;
+					ModelFile >> vertices[i + i_v * 8];
 				}
 
-			int ndx = 0;
-			while (!(iss.eof()))
-			{
-				iss >> bone_indexes[i_v * 4 + ndx] >> bone_weight[(ndx) + i_v * 4];
-				ndx++;
+				getline(ModelFile, tmp_string);
+
+				getline(ModelFile, tmp_string);
+
+
+				std::istringstream iss(tmp_string);
+
+				iss.width(10);
+				iss.precision(8);
+
+				for(int i = 0; i < 4; i++)
+					{
+						bone_indexes[i_v * 4 + i] = 0;
+						bone_weight[i + i_v * 4] = 0.0f;
+					}
+
+				int ndx = 0;
+				while (!(iss.eof()))
+				{
+					iss >> bone_indexes[i_v * 4 + ndx] >> bone_weight[(ndx) + i_v * 4];
+					ndx++;
+				}
+
+				i_v++;
 			}
 		}
 
