@@ -40,6 +40,9 @@ void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, *utility_texture.get());
     
+	glUniform1i(glGetUniformLocation(shaderProgram, "NormalTexture"), 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, *normal_texture.get());
 
 	glUniformMatrix4fv(boneLoc, jub_bones.get()->bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));
     Draw();
@@ -112,6 +115,9 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
 	png_name = /*path + */tmp_str;
     getline(modelfile, tmp_str);
     png_utility_name = /*path + */tmp_str;
+	getline(modelfile, tmp_str);
+    std::string png_normal_name = /*path + */tmp_str;
+	std::cout<<"\n---"<<png_normal_name<<"\n===\n";
 	modelfile >> parent_idx >> parent_bone>>frames_name;
     //std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<png_utility_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n"<<frames_name<<"\n";
 
@@ -123,6 +129,7 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
 	jal_mesh = resources->m_mesh_atlas.Assign(jal_name);
 	diffuse_texture = resources->m_texture_atlas.Assign(png_name);
 	utility_texture = resources->m_texture_atlas.Assign(png_utility_name);
+	normal_texture = resources->m_texture_atlas.Assign(png_normal_name);
 	jub_bones = resources->m_bones_atlas.Assign(jub_name);
 	//LoadTexture(png_name, diffuse_texture);
     //LoadTexture(png_utility_name, utility_texture);

@@ -29,6 +29,7 @@ public:
 	glm::mat4 model;
 	std::shared_ptr<GLuint> diffuse_texture;
     std::shared_ptr<GLuint> utility_texture;
+    std::shared_ptr<GLuint> normal_texture;
 	std::shared_ptr<IGlJubStruct> jub_bones;
 
 	glModel(GLResourcesManager &resources_manager)

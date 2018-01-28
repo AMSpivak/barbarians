@@ -20,23 +20,26 @@ void GLJalMeshAtlas::FillResource(std::string filename,IGlJalStruct * resource)
     glBindBuffer(GL_ARRAY_BUFFER, resource->VBO);
 
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
     
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(3);
 
 	glBindBuffer(GL_ARRAY_BUFFER, resource->VBO_BONES_IDX);
 
-    glVertexAttribIPointer(3, 4, GL_INT, 4 * sizeof(GL_INT), (GLvoid*)0);
-    glEnableVertexAttribArray(3);
+    glVertexAttribIPointer(4, 4, GL_INT, 4 * sizeof(GL_INT), (GLvoid*)0);
+    glEnableVertexAttribArray(4);
 	glBindBuffer(GL_ARRAY_BUFFER, resource->VBO_BONES);
 
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(5);
 
 
 

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <array>
 
 
 void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3)
@@ -342,7 +343,22 @@ GLuint LoadshaderProgram(std::string FileNameVS,std::string FileNameFS)
 	return shaderProgram;
 }
 
+glm::vec3 CalculateTangent(const std::array<glm::vec3 , 3> &pos,const std::array<glm::vec2 , 3> &uv)
+{
+	glm::vec3 edge1 = pos[1] - pos[0];
+	glm::vec3 edge2 = pos[2] - pos[0];
+	glm::vec2 deltaUV1 = uv[1] - uv[0];
+	glm::vec2 deltaUV2 = uv[2] - uv[0];
 
+	float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+	glm::vec3 tangent = glm::vec3(f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
+									f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
+									f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z));
+
+
+	return  glm::normalize(tangent);
+}
 
 void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint &VBO_BONES_IDX, int &vertex_count)
 {
@@ -369,20 +385,25 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 		getline(ModelFile, tmp_string);
 		//std::cout << tmp_string<< "\n";
 
-		GLfloat * vertices = new GLfloat[vertex_count*8];
+		GLfloat * vertices = new GLfloat[vertex_count*11];
 		GLfloat * bone_weight = new GLfloat[vertex_count*4];
 		GLint * bone_indexes = new GLint[vertex_count*4];
 		int i_v = 0;
+
+		std::array<glm::vec3 , 3> pos;
+		std::array<glm::vec2 , 3> uv;
 
 		for(int face_i =0; face_i<faces_count; face_i++)
 		{
 			for(int i =0; i<3; i++)
 			{
 				
-				for(int i = 0; i < 8; i++)
+				for(int ip = 0; ip < 8; ip++)
 				{
-					ModelFile >> vertices[i + i_v * 8];
+					ModelFile >> vertices[ip + i_v * 11];
 				}
+				pos[i] = glm::vec3(vertices[i_v * 11 + 0],  vertices[i_v * 11 + 1], vertices[i_v * 11 + 2]);
+				uv[i]  = glm::vec2(vertices[i_v * 11 + 6],  vertices[i_v * 11 + 7]);
 
 				getline(ModelFile, tmp_string);
 
@@ -394,10 +415,10 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 				iss.width(10);
 				iss.precision(8);
 
-				for(int i = 0; i < 4; i++)
+				for(int ib = 0; ib < 4; ib++)
 					{
-						bone_indexes[i_v * 4 + i] = 0;
-						bone_weight[i + i_v * 4] = 0.0f;
+						bone_indexes[i_v * 4 + ib] = 0;
+						bone_weight[ib + i_v * 4] = 0.0f;
 					}
 
 				int ndx = 0;
@@ -406,8 +427,19 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 					iss >> bone_indexes[i_v * 4 + ndx] >> bone_weight[(ndx) + i_v * 4];
 					ndx++;
 				}
-
+				
 				i_v++;
+			}
+
+			glm::vec3 tangent = CalculateTangent(pos,uv);
+			//std::cout <<tangent.x <<":"<<tangent.y<<":"<<tangent.z<<"\n";
+
+			for(int ip = 1; ip < 4; ip++)
+			{
+				int index = 8 + (i_v-ip) * 11;
+				vertices[index] = tangent.x;
+				vertices[index+1] = tangent.y;
+				vertices[index+2] = tangent.z;
 			}
 		}
 
@@ -418,7 +450,7 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, vertex_count * 8* sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertex_count * 11* sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO_BONES);
 		glBufferData(GL_ARRAY_BUFFER, vertex_count * 4* sizeof(GLfloat), bone_weight, GL_STATIC_DRAW);

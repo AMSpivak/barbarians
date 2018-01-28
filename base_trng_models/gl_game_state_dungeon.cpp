@@ -351,7 +351,7 @@ void GlGameStateDungeon::Draw()
         DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
         
 
-
+    /**/
 
 
         glDisable(GL_BLEND);

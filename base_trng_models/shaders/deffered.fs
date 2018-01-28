@@ -69,7 +69,7 @@ void main()
 	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
     shadow_res = smoothstep(0.0,0.99, shadow_res);
     //float res = min((shadow_res), norm_l);// * norm_l);//min(shadow_res,norm_l);
-    float res = shadow_res* (norm_l) + spec;// * norm_l);//min(shadow_res,norm_l);
+    float res = shadow_res* (norm_l + spec) ;// * norm_l);//min(shadow_res,norm_l);
     //res    = smoothstep(0.25,0.55,res);
      FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
 
