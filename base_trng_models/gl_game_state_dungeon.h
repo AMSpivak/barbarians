@@ -30,6 +30,7 @@ public:
     void SwitchIn(){}
     void SwitchOut(){}
 private:
+
     std::vector <std::shared_ptr<glModel> > Models;
     std::vector <std::shared_ptr<Animation> > Animations;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
@@ -50,6 +51,8 @@ private:
     glm::vec3 hero_position;
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
+
+    void LoadMap(const std::string &filename);
     
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );

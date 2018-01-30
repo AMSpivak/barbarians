@@ -16,6 +16,15 @@
 #include "map_event_valhalla.h"
 #include "collision.h"
 
+void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
+{
+    for(auto tmpModel : Models)
+    {
+        tmpModel->model = glm::rotate(tmpModel->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        tmpModel->model = glm::rotate(tmpModel->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    }
+}
+
 GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
                                     std::map<std::string,std::shared_ptr<IGlModel>> & models_map,
@@ -31,41 +40,44 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
 {
-    Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/statue/statue.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wall/wall.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wallcross/wallcross.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wally/wall.mdl", Animations));
-    //Models.emplace_back(std::make_shared<glModel>("material/barrel/barrel.mdl", Animations));
-    
-    //Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
-    int models_count = Models.size();
-    for(auto tmpModel : Models)
-    {
-        tmpModel->model = glm::rotate(tmpModel->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        tmpModel->model = glm::rotate(tmpModel->model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    }
 
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
+  
 
+    //debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
+    
+    time = glfwGetTime();/**/
+    LoadMap("test");
+}
+
+void GlGameStateDungeon::LoadMap(const std::string &filename)
+{
+
+    GLResourcesManager * resources_manager = GetResourceManager();
     light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle))); 
     light_dir_vector = glm::normalize(light_position);
     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     float f_near = 1.f;
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
-    sky_texture = resources_manager.m_texture_atlas.Assign("dungeon_bck.png");
-    skybox = resources_manager.m_texture_atlas.Assign("skybox/violent.cub");
-    fx_texture = resources_manager.m_texture_atlas.Assign("valh.png");
-    debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
 
-    
-    time = glfwGetTime();/**/
+    Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/statue/statue.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wall/wall.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wallcross/wallcross.mdl", Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wally/wall.mdl", Animations));
+
+    ResetModels(Models);
+
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
 
-    hero_position = glm::vec3(10.0f,0.0f,10.0f);
+    hero_position = glm::vec3(10.0f,0.0f,10.0f);  
+
+    sky_texture = resources_manager->m_texture_atlas.Assign("dungeon_bck.png");
+    skybox = resources_manager->m_texture_atlas.Assign("skybox/violent.cub");
+    fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");
 
     {
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
