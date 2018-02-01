@@ -1,7 +1,8 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
+#include <iostream>
+#include <fstream>
 //#define GLM_SWIZZLE_XYZW
 
 #include "glm/glm.hpp"
@@ -54,7 +55,11 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 void GlGameStateDungeon::LoadMap(const std::string &filename)
 {
 
+
     GLResourcesManager * resources_manager = GetResourceManager();
+     std::string ShaderString = "";
+	std::ifstream level_file;
+	level_file.open(filename);   
     light_radius = 10.0f;
     //light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle))); 
     light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
@@ -114,6 +119,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
         barrel_model.AddSequence("base",as_base);
         barrel_model.UseSequence("base");
     }
+    level_file.close();  
 
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
