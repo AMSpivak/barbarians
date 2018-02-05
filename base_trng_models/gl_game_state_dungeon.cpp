@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <fstream>
+#include  <functional>
 //#define GLM_SWIZZLE_XYZW
 
 #include "glm/glm.hpp"
@@ -16,6 +17,36 @@
 #include "map_event_hero_strikes.h"
 #include "map_event_valhalla.h"
 #include "collision.h"
+
+void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::function<void(const std::string &)> process)
+{
+
+
+    std::string sufix_start("<"+sufix+">");
+    std::string sufix_end("<!"+sufix+">");
+    std::string tempholder("");
+
+    while(!file.eof()&&(tempholder.compare(sufix_start)))
+    {
+        getline(file, tempholder);
+        std::cout<<tempholder<<"\n";
+    }
+
+
+    bool is_block_endline = false;
+
+    while(!file.eof()&&(!is_block_endline))
+    {
+        getline(file, tempholder);
+        is_block_endline = tempholder.compare(sufix_end) == 0;
+        if(!is_block_endline)
+        {
+            process(tempholder);
+        }
+    }
+    
+
+}
 
 void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
 {
@@ -52,14 +83,19 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     LoadMap("levels/test.lvl");
 }
 
+
+
+
 void GlGameStateDungeon::LoadMap(const std::string &filename)
 {
 
 
     GLResourcesManager * resources_manager = GetResourceManager();
-     std::string ShaderString = "";
+    
 	std::ifstream level_file;
-	level_file.open(filename);   
+	level_file.open(filename); 
+    
+    std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     light_radius = 10.0f;
     //light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle))); 
     light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
@@ -71,12 +107,12 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
 
-    Models.emplace_back(std::make_shared<glModel>("material/tiles/tile.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/statue/statue.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wall/wall.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wallcross/wallcross.mdl", Animations));
-    Models.emplace_back(std::make_shared<glModel>("material/dungeon/wally/wall.mdl", Animations));
 
+    LoadLineBlock(level_file,"models",[this](const std::string &line)
+                                        {
+                                            Models.emplace_back(std::make_shared<glModel>(line, Animations));
+                                        }
+                                        );
     ResetModels(Models);
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
@@ -84,7 +120,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
 
-    sky_texture = resources_manager->m_texture_atlas.Assign("dungeon_bck.png");
+    //sky_texture = resources_manager->m_texture_atlas.Assign("dungeon_bck.png");
     skybox = resources_manager->m_texture_atlas.Assign("skybox/violent.cub");
     fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");
 

@@ -1,0 +1,10 @@
+<Light>
+    light_position
+<!Light>
+<models>
+material/tiles/tile.mdl
+material/dungeon/statue/statue.mdl
+material/dungeon/wall/wall.mdl
+material/dungeon/wallcross/wallcross.mdl
+material/dungeon/wally/wall.mdl
+<!models>
