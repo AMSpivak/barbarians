@@ -10,4 +10,5 @@ material/dungeon/wally/wall.mdl
 <!models>
 <sky>
 skybox/violent.cub
+light_pos 10.0 20.0 -10.0
 <!sky>

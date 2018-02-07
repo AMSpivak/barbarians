@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include  <functional>
 //#define GLM_SWIZZLE_XYZW
@@ -87,6 +88,21 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     LoadMap("levels/test.lvl");
 }
 
+void GlGameStateDungeon::SetMapLight(const std::string &line)
+{
+    std::stringstream ss(line);
+    float light_x =10;
+    float light_y =10;
+    float light_z =10;
+    std::string info = "";
+    ss >> info >> light_x >> light_y >> light_z;
+
+     
+    //light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
+    light_position = glm::vec3(light_x, light_y, light_z);
+     
+
+}
 
 
 
@@ -100,7 +116,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 	level_file.open(filename); 
     
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
-    light_radius = 10.0f;
+    //light_radius = 10.0f;
     
     light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
     
@@ -111,7 +127,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     float f_far = 35.0f;
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
 
-
+    Models.clear();
     LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
                                         {
                                             for(auto line : lines)
@@ -129,6 +145,11 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
                                         {
                                             GLResourcesManager * resources_manager = GetResourceManager();
                                             skybox = resources_manager->m_texture_atlas.Assign(lines[0]);
+                                            if(lines.size()>1)
+                                            {
+                                               SetMapLight(lines[1]);
+                                            }
+
                                         }
                                         );
 
@@ -881,9 +902,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
 
                     Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                    //light_radius = 10;
-                    //glm::vec3 light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
-                    //Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
                     glm::vec3  light_dir_vector = glm::normalize(light_position);
                     time = time_now;
    

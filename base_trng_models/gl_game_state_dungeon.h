@@ -64,6 +64,8 @@ private:
     InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event);
 
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
+    void SetMapLight(const std::string &line);
+    
 };
 
 #endif
