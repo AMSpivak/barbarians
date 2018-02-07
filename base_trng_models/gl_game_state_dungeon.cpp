@@ -18,7 +18,7 @@
 #include "map_event_valhalla.h"
 #include "collision.h"
 
-void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::function<void(const std::string &)> process)
+void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::function<void(std::vector<std::string> &)> process)
 {
 
 
@@ -35,15 +35,19 @@ void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::funct
 
     bool is_block_endline = false;
 
+    std::vector<std::string> lines;
+
     while(!file.eof()&&(!is_block_endline))
     {
         getline(file, tempholder);
         is_block_endline = tempholder.compare(sufix_end) == 0;
         if(!is_block_endline)
         {
-            process(tempholder);
+            lines.push_back(tempholder);
         }
     }
+    process(lines);
+
     
 
 }
@@ -97,7 +101,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     light_radius = 10.0f;
-    //light_position = glm::vec3(0.0f, light_radius*glm::sin(glm::radians(light_angle)), -light_radius*glm::cos(glm::radians(light_angle))); 
+    
     light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
     
     light_dir_vector = glm::normalize(light_position);
@@ -108,8 +112,9 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
 
 
-    LoadLineBlock(level_file,"models",[this](const std::string &line)
+    LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
                                         {
+                                            for(auto line : lines)
                                             Models.emplace_back(std::make_shared<glModel>(line, Animations));
                                         }
                                         );
@@ -120,9 +125,12 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
 
-    //sky_texture = resources_manager->m_texture_atlas.Assign("dungeon_bck.png");
-    skybox = resources_manager->m_texture_atlas.Assign("skybox/violent.cub");
-    fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");
+    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines)
+                                        {
+                                            GLResourcesManager * resources_manager = GetResourceManager();
+                                            skybox = resources_manager->m_texture_atlas.Assign(lines[0]);
+                                        }
+                                        );
 
     {
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
@@ -155,7 +163,9 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
         barrel_model.AddSequence("base",as_base);
         barrel_model.UseSequence("base");
     }
-    level_file.close();  
+    level_file.close(); 
+
+    fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");    
 
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)

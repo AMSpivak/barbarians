@@ -8,3 +8,6 @@ material/dungeon/wall/wall.mdl
 material/dungeon/wallcross/wallcross.mdl
 material/dungeon/wally/wall.mdl
 <!models>
+<sky>
+skybox/violent.cub
+<!sky>
