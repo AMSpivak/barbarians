@@ -4,7 +4,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include  <functional>
+#include <functional>
+#include <utility>
 //#define GLM_SWIZZLE_XYZW
 
 #include "glm/glm.hpp"
@@ -77,31 +78,66 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
 {
-
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
-  
-
     //debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
-    
-    time = glfwGetTime();/**/
+    time = glfwGetTime();
     LoadMap("levels/test.lvl");
 }
 
-void GlGameStateDungeon::SetMapLight(const std::string &line)
+void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 {
-    std::stringstream ss(line);
-    float light_x =10;
-    float light_y =10;
-    float light_z =10;
+    if(lines.size()<=1) 
+        return;
+
+    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
+    execute_funcs.insert(std::make_pair("light_pos",[this](std::stringstream &sstream)
+                                        {
+                                            float light_x =10;
+                                            float light_y =10;
+                                            float light_z =10;
+                                            sstream >> light_x >> light_y >> light_z; 
+                                            light_position = glm::vec3(light_x, light_y, light_z);                                          
+                                        }));
+    execute_funcs.insert(std::make_pair("skybox",[this](std::stringstream &sstream)
+                                    {
+                                        std::string sky;
+                                        sstream >> sky;
+                                        GLResourcesManager * resources_manager = GetResourceManager();
+                                        skybox = resources_manager->m_texture_atlas.Assign(sky);
+                                                                                 
+                                    }));
+    execute_funcs.insert(std::make_pair("camera_lens",[this](std::stringstream &sstream)
+                                    {
+
+                                        float f_near = 1.f;
+                                        float f_far = 35.0f;
+                                        float size = 20.0f;
+                                        sstream >> size >> f_near >> f_far; 
+                                        Light.SetCameraLens_Orto(-size, size,-size, size,f_near,f_far);                                         
+                                    }));
+
+    execute_funcs.insert(std::make_pair("light_color",[this](std::stringstream &sstream)
+                                    {
+                                        float r = 1.f;
+                                        float g = 35.0f;
+                                        float b = 20.0f;
+                                        sstream >> r >> g >> b; 
+                                        light_color_vector = glm::vec3(r,g,b);                                        
+                                    }));
+
+    //light_color_vector = glm::vec3(1.0f,1.0f,1.0f);
+    
     std::string info = "";
-    ss >> info >> light_x >> light_y >> light_z;
+    for(auto line:lines)
+    {
+        std::stringstream ss(line);
+        ss >> info;
+        (execute_funcs[info])(ss);
+    }
 
-     
-    //light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
-    light_position = glm::vec3(light_x, light_y, light_z);
-     
-
+    light_dir_vector = glm::normalize(light_position);
+    Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 
@@ -114,19 +150,14 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     
 	std::ifstream level_file;
 	level_file.open(filename); 
-    
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
-    //light_radius = 10.0f;
     
-    light_position = glm::vec3(light_radius, 2 * light_radius/*glm::sin(glm::radians(light_angle))*/, -light_radius/*glm::cos(glm::radians(light_angle))*/);
-    
-    light_dir_vector = glm::normalize(light_position);
-    Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    float f_near = 1.f;
-    float f_far = 35.0f;
-    Light.SetCameraLens_Orto(-20.0f, 20.0f,-20.0f, 20.0f,f_near,f_far);
-
+    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines)
+                                        {
+                                            SetMapLight(lines);
+                                        }
+                                        );
     Models.clear();
     LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
                                         {
@@ -134,6 +165,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
                                             Models.emplace_back(std::make_shared<glModel>(line, Animations));
                                         }
                                         );
+
     ResetModels(Models);
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
@@ -141,17 +173,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
 
-    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines)
-                                        {
-                                            GLResourcesManager * resources_manager = GetResourceManager();
-                                            skybox = resources_manager->m_texture_atlas.Assign(lines[0]);
-                                            if(lines.size()>1)
-                                            {
-                                               SetMapLight(lines[1]);
-                                            }
 
-                                        }
-                                        );
 
     {
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
@@ -423,7 +445,7 @@ void GlGameStateDungeon::Draw()
 		GLuint view_pos  = glGetUniformLocation(current_shader, "viewPos");
 		glUniform3fv(view_pos, 1, glm::value_ptr(Camera.m_position));
 
-        glm::vec3 light_color_vector = glm::vec3(1.0f,1.0f,1.0f);
+        
         GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 

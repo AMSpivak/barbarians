@@ -51,6 +51,7 @@ private:
     glm::vec3 hero_position;
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
+    glm::vec3 light_color_vector;
 
     void LoadMap(const std::string &filename);
     
@@ -64,7 +65,7 @@ private:
     InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event);
 
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
-    void SetMapLight(const std::string &line);
+    void SetMapLight(std::vector<std::string> &lines);
     
 };
 

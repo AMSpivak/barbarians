@@ -1,6 +1,9 @@
-<Light>
-    light_position
-<!Light>
+<sky>
+skybox skybox/violent.cub
+light_pos 10.0 20.0 -10.0
+light_color 1.0 0.5 0.5
+camera_lens 20.0 1.0 35.0
+<!sky>
 <models>
 material/tiles/tile.mdl
 material/dungeon/statue/statue.mdl
@@ -8,7 +11,3 @@ material/dungeon/wall/wall.mdl
 material/dungeon/wallcross/wallcross.mdl
 material/dungeon/wally/wall.mdl
 <!models>
-<sky>
-skybox/violent.cub
-light_pos 10.0 20.0 -10.0
-<!sky>
