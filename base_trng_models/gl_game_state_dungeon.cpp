@@ -85,6 +85,28 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     LoadMap("levels/test.lvl");
 }
 
+void GlGameStateDungeon::LoadTiles(std::vector<std::string> &lines)
+{
+
+}
+
+void GlGameStateDungeon::LoadObjects(std::vector<std::string> &lines)
+{
+
+}
+
+void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
+{
+    std::stringstream ss(lines[0]);
+    size_t width = 3;
+    size_t height = 3;
+    size_t floors = 1;
+
+    ss >> width>> height>>floors;
+    m_dungeon = GlDungeon(width,height,floors);
+
+}
+
 void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 {
     if(lines.size()<=1) 
@@ -142,6 +164,8 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 
 
 
+
+
 void GlGameStateDungeon::LoadMap(const std::string &filename)
 {
 
@@ -162,7 +186,15 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
                                         {
                                             for(auto line : lines)
-                                            Models.emplace_back(std::make_shared<glModel>(line, Animations));
+                                            {
+                                                Models.emplace_back(std::make_shared<glModel>(line, Animations));
+                                            }
+                                        }
+                                        );
+    
+    LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines)
+                                        {
+                                            SetDungeonSize(lines);
                                         }
                                         );
 

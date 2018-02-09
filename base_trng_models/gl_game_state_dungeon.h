@@ -54,6 +54,10 @@ private:
     glm::vec3 light_color_vector;
 
     void LoadMap(const std::string &filename);
+
+    void LoadTiles(std::vector<std::string> &lines);
+    void LoadObjects(std::vector<std::string> &lines);
+    void SetDungeonSize(std::vector<std::string> &lines);
     
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
