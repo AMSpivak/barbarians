@@ -205,7 +205,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
 
-
+/*
 
     {
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
@@ -237,7 +237,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
         barrel_model.AddSequence("damage",as_damage);
         barrel_model.AddSequence("base",as_base);
         barrel_model.UseSequence("base");
-    }
+    }*/
     level_file.close(); 
 
     fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");    

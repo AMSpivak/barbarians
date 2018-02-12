@@ -6,10 +6,6 @@ camera_lens 34.0 1.0 45.0
 <!sky>
 <models>
 material/tiles/tile.mdl
-material/dungeon/statue/statue.mdl
-material/dungeon/wall/wall.mdl
-material/dungeon/wallcross/wallcross.mdl
-material/dungeon/wally/wall.mdl
 <!models>
 <dungeon_params>
 25 25 1

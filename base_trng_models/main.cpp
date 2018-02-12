@@ -153,9 +153,12 @@ int main(int argc, char const *argv[])
 
 	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
 	hero.mass_inv = 1.0;
-	hero.AddModel("material/new_brb/barb.mdl");
+	hero.AddModel("material/b_girl/body.mdl");
+	hero.AddModel("material/b_girl/hair.mdl");
+	hero.AddModel("material/b_girl/eyes.mdl");/**/
+	/*hero.AddModel("material/new_brb/barb.mdl");
 	hero.AddModel("material/new_brb/head.mdl");
-	hero.AddModel("material/b_axe/axe.mdl");
+	hero.AddModel("material/b_axe/axe.mdl");/**/
     AnimationSequence as_stance(91,99);
     AnimationSequence as_walk(127,135);
     hero.AddSequence("stance",as_stance);
