@@ -47,8 +47,8 @@ void main()
 	v +=(dot(vx_d,vx_d) + dot(vy_d,vy_d));
 	//v = 0.25 *v;
 	//v = pow(v,4);
-	FragColor = (1.0 - v)*texture(texMap, TexCoords);
+	//FragColor = (1.0 - v)*texture(texMap, TexCoords);
 	//vec4(v,v,v, 1.0);
-	//vec4 texColor = texture(texMap, TexCoords);
-    //FragColor = vec4(texColor.xyz, 1.0);
+	vec4 texColor = texture(texMap, TexCoords);
+    FragColor = vec4(texColor.xyz, 1.0);
 }
