@@ -54,6 +54,8 @@ void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::funct
 
 }
 
+
+
 void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
 {
     for(auto tmpModel : Models)
@@ -87,12 +89,42 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 
 void GlGameStateDungeon::LoadTiles(std::vector<std::string> &lines)
 {
-
+    size_t y = 0;
+    for(auto line : lines)
+    {
+        size_t x = 0;
+        size_t tile = 0;
+        std::stringstream ss(line);
+        while((x< m_dungeon.Width())&&(!ss.eof()))
+        {
+            ss >> tile;
+            m_dungeon.SetTile(x,y,0,tile);
+            ++x;            
+        }
+        ++y;
+        if(y>=m_dungeon.Height())
+            return;
+    }
 }
 
 void GlGameStateDungeon::LoadObjects(std::vector<std::string> &lines)
 {
-
+    size_t y = 0;
+    for(auto line : lines)
+    {
+        size_t x = 0;
+        size_t object = 0;
+        std::stringstream ss(line);
+        while((x<m_dungeon.Width())&&(!ss.eof()))
+        {
+            ss >> object;
+            m_dungeon.SetObject(x,y,0,object);
+            ++x;
+        }
+        ++y;
+        if(y>=m_dungeon.Height())
+            return;
+    }
 }
 
 void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
@@ -177,11 +209,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     
 
-    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines)
-                                        {
-                                            SetMapLight(lines);
-                                        }
-                                        );
+    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines){SetMapLight(lines);});
     Models.clear();
     LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
                                         {
@@ -192,11 +220,9 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
                                         }
                                         );
     
-    LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines)
-                                        {
-                                            SetDungeonSize(lines);
-                                        }
-                                        );
+    LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);});
+    LoadLineBlock(level_file,"dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);});
+    LoadLineBlock(level_file,"dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);});
 
     ResetModels(Models);
 
