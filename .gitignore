@@ -1,3 +1,7 @@
 *.o
 *.tags
 *.exe
+CAT.blend
+CAT.blend1
+base_trng_models/game
+.vscode/settings.json
