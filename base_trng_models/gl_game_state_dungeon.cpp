@@ -426,6 +426,9 @@ void GlGameStateDungeon::Draw()
 		unsigned int cameraLoc;
 
 		Light.SetLigtRender();
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.1,4000.0);
+
         glClear( GL_DEPTH_BUFFER_BIT);
 		GLuint current_shader = m_shader_map["shadowmap"];
 		glUseProgram(current_shader);
@@ -434,6 +437,8 @@ void GlGameStateDungeon::Draw()
 
         DrawDungeon(current_shader);
 		hero.Draw(current_shader);
+
+        glDisable(GL_POLYGON_OFFSET_FILL);
 
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
@@ -949,7 +954,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
                     if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
 
-                    if(distance<5.0f)distance=5.0f;
+                    if(distance<3.0f)distance=3.0f;
                     if(distance>14.0f)distance=14.0f;
 
                     if(light_angle<10.0f)light_angle=10.0f;

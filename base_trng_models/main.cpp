@@ -110,20 +110,17 @@ int main(int argc, char const *argv[])
     std::map<std::string,GLuint> m_shader_map;
 
     std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
-    {
-        std::shared_ptr<glRenderTarget> r_target(new glRenderTargetDeffered());
-        m_render_target_map.insert( std::pair<std::string,std::shared_ptr<glRenderTarget>>("base_deffered",r_target));
-        std::shared_ptr<glRenderTarget> r_target_final(new glRenderTarget());
-        m_render_target_map.insert( std::pair<std::string,std::shared_ptr<glRenderTarget>>("final",r_target_final));
-    }
 
-    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
-	glRenderTarget &final_render_target = *(m_render_target_map["final"].get());
-	//glRenderTargetDeffered render_target;
-	render_target.InitBuffer(width, height);
+    m_render_target_map.insert( std::make_pair("base_deffered",std::make_shared<glRenderTargetDeffered>()));
+    m_render_target_map.insert( std::make_pair("final",std::make_shared<glRenderTarget>()));
 
-	//glRenderTarget final_render_target;
-	final_render_target.InitBuffer(width, height);
+  
+
+	for(auto prt : m_render_target_map)
+	{
+		prt.second.get()->InitBuffer(width, height);
+	}
+
     // Build and compile our shader program
 
 

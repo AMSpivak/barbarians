@@ -29,21 +29,22 @@ float ShadowCalculation(vec4 PosLight, vec3 tNormal)
 
     vec2 shift = texelSize*vec2(0.0,1.0);
     //float res = (textureProj(shadowMap,vec4(projCoords,1.0)));
-    float res = texture(shadowMap,vec3(projCoords.xy,currentDepth - bias));
+    float res = texture(shadowMap,vec3(projCoords.xy,currentDepth));
+//    float res = texture(shadowMap,vec3(projCoords.xy,currentDepth - bias));
     //float depth = texture(shadowMap,projCoords.xy).r;
     //float res = smoothstep(-0.1,0.1,depth - currentDepth);
 
-    //res = smoothstep(0.0,1.0, (texture(shadowMap,projCoords.xy) - currentDepth + bias));
-
-    res += (texture(shadowMap,vec3(projCoords.xy + shift,currentDepth - bias)));
+  //  res = smoothstep(0.0,1.0, (texture(shadowMap,projCoords.xy) - currentDepth + bias));
+    res *=0.6;
+    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
     shift =texelSize*vec2(0.0,-1.0);
-    res += (texture(shadowMap,vec3(projCoords.xy + shift,currentDepth - bias)));
-    shift = texelSize*vec2(1.0, 0.0);
-    res += (texture(shadowMap,vec3(projCoords.xy + shift,currentDepth - bias)));
+    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+    shift =texelSize*vec2(1.0, 0.0);
+    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
     shift = texelSize*vec2(-1.0, 0.0);
-    res += (texture(shadowMap,vec3(projCoords.xy + shift,currentDepth - bias)));
+    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
 
-    res*=0.2;/**/
+    //res*=0.2;/**/
     return res;
 }
 
@@ -67,9 +68,9 @@ void main()
     //float norm_l = smoothstep(0.0,1.0,dot(texNormal,LightDir));
     //float norm_l = max(dot(texNormal,LightDir),0.0);
 	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
-    shadow_res = smoothstep(0.0,0.99, shadow_res);
+    //shadow_res = smoothstep(0.0,0.99, shadow_res);
     //float res = min((shadow_res), norm_l);// * norm_l);//min(shadow_res,norm_l);
-    float res = shadow_res* (norm_l + spec) ;// * norm_l);//min(shadow_res,norm_l);
+    float res = shadow_res * (norm_l + spec) ;// * norm_l);//min(shadow_res,norm_l);
     //res    = smoothstep(0.25,0.55,res);
      FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
 
