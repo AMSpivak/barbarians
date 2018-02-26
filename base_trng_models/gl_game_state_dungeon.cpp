@@ -20,7 +20,7 @@
 #include "map_event_valhalla.h"
 #include "collision.h"
 
-void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::function<void(std::vector<std::string> &)> process)
+void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::function<void(std::vector<std::string> &)> &process)
 {
 
 
@@ -211,6 +211,8 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 
     LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines){SetMapLight(lines);});
     Models.clear();
+    GetResourceManager()->Clean();  
+    
     LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
                                         {
                                             for(auto line : lines)
@@ -221,8 +223,8 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
                                         );
     
     LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);});
-    LoadLineBlock(level_file,"dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);});
-    LoadLineBlock(level_file,"dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);});
+    //LoadLineBlock(level_file,"dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);});
+    //LoadLineBlock(level_file,"dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);});
 
     ResetModels(Models);
 
@@ -266,7 +268,50 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
     }*/
     level_file.close(); 
 
-    fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");    
+    fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");  
+    GetResourceManager()->Clean();  
+
+}
+
+void GlGameStateDungeon::LoadMap(const std::string &filename)
+{
+
+
+    GLResourcesManager * resources_manager = GetResourceManager();
+    
+	std::ifstream level_file;
+	level_file.open(filename); 
+    std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
+    
+
+    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines){SetMapLight(lines);});
+    Models.clear();
+    GetResourceManager()->Clean();  
+    
+    LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
+                                        {
+                                            for(auto line : lines)
+                                            {
+                                                Models.emplace_back(std::make_shared<glModel>(line, Animations));
+                                            }
+                                        }
+                                        );
+    
+    LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);});
+    //LoadLineBlock(level_file,"dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);});
+    //LoadLineBlock(level_file,"dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);});
+
+    ResetModels(Models);
+
+    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
+    hero.UseSequence("stance");
+
+    hero_position = glm::vec3(10.0f,0.0f,10.0f);  
+
+    level_file.close(); 
+
+    fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");  
+    GetResourceManager()->Clean();  
 
 }
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
@@ -951,8 +996,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     }
 
 
-                    if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
-                    if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
+                    if(inputs[GLFW_KEY_RIGHT_BRACKET]) LoadMap("levels/test.lvl");//distance +=0.1f;
+                    if(inputs[GLFW_KEY_LEFT_BRACKET]) LoadMap("levels/test2.lvl");//distance -=0.1f;
 
                     if(distance<3.0f)distance=3.0f;
                     if(distance>14.0f)distance=14.0f;

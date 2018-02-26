@@ -54,7 +54,9 @@ public:
 
 
 	~glModel()
-	{}
+	{
+		
+	}
 
 
 

@@ -23,6 +23,7 @@ GLResourcesManager(const std::string & textures_folder,
                     ,m_bones_atlas(bones_folder)
 {}
 ~GLResourcesManager(){}
+void Clean();
 };
 
 GLResourcesManager * GetResourceManager();

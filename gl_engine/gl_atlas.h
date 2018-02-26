@@ -61,6 +61,9 @@ public:
         {
             if ((*cur).second.unique())
             {
+                std::cout <<"Delete resource: "<<(*cur).first<<"\n";
+                
+                EmptyResource((*cur).second.get());
                 m_map.erase(cur++); 
             }  
             else
