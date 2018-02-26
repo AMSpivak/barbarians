@@ -54,6 +54,36 @@ void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::funct
 
 }
 
+void LoadLineBlock2(std::ifstream &file,const std::string &sufix,std::vector<std::string> &lines)
+{
+    lines.clear();
+
+    std::string sufix_start("<"+sufix+">");
+    std::string sufix_end("<!"+sufix+">");
+    std::string tempholder("");
+
+    while(!file.eof()&&(tempholder.compare(sufix_start)))
+    {
+        getline(file, tempholder);
+        std::cout<<tempholder<<"\n";
+    }
+
+
+    bool is_block_endline = false;
+
+
+    while(!file.eof()&&(!is_block_endline))
+    {
+        getline(file, tempholder);
+        is_block_endline = tempholder.compare(sufix_end) == 0;
+        if(!is_block_endline)
+        {
+            lines.push_back(tempholder);
+        }
+    }
+    
+
+}
 
 
 void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
@@ -85,6 +115,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     //debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
     time = glfwGetTime();
     LoadMap("levels/test.lvl");
+
 }
 
 void GlGameStateDungeon::LoadTiles(std::vector<std::string> &lines)
@@ -208,25 +239,40 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 	level_file.open(filename); 
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     
+    std::vector<std::string> lines;
 
-    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines){SetMapLight(lines);});
-    Models.clear();
-    GetResourceManager()->Clean();  
+    //LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines){SetMapLight(lines);});
+    LoadLineBlock2(level_file,"sky",lines);
+    SetMapLight(lines);
     
-    LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
+    Models.clear();
+	//vector<glModel>().swap( Models );
+    Animations.clear();
+    //vector<Animation>().swap( Animations );
+    //GetResourceManager()->Clean();  
+
+    LoadLineBlock2(level_file,"models",lines);
+
+    for(auto line : lines)
+    {
+        Models.emplace_back(std::make_shared<glModel>(line, Animations));
+    }
+    ResetModels(Models);
+    
+    /*LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
                                         {
                                             for(auto line : lines)
                                             {
                                                 Models.emplace_back(std::make_shared<glModel>(line, Animations));
                                             }
                                         }
-                                        );
-    
-    LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);});
+                                        );*/
+    LoadLineBlock2(level_file,"dungeon_params",lines);
+    SetDungeonSize(lines);
+    //LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);});
     //LoadLineBlock(level_file,"dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);});
     //LoadLineBlock(level_file,"dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);});
 
-    ResetModels(Models);
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
@@ -273,47 +319,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 
 }
 
-void GlGameStateDungeon::LoadMap(const std::string &filename)
-{
 
-
-    GLResourcesManager * resources_manager = GetResourceManager();
-    
-	std::ifstream level_file;
-	level_file.open(filename); 
-    std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
-    
-
-    LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines){SetMapLight(lines);});
-    Models.clear();
-    GetResourceManager()->Clean();  
-    
-    LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
-                                        {
-                                            for(auto line : lines)
-                                            {
-                                                Models.emplace_back(std::make_shared<glModel>(line, Animations));
-                                            }
-                                        }
-                                        );
-    
-    LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);});
-    //LoadLineBlock(level_file,"dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);});
-    //LoadLineBlock(level_file,"dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);});
-
-    ResetModels(Models);
-
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
-    hero.UseSequence("stance");
-
-    hero_position = glm::vec3(10.0f,0.0f,10.0f);  
-
-    level_file.close(); 
-
-    fx_texture = resources_manager->m_texture_atlas.Assign("valh.png");  
-    GetResourceManager()->Clean();  
-
-}
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
 {
     glm::mat4 model_matrix = Models[0]->model;
@@ -997,7 +1003,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
 
                     if(inputs[GLFW_KEY_RIGHT_BRACKET]) LoadMap("levels/test.lvl");//distance +=0.1f;
-                    if(inputs[GLFW_KEY_LEFT_BRACKET]) LoadMap("levels/test2.lvl");//distance -=0.1f;
+                    if(inputs[GLFW_KEY_LEFT_BRACKET]) fx_texture = GetResourceManager()->m_texture_atlas.Assign("valh.png");  //distance -=0.1f;
 
                     if(distance<3.0f)distance=3.0f;
                     if(distance>14.0f)distance=14.0f;

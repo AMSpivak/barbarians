@@ -621,6 +621,7 @@ void Animation::LoadAnimation(std::string FileName, std::vector <Bone> &bones)
 	getline(ModelFile, tmp_string);
 	ModelFile>>tmp_string>>bon_count>>tmp_string>>tmp_string>>framescount;
 	frames.clear();
+	//vector<AnimationFrame>().swap( frames );
 	int current_frame;
 	glm::mat4 tmp_matrix;
 	for(int i_frame = 0; i_frame < framescount; i_frame++)
