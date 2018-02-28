@@ -1002,8 +1002,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     }
 
 
-                    if(inputs[GLFW_KEY_RIGHT_BRACKET]) LoadMap("levels/test.lvl");//distance +=0.1f;
-                    if(inputs[GLFW_KEY_LEFT_BRACKET]) fx_texture = GetResourceManager()->m_texture_atlas.Assign("valh.png");  //distance -=0.1f;
+                    if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
+                    if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
 
                     if(distance<3.0f)distance=3.0f;
                     if(distance>14.0f)distance=14.0f;
