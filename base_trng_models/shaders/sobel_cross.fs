@@ -10,8 +10,9 @@ uniform sampler2D LightMap;
 
 void main()
 {
+	vec4 Diffuse= texture(texMap, TexCoords.xy);
 
-	if(texture(texMap, TexCoords.xy).w < 0.05)
+	if(Diffuse.w < 0.05)
         discard;
 
     vec4 Light = texture(LightMap, TexCoords);
@@ -51,6 +52,7 @@ void main()
 	//FragColor  =/* (1.0-v_n )*(1.0 - d_depth)**/texture(texMap, TexCoords);
 	FragColor  = (1.0-v_n )*(1.0 - d_depth)*texture(texMap, TexCoords)*vec4(Light.xyz,1.0);
 	//vec4(v,v,v, 1.0);
-	vec4 texColor = texture(texMap, TexCoords)*vec4(Light.xyz,1.0);
+	Diffuse.w = 1.0;
+	vec4 texColor = Diffuse*vec4(Light.xyz,1.0);
     FragColor = vec4(texColor.xyz, 1.0);
 }

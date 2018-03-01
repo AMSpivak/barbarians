@@ -28,6 +28,7 @@ void main()
     //gNormal = vec4(ourColor.xyz, utility.y);
     //gNormal = vec4(normal.xyz, utility.y);
 
-	gAlbedoSpec = texColor;
+	gAlbedoSpec = vec4(texColor.xyz, 0.06 + utility.z*0.94);//texColor;
+	
 	//gAlbedoSpec = gNormal;
 }

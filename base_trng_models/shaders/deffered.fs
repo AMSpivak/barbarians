@@ -51,7 +51,7 @@ float ShadowCalculation(vec4 PosLight, vec3 tNormal)
 void main()
 {
 	vec4 texColor = texture(DiffuseMap, TexCoords);
-    if(texColor.a < 0.1)
+    if(texColor.a < 0.05)
         discard;
     vec4 normal_map = texture(NormalMap, TexCoords);
 	vec3 texNormal= normal_map.xyz;
@@ -66,7 +66,7 @@ void main()
     float dotNV = max(dot(texNormal, viewDir), 0.0);
     float a = pow(2.0,16 - 18* normal_map.w);
     float D = (a+2.0)/(2.0*3.14)*pow(dotNH,a);
-    float f0 = 0.7;
+    float f0 = texColor.a;
     float shlick =f0 + (1.0-f0)*pow((1.0 -dotHV),5);
     //float spec =norm_l * shlick * D/(4*norm_l*dotNV);
     float spec = norm_l * shlick*D;///(4*dotNV*norm_l);//*dotNV);
