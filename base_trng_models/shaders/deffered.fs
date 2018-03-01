@@ -57,11 +57,23 @@ void main()
 	vec3 texNormal= normal_map.xyz;
 	vec3 FragPos= texture(PositionMap, TexCoords).xyz;
 	float norm_l = max(dot(texNormal,LightDir),0);
-	vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
+	//vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    vec3 halfwayDir = normalize(LightDir + viewDir);  
-    float spec =normal_map.w * 10.0 *pow(max(dot(texNormal, halfwayDir), 0.0), 16.0);
+    vec3 halfwayDir = normalize(LightDir + viewDir); 
+    float dotHV = max(dot(viewDir, halfwayDir), 0.0);
+    float dotNH = max(dot(texNormal, halfwayDir), 0.0);
+    float dotNV = max(dot(texNormal, viewDir), 0.0);
+    float a = pow(2.0,16 - 18* normal_map.w);
+    float D = (a+2.0)/(2.0*3.14)*pow(dotNH,a);
+    float f0 = 0.7;
+    float shlick =f0 + (1.0-f0)*pow((1.0 -dotHV),5);
+    //float spec =norm_l * shlick * D/(4*norm_l*dotNV);
+    float spec = norm_l * shlick*D;///(4*dotNV*norm_l);//*dotNV);
+    spec = shlick*D/(4.0);//*dotNV);
+    //spec = (spec)/(spec+1);
+    //spec =0.0;//norm_l * shlick * D/(norm_l*dotNV);
+    //float spec =0;
     //float spec = 3.0 * pow(max(dot(viewDir, reflectDir), 0.0), 10);
     //float norm_l = smoothstep(0.45,0.55,dot(texNormal,LightDir));
 
