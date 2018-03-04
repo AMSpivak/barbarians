@@ -1,7 +1,11 @@
 #version 330 core
+
+#define M_PI 3.1415926535897932384626433832795
+
 out vec4 FragColor;
 
 in vec2 TexCoords;
+
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
@@ -48,6 +52,20 @@ float ShadowCalculation(vec4 PosLight, vec3 tNormal)
     return res;
 }
 
+float GGX_PartialGeometry(float cosThetaN, float alpha) {
+    float cosTheta_sqr = clamp(cosThetaN*cosThetaN, 0.0, 1.0);
+    float tan2 = ( 1 - cosTheta_sqr ) / cosTheta_sqr;
+    float GP = 2 / ( 1 + sqrt( 1 + alpha * alpha * tan2 ) );
+    return GP;
+}
+
+float GGX_Distribution(float cosThetaNH, float alpha) {
+    float alpha2 = alpha * alpha;
+    float NH_sqr = clamp(cosThetaNH*cosThetaNH, 0.0, 1.0);
+    float den = NH_sqr * alpha2 + (1.0 - NH_sqr);
+    return alpha2 / ( M_PI * den * den );
+}
+
 void main()
 {
 	vec4 texColor = texture(DiffuseMap, TexCoords);
@@ -64,13 +82,16 @@ void main()
     float dotHV = max(dot(viewDir, halfwayDir), 0.0);
     float dotNH = max(dot(texNormal, halfwayDir), 0.0);
     float dotNV = max(dot(texNormal, viewDir), 0.0);
-    float a = pow(2.0,16 - 18* normal_map.w);
-    float D = (a+2.0)/(2.0*3.14)*pow(dotNH,a);
-    float f0 = texColor.a;
-    float shlick =f0 + (1.0-f0)*pow((1.0 -dotHV),5);
-    //float spec =norm_l * shlick * D/(4*norm_l*dotNV);
-    float spec = norm_l * shlick*D;///(4*dotNV*norm_l);//*dotNV);
-    spec = shlick*D/(4.0);//*dotNV);
+
+    float f0 = mix(0.004,0.7,texColor.a);//texColor.a;
+    float shlick =f0 + (1.0-f0)*pow((1.0 -norm_l),5);
+    float roug_sqr = normal_map.w*normal_map.w;
+    float G = GGX_PartialGeometry(dotNV, roug_sqr) * GGX_PartialGeometry(norm_l, roug_sqr);
+    float D = GGX_Distribution(dotNH, roug_sqr);    
+
+    float spec = G*shlick*D*0.25/(max(0.0, dotNV)+0.001);//*dotNV);
+    spec =max(0.0, spec);
+   // specK = G*D*F*0.25/(NV+0.001);
     //spec = (spec)/(spec+1);
     //spec =0.0;//norm_l * shlick * D/(norm_l*dotNV);
     //float spec =0;
@@ -80,10 +101,13 @@ void main()
     //float norm_l = smoothstep(0.0,1.0,dot(texNormal,LightDir));
     //float norm_l = max(dot(texNormal,LightDir),0.0);
 	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
-    //shadow_res = smoothstep(0.0,0.99, shadow_res);
+     //shadow_res = smoothstep(0.0,0.99, shadow_res);
     //float res = min((shadow_res), norm_l);// * norm_l);//min(shadow_res,norm_l);
-    float res = shadow_res * (norm_l + spec) ;// * norm_l);//min(shadow_res,norm_l);
-    //res    = smoothstep(0.25,0.55,res);
+    float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
+    shadow_res =1.0;
+    //float res = shadow_res *M_PI*(norm_l/M_PI + spec) ;
+    float res = shadow_res *(diffuse*norm_l/M_PI + spec);
+     //res    = smoothstep(0.25,0.55,res);
      FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
 
     //FragColor =vec4(0.4 +0.6 *  (res) * LightColor,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
