@@ -91,25 +91,12 @@ void main()
 
     float spec = G*shlick*D*0.25/(max(0.0, dotNV)+0.001);//*dotNV);
     spec =max(0.0, spec);
-   // specK = G*D*F*0.25/(NV+0.001);
-    //spec = (spec)/(spec+1);
-    //spec =0.0;//norm_l * shlick * D/(norm_l*dotNV);
-    //float spec =0;
-    //float spec = 3.0 * pow(max(dot(viewDir, reflectDir), 0.0), 10);
-    //float norm_l = smoothstep(0.45,0.55,dot(texNormal,LightDir));
 
-    //float norm_l = smoothstep(0.0,1.0,dot(texNormal,LightDir));
-    //float norm_l = max(dot(texNormal,LightDir),0.0);
+
 	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
-     //shadow_res = smoothstep(0.0,0.99, shadow_res);
-    //float res = min((shadow_res), norm_l);// * norm_l);//min(shadow_res,norm_l);
-    float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
-    shadow_res =1.0;
-    //float res = shadow_res *M_PI*(norm_l/M_PI + spec) ;
-    float res = shadow_res *(diffuse*norm_l/M_PI + spec);
-     //res    = smoothstep(0.25,0.55,res);
-     FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
 
-    //FragColor =vec4(0.4 +0.6 *  (res) * LightColor,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
-    //FragColor =  vec4((0.3 +0.7 *  (norm_l)) * texColor.xyz,1.0);//texColor;// LightDir.y*(0.3 +0.7*(shadow_res) *norm_l) * texColor;
+    float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
+    float res = shadow_res *(diffuse*norm_l/M_PI + spec);
+
+    FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);
 }

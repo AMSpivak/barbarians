@@ -19,72 +19,7 @@
 #include "map_event_hero_strikes.h"
 #include "map_event_valhalla.h"
 #include "collision.h"
-
-void LoadLineBlock(std::ifstream &file,const std::string &sufix,const std::function<void(std::vector<std::string> &)> &process)
-{
-
-
-    std::string sufix_start("<"+sufix+">");
-    std::string sufix_end("<!"+sufix+">");
-    std::string tempholder("");
-
-    while(!file.eof()&&(tempholder.compare(sufix_start)))
-    {
-        getline(file, tempholder);
-        std::cout<<tempholder<<"\n";
-    }
-
-
-    bool is_block_endline = false;
-
-    std::vector<std::string> lines;
-
-    while(!file.eof()&&(!is_block_endline))
-    {
-        getline(file, tempholder);
-        is_block_endline = tempholder.compare(sufix_end) == 0;
-        if(!is_block_endline)
-        {
-            lines.push_back(tempholder);
-        }
-    }
-    process(lines);
-
-    
-
-}
-
-void LoadLineBlock2(std::ifstream &file,const std::string &sufix,std::vector<std::string> &lines)
-{
-    lines.clear();
-
-    std::string sufix_start("<"+sufix+">");
-    std::string sufix_end("<!"+sufix+">");
-    std::string tempholder("");
-
-    while(!file.eof()&&(tempholder.compare(sufix_start)))
-    {
-        getline(file, tempholder);
-        std::cout<<tempholder<<"\n";
-    }
-
-
-    bool is_block_endline = false;
-
-
-    while(!file.eof()&&(!is_block_endline))
-    {
-        getline(file, tempholder);
-        is_block_endline = tempholder.compare(sufix_end) == 0;
-        if(!is_block_endline)
-        {
-            lines.push_back(tempholder);
-        }
-    }
-    
-
-}
-
+#include "loader.h"
 
 void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
 {
@@ -239,39 +174,40 @@ void GlGameStateDungeon::LoadMap(const std::string &filename)
 	level_file.open(filename); 
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     
-    std::vector<std::string> lines;
-
-    //LoadLineBlock(level_file,"sky",[this](std::vector<std::string> &lines){SetMapLight(lines);});
-    LoadLineBlock2(level_file,"sky",lines);
-    SetMapLight(lines);
-    
-    Models.clear();
-	//vector<glModel>().swap( Models );
-    Animations.clear();
-    //vector<Animation>().swap( Animations );
-    //GetResourceManager()->Clean();  
-
-    LoadLineBlock2(level_file,"models",lines);
-
-    for(auto line : lines)
-    {
-        Models.emplace_back(std::make_shared<glModel>(line, Animations));
-    }
-    ResetModels(Models);
-    
-    /*LoadLineBlock(level_file,"models",[this](std::vector<std::string> &lines)
+    std::map<std::string,const std::function<void(std::vector<std::string> &lines)>> execute_funcs;
+    execute_funcs.insert(std::make_pair("sky",[this](std::vector<std::string> &lines){SetMapLight(lines);}));
+    execute_funcs.insert(std::make_pair("models",[this](std::vector<std::string> &lines)
                                         {
                                             for(auto line : lines)
                                             {
                                                 Models.emplace_back(std::make_shared<glModel>(line, Animations));
                                             }
-                                        }
-                                        );*/
-    LoadLineBlock2(level_file,"dungeon_params",lines);
-    SetDungeonSize(lines);
-    //LoadLineBlock(level_file,"dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);});
-    //LoadLineBlock(level_file,"dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);});
-    //LoadLineBlock(level_file,"dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);});
+                                            ResetModels(Models);
+                                        }));
+    execute_funcs.insert(std::make_pair("dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);}));
+    execute_funcs.insert(std::make_pair("dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);}));
+    execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);}));
+
+    Models.clear();
+    Animations.clear();
+    
+    std::vector<std::string> lines;
+    std::string sufix ="";
+
+    while(!level_file.eof())
+    {
+        sufix = LoaderUtility::FindPrefix(level_file);
+        std::cout<<sufix<<"\n";
+        LoaderUtility::LoadLineBlock(level_file,sufix,lines);
+        try
+        {
+            execute_funcs.at(sufix)(lines);
+        }
+        catch(const std::out_of_range& exp)
+        {
+            std::cout<<"Unknown prefix: "<<sufix<<"\n";
+        }
+    }
 
 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
