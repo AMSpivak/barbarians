@@ -3,6 +3,7 @@
 #include "i_gl_model.h"
 #include "animation_sequence.h"
 #include <string>
+#include <vector>
 #include <map>
 
 #include "gl_model.h"
@@ -22,6 +23,7 @@ public:
 
     int AddAxes(std::vector<glm::vec3> &axes);
     std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe);
+    void UpdateFromLines()
 
 private:
 
