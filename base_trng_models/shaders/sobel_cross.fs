@@ -7,6 +7,7 @@ uniform sampler2D texMap;
 uniform sampler2D NormalMap;
 uniform sampler2D DepthMap;
 uniform sampler2D LightMap;
+uniform sampler2D SpecMap;
 
 void main()
 {
@@ -16,9 +17,37 @@ void main()
         discard;
 
     vec4 Light = texture(LightMap, TexCoords);
+    vec4 Spec = texture(SpecMap, TexCoords);
 
 
 	vec2 texelSize = 0.7 / textureSize(NormalMap, 0);
+
+	Diffuse.w = 1.0;
+	vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+
+	vec2 offset = TexCoords+ vec2(-1, -1)* texelSize;
+	Light = texture(LightMap, offset);
+    Spec = texture(SpecMap, offset);
+	vec4 texColor1 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+
+	offset = TexCoords+ vec2(1, -1)* texelSize;
+	Light = texture(LightMap, offset);
+    Spec = texture(SpecMap, offset);
+	vec4 texColor2 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+
+	offset = TexCoords+ vec2(-1, 1)* texelSize;
+	Light = texture(LightMap, offset);
+    Spec = texture(SpecMap, offset);
+	vec4 texColor3 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+
+	offset = TexCoords+ vec2(1, 1)* texelSize;
+	Light = texture(LightMap, offset);
+    Spec = texture(SpecMap, offset);
+	vec4 texColor4 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+	vec4 BlurColor = (texColor1 + texColor2 + texColor3 + texColor4 + texColor)*0.2;
+
+	//Light = texture(LightMap, TexCoords);
+    //Spec = texture(SpecMap, TexCoords);
 
 	vec3 vt = (texture(NormalMap, TexCoords.xy + vec2(-1, -1)* texelSize).xyz
 					-texture(NormalMap, TexCoords.xy + vec2(1, 1)* texelSize ).xyz
@@ -50,9 +79,11 @@ void main()
 	//v = 0.25 *v;
 	//v = pow(v,4);
 	//FragColor  =/* (1.0-v_n )*(1.0 - d_depth)**/texture(texMap, TexCoords);
-	FragColor  = (1.0-v_n )*(1.0 - d_depth)*texture(texMap, TexCoords)*vec4(Light.xyz,1.0);
+	float blur = (1.0-v_n )*(1.0 - d_depth);
+	blur = clamp(blur,0.0,1.0);
+	FragColor  = blur*texture(texMap, TexCoords)*vec4(Light.xyz,1.0);
 	//vec4(v,v,v, 1.0);
-	Diffuse.w = 1.0;
-	vec4 texColor = Diffuse*vec4(Light.xyz,1.0);
-    FragColor = vec4(texColor.xyz, 1.0);
+	
+	//texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+    FragColor = vec4(blur*texColor.xyz + (1.0 - blur)*BlurColor.xyz, 1.0);
 }

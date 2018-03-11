@@ -2,9 +2,11 @@
 
 #define M_PI 3.1415926535897932384626433832795
 
-out vec4 FragColor;
-
+//out vec4 FragColor;
 in vec2 TexCoords;
+
+layout (location = 0) out vec4 gAlbedoSpec;
+layout (location = 1) out vec4 gNormal;
 
 
 uniform sampler2D DiffuseMap;
@@ -85,7 +87,7 @@ void main()
 
     float f0 = mix(0.004,0.7,texColor.a);//texColor.a;
     float shlick =f0 + (1.0-f0)*pow((1.0 -norm_l),5);
-    float roug_sqr = normal_map.w*normal_map.w;
+    float roug_sqr = (normal_map.w)*(normal_map.w);
     float G = GGX_PartialGeometry(dotNV, roug_sqr) * GGX_PartialGeometry(norm_l, roug_sqr);
     float D = GGX_Distribution(dotNH, roug_sqr);    
 
@@ -94,9 +96,10 @@ void main()
 
 
 	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
-
+    //shadow_res = 1.0;
     float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
-    float res = shadow_res *(diffuse*norm_l/M_PI + spec);
+    float res = shadow_res *(diffuse*norm_l/M_PI);
 
-    FragColor =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);
+    gAlbedoSpec =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);
+    gNormal =vec4(((shadow_res*spec) )* LightColor * vec3(1.0,1.0,1.0),1.0);
 }

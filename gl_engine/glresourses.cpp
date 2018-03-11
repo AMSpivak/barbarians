@@ -309,6 +309,7 @@ std::string readShaderFile(std::string FileName)
 
 GLuint LoadShader(std::string FileName,GLenum shaderType)
 {
+	std::cout<<FileName<<"\n";
 	std::string shader_text = readShaderFile(FileName);
 	GLchar const * ShaderSource = shader_text.c_str();
 

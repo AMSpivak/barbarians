@@ -436,6 +436,7 @@ void GlGameStateDungeon::Draw()
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_BACK);
+        glDepthFunc(GL_LEQUAL);
 
 
 
@@ -456,7 +457,7 @@ void GlGameStateDungeon::Draw()
 
 		glViewport(0, 0, width, height);
 
-		glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		current_shader = m_shader_map["luminocity"];
@@ -562,6 +563,10 @@ void GlGameStateDungeon::Draw()
 		glUniform1i(glGetUniformLocation(current_shader, "LightMap"), 3);
 		glActiveTexture(GL_TEXTURE0+3);
 		glBindTexture(GL_TEXTURE_2D, final_render_target.AlbedoMap);
+
+        glUniform1i(glGetUniformLocation(current_shader, "SpecMap"), 4);
+		glActiveTexture(GL_TEXTURE0+4);
+		glBindTexture(GL_TEXTURE_2D, final_render_target.NormalMap);
 
         renderQuad();/**/
 
