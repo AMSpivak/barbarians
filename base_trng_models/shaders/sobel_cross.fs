@@ -73,7 +73,7 @@ void main()
 					);
 
 
-	v_n /=v_n + 0.3;
+	v_n /=v_n + 0.1;
 
 	d_depth /= d_depth +0.01;
 	//v = 0.25 *v;
