@@ -1,7 +1,7 @@
 <sky>
 skybox skybox/violent.cub
 light_pos 10.0 30.0 -15.0
-light_color 6.0 6.0 6.0
+light_color 3.0 3.0 3.0
 camera_lens 34.0 1.0 45.0
 <!sky>
 <models>

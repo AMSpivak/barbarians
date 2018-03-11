@@ -7,6 +7,7 @@ uniform sampler2D texMap;
 uniform sampler2D NormalMap;
 uniform sampler2D DepthMap;
 uniform sampler2D LightMap;
+uniform sampler2D SpecMap;
 
 void main()
 {
@@ -16,6 +17,7 @@ void main()
         discard;
 
     vec4 Light = texture(LightMap, TexCoords);
+    vec4 Spec = texture(SpecMap, TexCoords);
 
 
 	vec2 texelSize = 0.7 / textureSize(NormalMap, 0);
@@ -53,6 +55,6 @@ void main()
 	FragColor  = (1.0-v_n )*(1.0 - d_depth)*texture(texMap, TexCoords)*vec4(Light.xyz,1.0);
 	//vec4(v,v,v, 1.0);
 	Diffuse.w = 1.0;
-	vec4 texColor = Diffuse*vec4(Light.xyz,1.0);
+	vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
     FragColor = vec4(texColor.xyz, 1.0);
 }
