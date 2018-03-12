@@ -39,6 +39,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                                         IGlGameState(shader_map,resources_manager,screen_width,screen_height)
                                                         ,m_render_target_map(render_target_map)
                                                         ,m_models_map(models_map)
+                                                        ,m_antialiase_enabled(true)
+                                                        ,m_start_place("")
                                                         ,light_angle (90.0f)
                                                         ,light_radius (20.0f)
                                                         ,now_frame(91)
@@ -49,7 +51,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
     //debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
     time = glfwGetTime();
-    LoadMap("levels/test.lvl");
+    LoadMap("levels/test.lvl","");
 
 }
 
@@ -164,7 +166,7 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 
 
 
-void GlGameStateDungeon::LoadMap(const std::string &filename)
+void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &atart_place)
 {
 
 
@@ -543,7 +545,8 @@ void GlGameStateDungeon::Draw()
 
         }
         glClear(GL_DEPTH_BUFFER_BIT);
-		current_shader = m_shader_map["sobel"];
+        
+		current_shader = m_shader_map[m_antialiase_enabled?"sobel_aa":"sobel"];
 
 		glUseProgram(current_shader);
 
@@ -851,9 +854,14 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             //std::cout<<(time_now - time)<<'\n';
             if((time_now - time)>(1.0/30.0))
                 {
+                    /*if(inputs[GLFW_KEY_F1])
+                    {
+                        antialiase_enabled = !antialiase_enabled;
+                    }*/
+                    m_antialiase_enabled = !inputs[GLFW_KEY_F1];
                     static float distance = 12.f;
                     bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
-                    
+
                     //key_angle = 0.0f;
                     int joy_axes_count;
                     const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);       

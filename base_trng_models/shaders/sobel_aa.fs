@@ -46,7 +46,8 @@ void main()
 	vec4 texColor4 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
 	vec4 BlurColor = (texColor1 + texColor2 + texColor3 + texColor4 + texColor)*0.2;
 
-
+	//Light = texture(LightMap, TexCoords);
+    //Spec = texture(SpecMap, TexCoords);
 
 	vec3 vt = (texture(NormalMap, TexCoords.xy + vec2(-1, -1)* texelSize).xyz
 					-texture(NormalMap, TexCoords.xy + vec2(1, 1)* texelSize ).xyz
@@ -57,7 +58,6 @@ void main()
 	vt = 0.5 *(vt + vt2);
 
 	float v_n =dot(vt,vt2);
-
 
 
 	float d_depth = abs(
@@ -77,5 +77,5 @@ void main()
 	float blur = (1.0-v_n )*(1.0 - d_depth);
 	blur = clamp(blur,0.0,1.0);
 
-    FragColor = vec4(texColor.xyz, 1.0);
+    FragColor = vec4(blur*texColor.xyz + (1.0 - blur)*BlurColor.xyz, 1.0);
 }
