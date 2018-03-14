@@ -11,6 +11,49 @@ GlCharacter::~GlCharacter()
 {
 
 }
+void UpdateFromFile(const std::string &filename)
+{
+
+}
+
+void UpdateFromLines(std::vector<std::string> &lines)
+{
+    if(lines.size()<=1) 
+    return;
+
+    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
+    execute_funcs.insert(std::make_pair("model",[this](std::stringstream &sstream)
+                                        {
+                                            std::string name;
+                                            sstream >> name;
+                                            AddModel(name);
+                                        }));
+
+    execute_funcs.insert(std::make_pair("sequence",[this](std::stringstream &sstream)
+                                        {
+                                            size_t start =0;
+                                            size_t end =0;
+                                            std::string name;
+                                            sstream >> name >> start >> end; 
+                                            AnimationSequence sequence(start,end);
+                                            AddSequence(name,sequence);
+                                        }));
+    for(auto s : lines)
+    {
+        std::stringstream ss(s);
+        std::string parameter;
+        ss >> parameter;
+        try
+        {
+            execute_funcs.at(s)(ss);
+        }
+        catch(const std::out_of_range& exp)
+        {
+            std::cout<<"Unknown model parameter: "<<s<<"\n";
+        } 
+    }
+}
+
 
 void GlCharacter::UseSequence(const std::string & name)
 {
