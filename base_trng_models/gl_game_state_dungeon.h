@@ -40,7 +40,8 @@ private:
     std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
     std::list<std::shared_ptr<IMapEvent>> map_events;
     
-
+    bool m_antialiase_enabled;
+    std::string m_start_place;
     glLight Light;
     float light_angle;
     float light_radius;
@@ -53,7 +54,7 @@ private:
     glm::vec3 light_dir_vector;
     glm::vec3 light_color_vector;
 
-    void LoadMap(const std::string &filename);
+    void LoadMap(const std::string &filename,const std::string &atart_place);
 
     void LoadTiles(std::vector<std::string> &lines);
     void LoadObjects(std::vector<std::string> &lines);

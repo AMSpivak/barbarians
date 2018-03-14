@@ -42,6 +42,7 @@ int main(int argc, char const *argv[])
 	inputs[GLFW_KEY_DOWN] = false;
     inputs[GLFW_KEY_RIGHT_BRACKET] = false;
     inputs[GLFW_KEY_LEFT_BRACKET] = false;
+    inputs[GLFW_KEY_F1] = false;
 
 	//Инициализация GLFW
 	glfwInit();
@@ -125,6 +126,7 @@ int main(int argc, char const *argv[])
 
 
     m_shader_map.insert ( std::pair<std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
+    m_shader_map.insert ( std::pair<std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
@@ -150,10 +152,10 @@ int main(int argc, char const *argv[])
 
 	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
 	hero.mass_inv = 1.0;
-	hero.AddModel("material/b_girl/body.mdl");
+	/*hero.AddModel("material/b_girl/body.mdl");
 	hero.AddModel("material/b_girl/hair.mdl");
 	hero.AddModel("material/b_girl/eyes.mdl");/**/
-	/*hero.AddModel("material/iris/body.mdl");
+	hero.AddModel("material/iris/body.mdl");
 	hero.AddModel("material/iris/cloth.mdl");
 	hero.AddModel("material/iris/head.mdl");
 	hero.AddModel("material/iris/eyes.mdl");	
@@ -240,5 +242,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (key == GLFW_KEY_RIGHT_BRACKET )
         inputs[GLFW_KEY_RIGHT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;
-
+    
+	if (key == GLFW_KEY_F1 )
+        inputs[GLFW_KEY_F1] = (action != GLFW_RELEASE) ?  true : false;
 }
