@@ -20,6 +20,8 @@ void UpdateFromLines(std::vector<std::string> &lines)
 {
     if(lines.size()<=1) 
     return;
+    
+    model_matrix = glm::rotate(model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
     execute_funcs.insert(std::make_pair("model",[this](std::stringstream &sstream)
