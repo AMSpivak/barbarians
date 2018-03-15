@@ -1,4 +1,5 @@
 #include "gl_character.h"
+#include <sstream>
 
 GlCharacter::GlCharacter():
                          now_frame(0)
@@ -16,7 +17,7 @@ void UpdateFromFile(const std::string &filename)
 
 }
 
-void UpdateFromLines(std::vector<std::string> &lines)
+void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
 {
     if(lines.size()<=1) 
     return;
@@ -39,7 +40,44 @@ void UpdateFromLines(std::vector<std::string> &lines)
                                             sstream >> name >> start >> end; 
                                             AnimationSequence sequence(start,end);
                                             AddSequence(name,sequence);
+                                            UseSequence(name);
                                         }));
+
+    execute_funcs.insert(std::make_pair("orientation",[this](std::stringstream &sstream)
+                                        {
+                                            float a_x = 0.0f;
+                                            float a_y = 0.0f;
+                                            float a_z = 0.0f;
+
+                                            sstream >> a_x >> a_y >> a_z; 
+                                            
+                                            model_matrix = glm::rotate(model_matrix, glm::radians(a_x), glm::vec3(1.0f, 0.0f, 0.0f));
+                                            model_matrix = glm::rotate(model_matrix, glm::radians(a_y), glm::vec3(0.0f, 1.0f, 0.0f));
+                                            model_matrix = glm::rotate(model_matrix, glm::radians(a_z), glm::vec3(0.0f, 0.0f, 1.0f));
+                                        }));
+    execute_funcs.insert(std::make_pair("mass_inv",[this](std::stringstream &sstream)
+                                        {
+                                            sstream >> mass_inv;
+                                        }));
+
+    execute_funcs.insert(std::make_pair("radius",[this](std::stringstream &sstream)
+                                        {
+                                            sstream >> radius;
+                                        }));
+    execute_funcs.insert(std::make_pair("position",[this](std::stringstream &sstream)
+                                        {
+                                            float a_x = 0.0f;
+                                            float a_y = 0.0f;
+                                            float a_z = 0.0f;
+
+                                            sstream >> a_x >> a_y >> a_z; 
+                                            position = glm::vec3(a_x,a_y,a_z);                                    
+                                            
+                                        }));  
+
+    
+
+
     for(auto s : lines)
     {
         std::stringstream ss(s);
@@ -47,7 +85,9 @@ void UpdateFromLines(std::vector<std::string> &lines)
         ss >> parameter;
         try
         {
-            execute_funcs.at(s)(ss);
+            execute_funcs.at(parameter)(ss);
+            //(execute_funcs[info])(ss);
+            
         }
         catch(const std::out_of_range& exp)
         {

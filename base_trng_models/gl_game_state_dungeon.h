@@ -57,7 +57,8 @@ private:
     void LoadMap(const std::string &filename,const std::string &atart_place);
 
     void LoadTiles(std::vector<std::string> &lines);
-    void LoadObjects(std::vector<std::string> &lines);
+    void LoadDungeonObjects(std::vector<std::string> &lines);
+    void LoadObject(std::vector<std::string> &lines);
     void SetDungeonSize(std::vector<std::string> &lines);
     
     void DrawDungeon(GLuint current_shader);

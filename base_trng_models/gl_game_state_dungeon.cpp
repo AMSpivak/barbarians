@@ -75,7 +75,7 @@ void GlGameStateDungeon::LoadTiles(std::vector<std::string> &lines)
     }
 }
 
-void GlGameStateDungeon::LoadObjects(std::vector<std::string> &lines)
+void GlGameStateDungeon::LoadDungeonObjects(std::vector<std::string> &lines)
 {
     size_t y = 0;
     for(auto line : lines)
@@ -93,6 +93,26 @@ void GlGameStateDungeon::LoadObjects(std::vector<std::string> &lines)
         if(y>=m_dungeon.Height())
             return;
     }
+}
+
+void GlGameStateDungeon::LoadObject(std::vector<std::string> &lines)
+{
+        std::shared_ptr<IGlModel> object_ptr(new GlCharacter());
+        dungeon_objects.push_back(object_ptr);
+        GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(object_ptr.get()));
+        barrel_model.UpdateFromLines(lines);
+
+        barrel_model.mass_inv = 1.0f;
+        barrel_model.radius = 0.5f;
+        barrel_model.position = glm::vec3(10.0f,0.0f,12.0f);
+        barrel_model.model_matrix = glm::rotate(barrel_model.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        barrel_model.AddModel("material/barrel/barrel.mdl");
+        AnimationSequence as_base(0,1);
+        barrel_model.AddSequence("base",as_base);
+        AnimationSequence as_damage(2,3);
+        barrel_model.AddSequence("damage",as_damage);
+        barrel_model.UseSequence("base");
+   
 }
 
 void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
@@ -188,7 +208,8 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
                                         }));
     execute_funcs.insert(std::make_pair("dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);}));
-    execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadObjects(lines);}));
+    execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadDungeonObjects(lines);}));
+    execute_funcs.insert(std::make_pair("object",[this](std::vector<std::string> &lines){LoadObject(lines);}));
 
     Models.clear();
     Animations.clear();
@@ -217,8 +238,8 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
 
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
 
-/*
 
+/*
     {
         std::shared_ptr<IGlModel> barrel_ptr(new GlCharacter());
         dungeon_objects.push_back( barrel_ptr);
