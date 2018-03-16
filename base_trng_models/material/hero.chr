@@ -4,5 +4,5 @@ model material/b_girl/body.mdl
 model material/b_girl/hair.mdl
 model material/b_girl/eyes.mdl
 sequence strike 149 157
-sequence walk 127 135
-sequence stance 91 99
+sequence walk 11 70
+sequence stance 25 25
