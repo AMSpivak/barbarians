@@ -37,4 +37,6 @@ private:
     //void RefreshMatrixes();
 
 };
+
+void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character);
 #endif

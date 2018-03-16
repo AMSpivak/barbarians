@@ -1,5 +1,7 @@
 #include "gl_character.h"
 #include <sstream>
+#include "loader.h"
+
 
 GlCharacter::GlCharacter():
                          now_frame(0)
@@ -12,9 +14,16 @@ GlCharacter::~GlCharacter()
 {
 
 }
-void UpdateFromFile(const std::string &filename)
+void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character)
 {
+    std::ifstream char_file;
+	char_file.open(filename);
+    std::vector<std::string> lines;
+    LoaderUtility::LoadLineBlock(char_file,"never_exists",lines);
+    char_file.close(); 
 
+    character.UpdateFromLines(lines);
+       
 }
 
 void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)

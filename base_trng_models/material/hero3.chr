@@ -1,0 +1,8 @@
+mass_inv 1.0
+radius 1.0
+model material/new_brb/barb.mdl
+model material/new_brb/head.mdl
+model material/b_axe/axe.mdl
+sequence strike 149 157
+sequence walk 127 135
+sequence stance 91 99

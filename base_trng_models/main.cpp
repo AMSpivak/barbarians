@@ -151,27 +151,8 @@ int main(int argc, char const *argv[])
     }
 
 	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
-	hero.mass_inv = 1.0;
-	/*hero.AddModel("material/b_girl/body.mdl");
-	hero.AddModel("material/b_girl/hair.mdl");
-	hero.AddModel("material/b_girl/eyes.mdl");/**/
-	hero.AddModel("material/iris/body.mdl");
-	hero.AddModel("material/iris/cloth.mdl");
-	hero.AddModel("material/iris/head.mdl");
-	hero.AddModel("material/iris/eyes.mdl");	
-	hero.AddModel("material/iris/hair.mdl");/**/
-	/*hero.AddModel("material/new_brb/barb.mdl");
-	hero.AddModel("material/new_brb/head.mdl");
-	hero.AddModel("material/b_axe/axe.mdl");/**/
-    AnimationSequence as_stance(91,99);
-    AnimationSequence as_walk(127,135);
-    hero.AddSequence("stance",as_stance);
-    hero.AddSequence("walk",as_walk);
-    AnimationSequence as_strike(149,157);
-    hero.AddSequence("strike",as_strike);
 
-
-
+	UpdateCharacterFromFile("material/hero.chr",hero);
 
 
 	glEnable(GL_DEPTH_TEST);
@@ -180,7 +161,7 @@ int main(int argc, char const *argv[])
 
 
 
-	hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 
    // GlGameStateArena game_state_arena(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
