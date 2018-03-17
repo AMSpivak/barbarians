@@ -973,7 +973,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     if(moving&&!attack)
                     {
                         hero.UseSequence("walk");
-                        glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.1f,0.0f,1.0f);
+                        glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.071f,0.0f,1.0f);
                         MoveHero(glm::vec3(move_h));
                     }else
                     if(attack)
