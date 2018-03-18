@@ -21,6 +21,9 @@
 #include "collision.h"
 #include "loader.h"
 
+
+
+
 void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
 {
     for(auto tmpModel : Models)
@@ -257,7 +260,6 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
 
                 model_matrix = Models[index]->model;
                 Models[index]->model = pos_matrix * model_matrix;
-                //pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
                 Models[index]->Draw(current_shader,now_frame);
                 Models[index]->model = model_matrix;
             }
@@ -268,7 +270,6 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
 
                 model_matrix = Models[index]->model;
                 Models[index]->model = pos_matrix * model_matrix;
-                //pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
                 Models[index]->Draw(current_shader,now_frame);
                 Models[index]->model = model_matrix;
             }
@@ -763,60 +764,54 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
     hero_position += 1.0f*hero_move;
 }
 
-IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
-{
-    std::list<std::shared_ptr<IGlModel>>::iterator cur_obj = dungeon_objects.begin();
-    std::list<std::shared_ptr<IGlModel>>::iterator end_obj = dungeon_objects.end();
-    
-    std::list<std::shared_ptr<IMapEvent>>::iterator cur = map_events.begin();
-    std::list<std::shared_ptr<IMapEvent>>::iterator end = map_events.end();
+bool IsKilled (std::shared_ptr<IMapEvent> value) { return value.get()->Process() == EventProcessResult::Kill; }
 
+
+bool GlGameStateDungeon::MobKilled(std::shared_ptr<IGlModel> obj)
+{
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     
-    
-    while (cur_obj != end_obj)
+    IGlModel * o_ptr = obj.get();
+
+    for(auto event : map_events)
     {
-        IGlModel * o_ptr = cur_obj->get();
+        ReactObjectToEvent(*o_ptr,*event.get());
+    }
 
-        while (cur != end)
-        {
-            IMapEvent * e_ptr = cur->get();
-            InteractionResult interaction = ReactObjectToEvent(*o_ptr,*e_ptr);
-            ++cur;
-        }
-        cur = map_events.begin();
+    for(auto event : mob_events)
+    {
+        ReactObjectToEvent(*o_ptr,*event.get());
+    }
 
-        if (cur_obj->get()->GetLifeValue() < 0.0f)
+    if (o_ptr->GetLifeValue() < 0.0f)
         {
             std::shared_ptr<MapEventValhalla>e_ptr(new MapEventValhalla(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
                         
                         MapEventValhalla & event = *(e_ptr.get());
                         
-                        event.position = cur_obj->get()->position;
+                        event.position = o_ptr->position;
                         event.position.y = 1.5f;
                         map_events.push_back(e_ptr);
 
-            dungeon_objects.erase(cur_obj++); 
-        }  
-        else
-        {
-            ++cur_obj;
+            return true;
         }
-        
-    }
+    return false;
+}
+
+void GlGameStateDungeon::MapObjectsEventsInteract()
+{
+    dungeon_objects.remove_if([this](std::shared_ptr<IGlModel> obj){return MobKilled(obj);});
+
+    mob_events.remove_if(IsKilled);
+    map_events.remove_if(IsKilled);
     
-    while (cur != end)
-    {
-        if (cur->get()->Process() == EventProcessResult::Kill)
-        {
-            map_events.erase(cur++); 
-        }  
-        else
-        {
-            ++cur;
-        }
-    }
+}
+
+IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
+{
+    glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     
+
     
 
 
@@ -833,10 +828,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             //std::cout<<(time_now - time)<<'\n';
             if((time_now - time)>(1.0/30.0))
                 {
-                    /*if(inputs[GLFW_KEY_F1])
-                    {
-                        antialiase_enabled = !antialiase_enabled;
-                    }*/
+                    MapObjectsEventsInteract();
+
                     m_antialiase_enabled = !inputs[GLFW_KEY_F1];
                     static float distance = 12.f;
                     bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
@@ -962,7 +955,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     {
                         camera_rotation_angle +=  360.0f;
                     }
-                    //Camera.SetCameraLocation(glm::vec3(distance, 2.0f, 0.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    
                     glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
 
                     Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -987,7 +980,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
                         event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
                         event.position = hero.position;
-                        map_events.push_back(e_ptr);
+                        mob_events.push_back(e_ptr);
                     }
                     else
                     {
@@ -995,7 +988,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     }
 
                     now_frame++;
-                    if(now_frame == 99 + 1) now_frame = 91;
+                    if(now_frame == 99) now_frame = 91;
+
                     hero.Process();
                     FitObjects(10,0.0f);
                 }

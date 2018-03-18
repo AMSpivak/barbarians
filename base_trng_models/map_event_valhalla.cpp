@@ -25,7 +25,7 @@ int MapEventValhalla::AddAxes(std::vector<glm::vec3> &axes)
 bool MapEventValhalla::IsLight(glm::vec4 &light_position,glm::vec3 &color)
 {
     light_position = glm::vec4(position[0],position[1],position[2],6.0f);
-    color = glm::vec3(1.0f,1.0f,1.0f);
+    color = glm::vec3(3.0f,3.0f,3.0f);
     //color = glm::vec3(m_alpha,m_alpha,m_alpha);
     return true;
 }

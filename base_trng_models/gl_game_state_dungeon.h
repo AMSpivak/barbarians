@@ -39,6 +39,8 @@ private:
     GlDungeon m_dungeon;
     std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
     std::list<std::shared_ptr<IMapEvent>> map_events;
+    std::list<std::shared_ptr<IMapEvent>> hero_events;
+    std::list<std::shared_ptr<IMapEvent>> mob_events;
     
     bool m_antialiase_enabled;
     std::string m_start_place;
@@ -72,6 +74,10 @@ private:
 
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
     void SetMapLight(std::vector<std::string> &lines);
+    void MapObjectsEventsInteract();
+    bool MobKilled(std::shared_ptr<IGlModel> obj);
+    
+    
     
 };
 
