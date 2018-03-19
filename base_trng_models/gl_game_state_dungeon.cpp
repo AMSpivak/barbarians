@@ -804,7 +804,6 @@ void GlGameStateDungeon::MapObjectsEventsInteract()
 
     mob_events.remove_if(IsKilled);
     map_events.remove_if(IsKilled);
-    
 }
 
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
@@ -891,7 +890,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         glm::vec4 move_h = hero.model_matrix * glm::vec4(1.0f,0.0f,0.0f,1.0f);
                         glm::vec3 old_dir = glm::vec3(move_h);
 
-                        float l = 0.4f * glm::length(old_dir - x_basis);
+                        float l = 0.2f * glm::length(old_dir - x_basis);
                         x_basis =(1.0f - l) * old_dir + l * x_basis;
                         x_basis = glm::normalize(x_basis);
 
@@ -904,9 +903,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                             glm::vec4(0.0,0.0,0.0,1.0f)
                             );
 
-                        hero.model_matrix = glm::mat4();
-                        hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                        hero.model_matrix = rm * hero.model_matrix;
+                        //hero.model_matrix = glm::mat4();
+                        //hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                        hero.model_matrix = rm * glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));;
                        
                     }
                     bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
@@ -929,8 +928,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                     if(distance<3.0f)distance=3.0f;
                     if(distance>14.0f)distance=14.0f;
 
-                    if(light_angle<10.0f)light_angle=10.0f;
-                    if(light_angle>170.0f)light_angle=170.0f;
 
                     float joy_diff = joy_x - old_joy_x;
                     if(std::abs(joy_diff) <  0.01f)
@@ -987,10 +984,12 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                         hero.UseSequence("stance");
                     }
 
-                    now_frame++;
-                    if(now_frame == 99) now_frame = 91;
+                    //now_frame++;
+                    //if(now_frame == 99) now_frame = 91;
 
                     hero.Process();
+
+
                     FitObjects(10,0.0f);
                 }
 
