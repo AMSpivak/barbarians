@@ -26,6 +26,8 @@ void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character
        
 }
 
+
+
 void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
 {
     if(lines.size()<=1) 
@@ -68,6 +70,22 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             sstream >> mass_inv;
                                         }));
 
+    execute_funcs.insert(std::make_pair("light",[this](std::stringstream &sstream)
+                                        {
+                                            float a_x = 0.0f;
+                                            float a_y = 0.0f;
+                                            float a_z = 0.0f;
+                                            float color_r = 0.0f;
+                                            float color_g = 0.0f;
+                                            float color_b = 0.0f;
+                                            float light_radius = 0.0f;
+                                            std::cout<<"\nlight!\n\n\n";
+                                            sstream >> color_r >> color_g >> color_b ; 
+                                            sstream >> a_x >> a_y >> a_z >> light_radius; 
+
+                                            SetLight(true,glm::vec3(color_r,color_g,color_b),glm::vec3(a_x,a_y,a_z),light_radius);
+                                        }));
+
     execute_funcs.insert(std::make_pair("radius",[this](std::stringstream &sstream)
                                         {
                                             sstream >> radius;
@@ -105,6 +123,7 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
     model_matrix = glm::rotate(model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     
 }
+
 
 
 void GlCharacter::UseSequence(const std::string & name)

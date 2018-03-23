@@ -46,7 +46,8 @@ sequence base 0 1
 mass_inv 1.0
 radius 0.5
 position 12.0 0.0 12.0
-model material/barrel/barrel.mdl
+model material/candle/candle.mdl
+light 12.0 8.0 2.0 0.0 0.0 1.5 4.0
 sequence damage 2 3
 sequence base 0 1
 <!object>

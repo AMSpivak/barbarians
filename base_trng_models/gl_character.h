@@ -34,6 +34,7 @@ private:
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;
 
+
     //void RefreshMatrixes();
 
 };

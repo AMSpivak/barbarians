@@ -293,7 +293,7 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
     
 }
 
-void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target)
+void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,const glm::vec3 &camera_position,GLuint current_shader,glRenderTargetDeffered &render_target)
 {
     glClear(GL_DEPTH_BUFFER_BIT);
         //current_shader = m_shader_map["deffered_simple"];
@@ -309,6 +309,9 @@ void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_co
 		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
+
+        GLuint view_pos  = glGetUniformLocation(current_shader, "viewPos");
+		glUniform3fv(view_pos, 1, glm::value_ptr(camera_position));
 
 
 		GLuint light_pos  = glGetUniformLocation(current_shader, "LightLocation");
@@ -328,14 +331,24 @@ void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::
     glm::vec3 light_color;
     
     for(std::shared_ptr<IMapEvent> event :map_events) 
-      {
-          IMapEvent * e_ptr = event.get();
-          if(e_ptr->IsLight(light_position,light_color))
-          {
-                DrawSimpleLight(light_position - light_pos_vector,light_color,current_shader,render_target );
-          }
-      }
+    {
+        if(event.get()->IsLight(light_position,light_color))
+        {
+            DrawSimpleLight(light_position - light_pos_vector,light_color,Camera.m_position,current_shader,render_target );
+        }
+    }
 
+    for(auto object :dungeon_objects) 
+    {
+        if(object.get()->IsLight(light_position,light_color))
+        {
+            //light_position = glm::vec4(0.0,1.1,0.0,6.0);
+            //light_color = glm::vec3(5.0,5.0,5.0);
+            //std::cout<<"light\n"<<light_position[0]<<" "<<light_position[1]<<" "<<light_position[2]<<" "<<"light\n";
+
+            DrawSimpleLight(light_position - light_pos_vector,light_color,Camera.m_position,current_shader,render_target );
+        }
+    }
 }
 
 void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
@@ -370,11 +383,11 @@ void GlGameStateDungeon::Draw2D(GLuint depth_map)
 {
       /*  renderBillBoardDepth(m_shader_map["sprite2d"],depth_map,fx_texture.get(),
         1.0f,1.45f,glm::vec3(2.0f,2.0f,3.0f),hero_position,Camera);
-*/
+    */
+
       for(std::shared_ptr<IMapEvent> event :map_events) 
       {
-          IMapEvent * e_ptr = event.get();
-          e_ptr->Show(hero_position,Camera);
+          event.get()->Show(hero_position,Camera);
       }
 }
 
@@ -489,8 +502,7 @@ void GlGameStateDungeon::Draw()
 
         current_shader = m_shader_map["deffered_simple"];
 
-        view_pos  = glGetUniformLocation(current_shader, "viewPos");
-		glUniform3fv(view_pos, 1, glm::value_ptr(Camera.m_position));
+
 
         DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
         
