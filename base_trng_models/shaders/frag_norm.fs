@@ -22,13 +22,17 @@ void main()
     vec4 pos = vec4(v_Position,utility.x);
     gPosition = pos;
     vec3 normal = texture(NormalTexture, TexCoord).xyz;
-    normal = normalize(normal * 2.0 - 1.0);   
+    normal = normalize(normal * 2.0 - 1.0); 
     normal = normalize(TBN * normal); 
-    gNormal = vec4(normal.xyz, utility.y);
+    //normal = normal * 0.5 + 0.5; 
+    
+    gNormal = vec4(normal, utility.y);
     //gNormal = vec4(ourColor.xyz, utility.y);
     //gNormal = vec4(normal.xyz, utility.y);
+    float val = length(normal);
 
 	gAlbedoSpec = vec4(texColor.xyz, 0.06 + utility.z*0.94);//texColor;
+	//gAlbedoSpec = vec4(val,val,val, 0.06 + utility.z*0.94);//texColor;
 	
 	//gAlbedoSpec = gNormal;
 }

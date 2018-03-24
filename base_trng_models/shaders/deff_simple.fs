@@ -1,8 +1,10 @@
 #version 330 core
 #define M_PI 3.1415926535897932384626433832795
-out vec4 FragColor;
 
 in vec2 TexCoords;
+
+layout (location = 0) out vec4 gAlbedoSpec;
+layout (location = 1) out vec4 gNormal;
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
@@ -41,8 +43,9 @@ void main()
     vec3 LightVec = LightLocation.xyz - FragPos;
     vec3 LightDir = normalize(LightVec);
 	vec3 texNormal= normal_map.xyz;
-
+    //texNormal = normalize(texNormal * 2.0 - 1.0); 
     float norm_l = max(dot(texNormal,LightDir),0);
+    //float norm_l = abs(dot(texNormal,LightDir));
 
     vec3 halfwayDir = normalize(LightDir + viewDir); 
     float dotHV = max(dot(viewDir, halfwayDir), 0.0);
@@ -62,7 +65,8 @@ void main()
     float intensivity = 1.0 - smoothstep(rad*0.3,rad,length(LightVec));
     float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
 
-    float res = intensivity *(diffuse*norm_l/M_PI + spec);
-
-    FragColor =vec4((res) * LightColor * vec3(1.0,1.0,1.0),1.0);
+    float res = intensivity *(diffuse*norm_l/M_PI);
+    gAlbedoSpec =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);
+   // gAlbedoSpec =vec4(((norm_l) )* LightColor * vec3(1.0,1.0,1.0),1.0);
+    gNormal =vec4(((intensivity*spec) )* LightColor * vec3(1.0,1.0,1.0),1.0);
 }

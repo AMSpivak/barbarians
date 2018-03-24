@@ -36,7 +36,7 @@ void main()
         ourColor = ourColor+a_BoneWeights.y*vec3(model *u_BoneMatrices[indexOfBone.y]* vec4(a_Normal, 0.0));
         ourColor = ourColor+a_BoneWeights.z*vec3(model *u_BoneMatrices[indexOfBone.z]* vec4(a_Normal, 0.0));
         ourColor = ourColor+a_BoneWeights.w*vec3(model *u_BoneMatrices[indexOfBone.w]* vec4(a_Normal, 0.0));
-
+		//ourColor = normalize((camera * vec4(ourColor,1.0)).xyz);
 		//ourColorView = normalize((camera * vec4(ourColor,1.0)).xyz);
 
 	
@@ -44,6 +44,7 @@ void main()
         tangent = tangent+a_BoneWeights.y*vec3(model *u_BoneMatrices[indexOfBone.y]* vec4(a_Tangent, 0.0));
         tangent = tangent+a_BoneWeights.z*vec3(model *u_BoneMatrices[indexOfBone.z]* vec4(a_Tangent, 0.0));
         tangent = tangent+a_BoneWeights.w*vec3(model *u_BoneMatrices[indexOfBone.w]* vec4(a_Tangent, 0.0));
+		//tangent = normalize((camera * vec4(tangent,1.0)).xyz);
 
 		//ourColorView = normalize((camera * vec4(ourColor,1.0)).xyz);
 		tangent = normalize(tangent - dot(tangent, ourColor) * ourColor);

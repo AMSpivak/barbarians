@@ -75,6 +75,7 @@ void main()
         discard;
     vec4 normal_map = texture(NormalMap, TexCoords);
 	vec3 texNormal= normal_map.xyz;
+    //texNormal = normalize(texNormal * 2.0 - 1.0); 
 	vec3 FragPos= texture(PositionMap, TexCoords).xyz;
 	float norm_l = max(dot(texNormal,LightDir),0);
 	//vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
