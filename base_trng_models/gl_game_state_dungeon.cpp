@@ -342,11 +342,6 @@ void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::
     {
         if(object.get()->IsLight(light_position,light_color))
         {
-            //light_position = glm::vec4(0.0,1.1,0.0,6.0);
-            //light_color = glm::vec3(5.0,5.0,5.0);
-            //std::cout<<"light\n"<<light_position[0]<<" "<<light_position[1]<<" "<<light_position[2]<<" "<<light_position[3];
-            //std::cout<<" : "<<light_color[0]<<" "<<light_color[1]<<" "<<light_color[2]<<" "<<"light\n";
-
             DrawSimpleLight(light_position - light_pos_vector,light_color,Camera.m_position,current_shader,render_target );
         }
     }
