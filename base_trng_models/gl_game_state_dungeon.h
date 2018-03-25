@@ -76,6 +76,8 @@ private:
     void SetMapLight(std::vector<std::string> &lines);
     void MapObjectsEventsInteract();
     bool MobKilled(std::shared_ptr<IGlModel> obj);
+
+    std::shared_ptr<IMapEvent> AddStrike(IGlModel &model,glRenderTargetDeffered &render_target);
     
     
     

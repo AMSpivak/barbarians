@@ -58,6 +58,20 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 
 }
 
+std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(IGlModel &model,glRenderTargetDeffered &render_target)
+{
+
+    std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
+    IMapEventHeroStrike & event = *(e_ptr.get());
+    event.model_matrix = model.model_matrix;
+    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
+    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
+    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
+    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
+    event.position = model.position;
+    return e_ptr;
+}
+
 void GlGameStateDungeon::LoadTiles(std::vector<std::string> &lines)
 {
     size_t y = 0;
@@ -818,11 +832,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 {
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     
-
-    
-
-
-
     static float camera_rotation_angle = 0.0f;
     static float hero_rotation_angle = 0.0f;
     static float old_joy_x = 0.0f;
@@ -830,179 +839,163 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
     GLuint current_shader;
 
-            int models_count = Models.size();
-            double time_now = glfwGetTime();
-            //std::cout<<(time_now - time)<<'\n';
-            if((time_now - time)>(1.0/30.0))
+    int models_count = Models.size();
+    double time_now = glfwGetTime();
+    //std::cout<<(time_now - time)<<'\n';
+    if((time_now - time)>(1.0/30.0))
+    {
+        MapObjectsEventsInteract();
+
+        m_antialiase_enabled = !inputs[GLFW_KEY_F1];
+        static float distance = 12.f;
+        bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
+
+        //key_angle = 0.0f;
+        int joy_axes_count;
+        const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);       
+        if(joy_axes!=nullptr)
+        {
+            if(std::abs(joy_axes[0])+std::abs(joy_axes[1])>0.6f)
+            {
+                moving = true;
+            }
+            
+            
+        }
+
+        if(moving)
+        {
+            glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
+
+            glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
+
+            if(joy_axes!=nullptr)
+            {
+                x_basis[0]= -joy_axes[0];
+                x_basis[2]= -joy_axes[1];
+            }
+            else
+            {
+                if(inputs[GLFW_KEY_UP])
                 {
-                    MapObjectsEventsInteract();
-
-                    m_antialiase_enabled = !inputs[GLFW_KEY_F1];
-                    static float distance = 12.f;
-                    bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
-
-                    //key_angle = 0.0f;
-                    int joy_axes_count;
-                    const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);       
-                    if(joy_axes!=nullptr)
-                    {
-                        if(std::abs(joy_axes[0])+std::abs(joy_axes[1])>0.6f)
-                        {
-                            moving = true;
-                        }
-                        
-                        
-                    }
-
-                    if(moving)
-                    {
-                        glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
-
-                        glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
-
-                        if(joy_axes!=nullptr)
-                        {
-                            x_basis[0]= -joy_axes[0];
-                            x_basis[2]= -joy_axes[1];
-                        }
-                        else
-                        {
-                            if(inputs[GLFW_KEY_UP])
-                            {
-                                x_basis[2]=1.0f;
-                            }
-                            else
-                            if(inputs[GLFW_KEY_DOWN])
-                            {
-                                x_basis[2]=-1.0f;                            
-                            }
-
-                            if(inputs[GLFW_KEY_LEFT])
-                            {
-                                x_basis[0]=1.0f;
-                            }
-                            else
-                            if(inputs[GLFW_KEY_RIGHT])
-                            {
-                                x_basis[0]=-1.0f;                          
-                            }
-                        }
-
-                        x_basis = glm::normalize(x_basis);
-                        
-                        glm::mat4 m = glm::rotate(glm::radians(camera_rotation_angle), glm::vec3(0.0f, 1.0f, 0.0f));
-                        glm::vec4 x_basis4 = m *glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f);
-                        x_basis = glm::vec3(x_basis4[0],x_basis4[1],x_basis4[2]);
-                        x_basis = glm::normalize(x_basis);
-                        
-                        glm::vec4 move_h = hero.model_matrix * glm::vec4(1.0f,0.0f,0.0f,1.0f);
-                        glm::vec3 old_dir = glm::vec3(move_h);
-
-                        float l = 0.2f * glm::length(old_dir - x_basis);
-                        x_basis =(1.0f - l) * old_dir + l * x_basis;
-                        x_basis = glm::normalize(x_basis);
-
-                        glm::vec3 z_basis = glm::cross(x_basis, y_basis);
-
-                        glm::mat4 rm(
-                            glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f),
-                            glm::vec4(y_basis[0],y_basis[1],y_basis[2],0.0f),
-                            glm::vec4(z_basis[0],z_basis[1],z_basis[2],0.0f),
-                            glm::vec4(0.0,0.0,0.0,1.0f)
-                            );
-
-                        //hero.model_matrix = glm::mat4();
-                        //hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-                        hero.model_matrix = rm * glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));;
-                       
-                    }
-                    bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
-
-                    int buttons_count;
-                    const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
-                    
-                    if(buttons!= nullptr)
-                    {
-                        if(buttons_count>7)
-                        {
-                            attack = buttons[7] == GLFW_PRESS;
-                        }
-                    }
-
-
-                    if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
-                    if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
-
-                    if(distance<3.0f)distance=3.0f;
-                    if(distance>14.0f)distance=14.0f;
-
-
-                    float joy_diff = joy_x - old_joy_x;
-                    if(std::abs(joy_diff) <  0.01f)
-                    {
-                        joy_diff = 0.0f;
-                    }
-
-                    if(joy_axes_count>2&&joy_axes!=nullptr)
-                    {
-                        joy_diff = joy_axes[2];
-                    }
-
-                    old_joy_x = joy_x;
-                    camera_rotation_angle -= joy_diff * 12.0f;
-
-
-                    if(camera_rotation_angle > 360.0f)
-                    {
-                        camera_rotation_angle -=  360.0f;
-                    }
-                    if(camera_rotation_angle < 0.0f)
-                    {
-                        camera_rotation_angle +=  360.0f;
-                    }
-                    
-                    glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
-
-                    Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-                    glm::vec3  light_dir_vector = glm::normalize(light_position);
-                    time = time_now;
-   
-                    if(moving&&!attack)
-                    {
-                        hero.UseSequence("walk");
-                        glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.071f,0.0f,1.0f);
-                        MoveHero(glm::vec3(move_h));
-                    }else
-                    if(attack)
-                    {
-                        hero.UseSequence("strike");
-                        std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
-                        IMapEventHeroStrike & event = *(e_ptr.get());
-                        event.model_matrix = hero.model_matrix;
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
-                        event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
-                        event.position = hero.position;
-                        mob_events.push_back(e_ptr);
-                    }
-                    else
-                    {
-                        hero.UseSequence("stance");
-                    }
-
-                    //now_frame++;
-                    //if(now_frame == 99) now_frame = 91;
-
-                    hero.Process();
-
-
-                    FitObjects(10,0.0f);
+                    x_basis[2]=1.0f;
+                }
+                else
+                if(inputs[GLFW_KEY_DOWN])
+                {
+                    x_basis[2]=-1.0f;                            
                 }
 
+                if(inputs[GLFW_KEY_LEFT])
+                {
+                    x_basis[0]=1.0f;
+                }
+                else
+                if(inputs[GLFW_KEY_RIGHT])
+                {
+                    x_basis[0]=-1.0f;                          
+                }
+            }
 
-                
+            x_basis = glm::normalize(x_basis);
+            
+            glm::mat4 m = glm::rotate(glm::radians(camera_rotation_angle), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::vec4 x_basis4 = m *glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f);
+            x_basis = glm::vec3(x_basis4[0],x_basis4[1],x_basis4[2]);
+            x_basis = glm::normalize(x_basis);
+            
+            glm::vec4 move_h = hero.model_matrix * glm::vec4(1.0f,0.0f,0.0f,1.0f);
+            glm::vec3 old_dir = glm::vec3(move_h);
 
-                return this;
+            float l = 0.2f * glm::length(old_dir - x_basis);
+            x_basis =(1.0f - l) * old_dir + l * x_basis;
+            x_basis = glm::normalize(x_basis);
+
+            glm::vec3 z_basis = glm::cross(x_basis, y_basis);
+
+            glm::mat4 rm(
+                glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f),
+                glm::vec4(y_basis[0],y_basis[1],y_basis[2],0.0f),
+                glm::vec4(z_basis[0],z_basis[1],z_basis[2],0.0f),
+                glm::vec4(0.0,0.0,0.0,1.0f)
+                );
+
+            //hero.model_matrix = glm::mat4();
+            //hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            hero.model_matrix = rm * glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));;
+            
+        }
+        bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
+
+        int buttons_count;
+        const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
+        
+        if(buttons!= nullptr)
+        {
+            if(buttons_count>7)
+            {
+                attack = buttons[7] == GLFW_PRESS;
+            }
+        }
+
+
+        if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
+        if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
+
+        if(distance<3.0f)distance=3.0f;
+        if(distance>14.0f)distance=14.0f;
+
+
+        float joy_diff = joy_x - old_joy_x;
+        if(std::abs(joy_diff) <  0.01f)
+        {
+            joy_diff = 0.0f;
+        }
+
+        if(joy_axes_count>2&&joy_axes!=nullptr)
+        {
+            joy_diff = joy_axes[2];
+        }
+
+        old_joy_x = joy_x;
+        camera_rotation_angle -= joy_diff * 12.0f;
+
+
+        if(camera_rotation_angle > 360.0f)
+        {
+            camera_rotation_angle -=  360.0f;
+        }
+        if(camera_rotation_angle < 0.0f)
+        {
+            camera_rotation_angle +=  360.0f;
+        }
+        
+        glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
+
+        Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        //glm::vec3  light_dir_vector = glm::normalize(light_position);
+
+        time = time_now;
+
+        if(moving&&!attack)
+        {
+            hero.UseSequence("walk");
+            glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.071f,0.0f,1.0f);
+            MoveHero(glm::vec3(move_h));
+        }else
+        if(attack)
+        {
+            hero.UseSequence("strike");
+            mob_events.push_back(AddStrike(hero,render_target));
+        }
+        else
+        {
+            hero.UseSequence("stance");
+        }
+
+        hero.Process();
+        FitObjects(10,0.0f);
+    }
+    return this;
 }
