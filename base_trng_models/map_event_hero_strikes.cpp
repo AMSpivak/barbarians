@@ -62,7 +62,7 @@ EventProcessResult IMapEventHeroStrike::Process()
     return EventProcessResult::Kill;
 }
 
-InteractionResult IMapEventHeroStrike::Interact(IGlModel &model)
+InteractionResult IMapEventHeroStrike::Interact(IGlModel &model,std::string &return_value)
 {
     model.Damage(0.1f);
     //std::cout<<"life "<<model.GetLifeValue()<<"\n";

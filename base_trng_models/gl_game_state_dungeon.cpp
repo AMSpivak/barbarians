@@ -54,7 +54,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
     //debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
     time = glfwGetTime();
-    LoadMap("levels/test.lvl","");
+    LoadMap("levels/test.lvl","base");
 
 }
 
@@ -71,6 +71,22 @@ std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(IGlModel &model,glRende
     event.position = model.position;
     return e_ptr;
 }
+
+void GlGameStateDungeon::SelectStart(std::vector<std::string> &lines)
+{
+    size_t y = 0;
+    std::string start_name;
+    for(auto line : lines)
+    {
+        size_t x = 0;
+        size_t tile = 0;
+        std::stringstream ss(line);
+        ss >> start_name >> hero_position;
+        if(!start_name.compare(m_start_place)) 
+            return;
+    }
+}
+
 
 void GlGameStateDungeon::LoadTiles(std::vector<std::string> &lines)
 {
@@ -141,11 +157,11 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
     std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
     execute_funcs.insert(std::make_pair("light_pos",[this](std::stringstream &sstream)
                                         {
-                                            float light_x =10;
+                                            /*float light_x =10;
                                             float light_y =10;
-                                            float light_z =10;
-                                            sstream >> light_x >> light_y >> light_z; 
-                                            light_position = glm::vec3(light_x, light_y, light_z);                                          
+                                            float light_z =10;*/
+                                            sstream >> light_position;//light_x >> light_y >> light_z; 
+                                            //light_position = glm::vec3(light_x, light_y, light_z);                                          
                                         }));
     execute_funcs.insert(std::make_pair("skybox",[this](std::stringstream &sstream)
                                     {
@@ -167,11 +183,11 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 
     execute_funcs.insert(std::make_pair("light_color",[this](std::stringstream &sstream)
                                     {
-                                        float r = 1.f;
+                                        /*float r = 1.f;
                                         float g = 35.0f;
-                                        float b = 20.0f;
-                                        sstream >> r >> g >> b; 
-                                        light_color_vector = glm::vec3(r,g,b);                                        
+                                        float b = 20.0f;*/
+                                        sstream >> light_color_vector;//r >> g >> b; 
+                                        //light_color_vector = glm::vec3(r,g,b);                                        
                                     }));
 
     //light_color_vector = glm::vec3(1.0f,1.0f,1.0f);
@@ -192,10 +208,10 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 
 
 
-void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &atart_place)
+void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
 {
-
-
+    hero_position = glm::vec3(10.0f,0.0f,10.0f);  
+    m_start_place = start_place;
     GLResourcesManager * resources_manager = GetResourceManager();
     
 	std::ifstream level_file;
@@ -212,6 +228,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
                                             }
                                             ResetModels(Models);
                                         }));
+    execute_funcs.insert(std::make_pair("starts",[this](std::vector<std::string> &lines){SelectStart(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadDungeonObjects(lines);}));
@@ -242,7 +259,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
 
-    hero_position = glm::vec3(10.0f,0.0f,10.0f);  
+    
 
 
 
@@ -707,7 +724,7 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     
 }
 
-InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event)
+InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value)
 {
     std::vector < glm::vec3 > axes;
     axes.push_back(glm::normalize(object.position - event.position));
@@ -733,7 +750,7 @@ InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEv
         }
     }
     
-    return event.Interact(object);
+    return event.Interact(object,return_value);
 }
 
 void GlGameStateDungeon::FitObjects(int steps, float accuracy)
@@ -794,15 +811,15 @@ bool GlGameStateDungeon::MobKilled(std::shared_ptr<IGlModel> obj)
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     
     IGlModel * o_ptr = obj.get();
-
+    std::string event_return_string;
     for(auto event : map_events)
     {
-        ReactObjectToEvent(*o_ptr,*event.get());
+        ReactObjectToEvent(*o_ptr,*event.get(),event_return_string);
     }
 
     for(auto event : mob_events)
     {
-        ReactObjectToEvent(*o_ptr,*event.get());
+        ReactObjectToEvent(*o_ptr,*event.get(),event_return_string);
     }
 
     if (o_ptr->GetLifeValue() < 0.0f)

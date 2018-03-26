@@ -33,7 +33,7 @@ public:
     ~IMapEventHeroStrike(){}
 
 
-    InteractionResult Interact(IGlModel &model);
+    InteractionResult Interact(IGlModel &model,std::string &return_value);
     EventProcessResult Process();
     void Show(const glm::vec3 & offset, glCamera & camera);
 

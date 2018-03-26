@@ -55,9 +55,10 @@ private:
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
     glm::vec3 light_color_vector;
+    
 
-    void LoadMap(const std::string &filename,const std::string &atart_place);
-
+    void LoadMap(const std::string &filename,const std::string &start_place);
+    void SelectStart(std::vector<std::string> &lines);
     void LoadTiles(std::vector<std::string> &lines);
     void LoadDungeonObjects(std::vector<std::string> &lines);
     void LoadObject(std::vector<std::string> &lines);
@@ -70,7 +71,7 @@ private:
     void FitObjects(int steps, float accuracy);
     float FitObjectToMap(IGlModel& object, glm::vec3 & position);
     float FitObjectToObject(IGlModel& object1,IGlModel& object2);
-    InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event);
+    InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value);
 
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
     void SetMapLight(std::vector<std::string> &lines);
