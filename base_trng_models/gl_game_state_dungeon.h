@@ -63,6 +63,7 @@ private:
     void LoadDungeonObjects(std::vector<std::string> &lines);
     void LoadObject(std::vector<std::string> &lines);
     void SetDungeonSize(std::vector<std::string> &lines);
+    void LoadMapEvent(std::vector<std::string> &lines);
     
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
@@ -76,8 +77,9 @@ private:
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
     void SetMapLight(std::vector<std::string> &lines);
     void MapObjectsEventsInteract();
+    bool HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr);
     bool MobKilled(std::shared_ptr<IGlModel> obj);
-
+    void ProcessMessage(std::string event_string);
     std::shared_ptr<IMapEvent> AddStrike(IGlModel &model,glRenderTargetDeffered &render_target);
     
     

@@ -9,7 +9,7 @@ else
 	LDFLAGS=  -lGLEW -lSOIL -lGL `pkg-config --cflags glfw3` `pkg-config --static --libs glfw3`
 endif
 ENGINE_SOURCES= $(ENGINE)\glresourses.cpp $(ENGINE)\glscene.cpp $(ENGINE)\collision.cpp $(ENGINE)\gl_jal_mesh_atlas.cpp $(ENGINE)\gl_texture_atlas.cpp
-SOURCES= $(ENGINE_SOURCES) main.cpp loader.cpp map_event_valhalla.cpp map_event_hero_strikes.cpp  gl_resources_manager.cpp gl_render_target.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
+SOURCES= $(ENGINE_SOURCES) main.cpp loader.cpp map_event_general.cpp map_event_valhalla.cpp map_event_hero_strikes.cpp  gl_resources_manager.cpp gl_render_target.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=game
 
