@@ -41,14 +41,14 @@ float ShadowCalculation(vec4 PosLight, vec3 tNormal)
     //float res = smoothstep(-0.1,0.1,depth - currentDepth);
 
   //  res = smoothstep(0.0,1.0, (texture(shadowMap,projCoords.xy) - currentDepth + bias));
-    res *=0.6;
-    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+    res *=0.4;
+    res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
     shift =texelSize*vec2(0.0,-1.0);
-    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+    res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
     shift =texelSize*vec2(1.0, 0.0);
-    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+    res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
     shift = texelSize*vec2(-1.0, 0.0);
-    res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+    res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
 
     //res*=0.2;/**/
     return res;
@@ -97,7 +97,8 @@ void main()
 
 
 	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
-    //shadow_res = 1.0;
+    float shadow_norm =1.0 -  smoothstep(0.6,1.0,1.0-norm_l);//norm_l;//smoothstep(shadow_res,1.0,norm_l);
+    shadow_res = 1.0 - (1.0 - shadow_res) * norm_l;
     float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
     float res = shadow_res *(diffuse*norm_l/M_PI);
 
