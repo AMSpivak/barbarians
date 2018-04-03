@@ -33,3 +33,7 @@ material/dungeon/wally/wall.mdl
 2 0 0 0 0 0 0 2
 0 1 1 1 1 1 1 0
 <!dungeon_objects>
+<starts> 
+base 5.0 0.0 5.0      
+start2 5.0 0.0 12.0      
+<!starts>  

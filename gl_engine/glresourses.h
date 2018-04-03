@@ -36,6 +36,7 @@ struct Animation
 std::istream& operator>> ( std::istream& is, glm::mat4& mat) ;
 
 std::istream& operator>> ( std::istream& is, Bone& bone) ;
+std::istream& operator>> ( std::istream& is, glm::vec3 & fill_vector) ;
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector);
 

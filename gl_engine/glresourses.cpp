@@ -32,6 +32,12 @@ void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,f
 
 }
 
+std::istream& operator>> ( std::istream& is, glm::vec3 & fill_vector)
+{
+	is>>fill_vector[0] >>fill_vector[1]>>fill_vector[2];
+	return is;
+}
+
 
 void renderSprite(GLuint current_shader,
 	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,

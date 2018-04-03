@@ -18,6 +18,7 @@
 #include "gl_game_state_dungeon.h"
 #include "map_event_hero_strikes.h"
 #include "map_event_valhalla.h"
+#include "map_event_general.h"
 #include "collision.h"
 #include "loader.h"
 
@@ -153,27 +154,20 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 {
     if(lines.size()<=1) 
         return;
+ 
 
     std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
     execute_funcs.insert(std::make_pair("light_pos",[this](std::stringstream &sstream)
-                                        {
-                                            /*float light_x =10;
-                                            float light_y =10;
-                                            float light_z =10;*/
-                                            sstream >> light_position;//light_x >> light_y >> light_z; 
-                                            //light_position = glm::vec3(light_x, light_y, light_z);                                          
-                                        }));
+                                        {sstream >> light_position;}));
     execute_funcs.insert(std::make_pair("skybox",[this](std::stringstream &sstream)
                                     {
                                         std::string sky;
                                         sstream >> sky;
                                         GLResourcesManager * resources_manager = GetResourceManager();
                                         skybox = resources_manager->m_texture_atlas.Assign(sky);
-                                                                                 
                                     }));
     execute_funcs.insert(std::make_pair("camera_lens",[this](std::stringstream &sstream)
                                     {
-
                                         float f_near = 1.f;
                                         float f_far = 35.0f;
                                         float size = 20.0f;
@@ -182,16 +176,8 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
                                     }));
 
     execute_funcs.insert(std::make_pair("light_color",[this](std::stringstream &sstream)
-                                    {
-                                        /*float r = 1.f;
-                                        float g = 35.0f;
-                                        float b = 20.0f;*/
-                                        sstream >> light_color_vector;//r >> g >> b; 
-                                        //light_color_vector = glm::vec3(r,g,b);                                        
-                                    }));
+                                    { sstream >> light_color_vector;}));
 
-    //light_color_vector = glm::vec3(1.0f,1.0f,1.0f);
-    
     std::string info = "";
     for(auto line:lines)
     {
@@ -205,18 +191,55 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 }
 
 
+void GlGameStateDungeon::LoadMapEvent(std::vector<std::string> &lines)
+{
+    if(lines.size()<=1) 
+        return;
 
+    
+    std::shared_ptr<MapEventGeneral>e_ptr(new MapEventGeneral(m_shader_map["sprite2d"],0,nullptr,1.0f,1.4f));
+
+    float radius = 0;
+    
+    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
+    execute_funcs.insert(std::make_pair("position",[e_ptr](std::stringstream &sstream)
+                                        {sstream >> e_ptr->position;}));
+    execute_funcs.insert(std::make_pair("message",[e_ptr](std::stringstream &sstream)
+                                    { 
+                                        std::string tmp;
+                                        //sstream >> tmp;
+                                        std::getline(sstream,tmp);
+                                        e_ptr->SetMessage(tmp);
+                                        
+                                    }));
+    execute_funcs.insert(std::make_pair("radius",[e_ptr](std::stringstream &sstream)
+                                    { sstream >> e_ptr->radius;}));
+    std::string info = "";
+    for(auto line:lines)
+    {
+        std::stringstream ss(line);
+        ss >> info;
+        (execute_funcs[info])(ss);
+    }
+    hero_events.push_back(e_ptr);
+
+}
 
 
 void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
-{
+{  
+    std::ifstream level_file;
+	level_file.open(filename); 
+    std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
+    if(!level_file.is_open()) return;
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
     m_start_place = start_place;
     GLResourcesManager * resources_manager = GetResourceManager();
-    
-	std::ifstream level_file;
-	level_file.open(filename); 
-    std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
+    hero_events.clear();
+    mob_events.clear();
+    map_events.clear();
+    dungeon_objects.clear();
+
     
     std::map<std::string,const std::function<void(std::vector<std::string> &lines)>> execute_funcs;
     execute_funcs.insert(std::make_pair("sky",[this](std::vector<std::string> &lines){SetMapLight(lines);}));
@@ -233,6 +256,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     execute_funcs.insert(std::make_pair("dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadDungeonObjects(lines);}));
     execute_funcs.insert(std::make_pair("object",[this](std::vector<std::string> &lines){LoadObject(lines);}));
+    execute_funcs.insert(std::make_pair("hero_event",[this](std::vector<std::string> &lines){LoadMapEvent(lines);}));
 
     Models.clear();
     Animations.clear();
@@ -845,6 +869,53 @@ void GlGameStateDungeon::MapObjectsEventsInteract()
     map_events.remove_if(IsKilled);
 }
 
+void GlGameStateDungeon::ProcessMessage(std::string event_string)
+{
+    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
+
+    execute_funcs.insert(std::make_pair("teleport",[this](std::stringstream &sstream)
+                                    {
+                                        std::string level;
+                                        std::string start;
+                                        sstream >> level >> start;
+
+                                        LoadMap(level,start);
+                                    }));
+    std::string info;                               
+    std::stringstream ss(event_string);
+    ss >> info;
+    //size_t first = info.find_first_not_of(' ');
+    //size_t last = info.find_last_not_of(' ');
+    std::cout<<"prefix:"<<info<<"\n";
+    std::cout<<"source:"<<event_string<<"\n";
+    //std::cout<<"trim prefix: "<<info.substr(first, (last-first+1))<<"\n";
+    //str.erase(std::remove(info.begin(), info.end(), ' '), info.end());
+    try
+        {
+            execute_funcs.at(info)(ss);
+        }
+        catch(const std::out_of_range& exp)
+        {
+            std::cout<<"Unknown prefix: "<<info<<"\n";
+        }
+
+}
+
+
+bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr)
+{
+    std::string event_return_string;
+    for(auto event : hero_events)
+    {
+       if(ReactObjectToEvent(*hero_ptr,*event.get(),event_return_string) == InteractionResult::PostMessage)
+       {
+           ProcessMessage(event_return_string);
+           return true;
+       }
+    }
+    return false;
+}
+
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
 {
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
@@ -852,8 +923,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     static float camera_rotation_angle = 0.0f;
     static float hero_rotation_angle = 0.0f;
     static float old_joy_x = 0.0f;
+    std::shared_ptr<IGlModel> hero_ptr = m_models_map["Hero"];
    
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));;
+    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(hero_ptr.get()));
     GLuint current_shader;
 
     int models_count = Models.size();
@@ -862,6 +934,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     if((time_now - time)>(1.0/30.0))
     {
         MapObjectsEventsInteract();
+        if(HeroEventsInteract(hero_ptr)) return this;
+        
 
         m_antialiase_enabled = !inputs[GLFW_KEY_F1];
         static float distance = 12.f;
