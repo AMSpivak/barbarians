@@ -641,3 +641,14 @@ void Animation::LoadAnimation(std::string FileName, std::vector <Bone> &bones)
 	}
 	ModelFile.close();
 }
+
+std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)
+{
+	//float tmp[3];
+	for(size_t i =0; i<3; i++)
+	{
+		is>>glm_vector[i];
+	}
+
+}
+

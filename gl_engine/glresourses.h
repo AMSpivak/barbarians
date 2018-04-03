@@ -37,6 +37,7 @@ std::istream& operator>> ( std::istream& is, glm::mat4& mat) ;
 
 std::istream& operator>> ( std::istream& is, Bone& bone) ;
 
+std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector);
 
 std::string readShaderFile(std::string FileName);
 
