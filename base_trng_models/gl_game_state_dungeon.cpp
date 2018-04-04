@@ -322,11 +322,14 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
             index = m_dungeon.GetMapObjectIndex(ix,iy,iz);//m_dungeon_map_objects[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
             if(index>0)
             {
-
-                model_matrix = Models[index]->model;
-                Models[index]->model = pos_matrix * model_matrix;
-                Models[index]->Draw(current_shader,now_frame);
-                Models[index]->model = model_matrix;
+                int mod_index = index>>2;
+                int rot = index - (mod_index<<2);
+                model_matrix = Models[mod_index]->model;
+                //model_matrix =  * model_matrix;
+                glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 1.0f, 0.0f));
+                Models[mod_index]->model = pos_matrix * glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 0.0f, 1.0f));//model_matrix;
+                Models[mod_index]->Draw(current_shader,now_frame);
+                Models[mod_index]->model = model_matrix;
             }
             pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
         }
