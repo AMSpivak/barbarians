@@ -13,6 +13,7 @@ class IGlModel
 private:
     float life_value;
     float armor_value;
+    bool ghost;
 public:
 	int parent;
 	int parent_attach_point;
@@ -27,7 +28,7 @@ public:
     glm::vec3 m_light_color;
     glm::vec3 m_light_position;
 
-    IGlModel():life_value(1.0),model_matrix(),mass_inv(0),radius(1.0f), position(0.0f,0.0f,0.0f),m_is_light(false)
+    IGlModel():life_value(1.0),armor_value(1.0),ghost(false),model_matrix(),mass_inv(0),radius(1.0f), position(0.0f,0.0f,0.0f),m_is_light(false)
     {
 
     }
@@ -59,9 +60,15 @@ public:
     {
         life_value= value;
     }
+
+     void SetArmorValue(float value)
+    {
+        armor_value= value;
+    }
+
     void Damage(float damage)
     {
-        life_value -= damage;// * armor_value;
+        life_value -= damage * armor_value;
     }
 
     virtual ~IGlModel(){}

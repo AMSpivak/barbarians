@@ -70,20 +70,23 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             sstream >> mass_inv;
                                         }));
 
+    execute_funcs.insert(std::make_pair("armor",[this](std::stringstream &sstream)
+                                        {
+                                            float armor = 1.0;
+                                            sstream >> armor;
+                                            SetArmorValue(armor);
+                                        }));
+
     execute_funcs.insert(std::make_pair("light",[this](std::stringstream &sstream)
                                         {
-                                            float a_x = 0.0f;
-                                            float a_y = 0.0f;
-                                            float a_z = 0.0f;
-                                            float color_r = 0.0f;
-                                            float color_g = 0.0f;
-                                            float color_b = 0.0f;
+                                            
                                             float light_radius = 0.0f;
-                                            std::cout<<"\nlight!\n\n\n";
-                                            sstream >> color_r >> color_g >> color_b ; 
-                                            sstream >> a_x >> a_y >> a_z >> light_radius; 
+                                            glm::vec3 color;
+                                            glm::vec3 l_position;
+                                            //std::cout<<"\nlight!\n\n\n";
+                                            sstream >> color >> l_position >> light_radius; 
 
-                                            SetLight(true,glm::vec3(color_r,color_g,color_b),glm::vec3(a_x,a_y,a_z),light_radius);
+                                            SetLight(true,color,l_position,light_radius);
                                         }));
 
     execute_funcs.insert(std::make_pair("radius",[this](std::stringstream &sstream)
