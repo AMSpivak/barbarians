@@ -267,7 +267,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     while(!level_file.eof())
     {
         sufix = LoaderUtility::FindPrefix(level_file);
-        std::cout<<sufix<<"\n";
+        //std::cout<<sufix<<"\n";
         LoaderUtility::LoadLineBlock(level_file,sufix,lines);
         try
         {
@@ -772,6 +772,11 @@ InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEv
 
         if(axe_intersection < intersection)
         {
+            std::cout << axe_intersection<<" " << axe
+                        <<" " << object.position
+                        <<" " << event.position << "\n";
+            std::cout << projection1.first<<" " << projection1.second<< "\n";
+            std::cout << projection2.first<<" " << projection2.second<< "\n";
             compensate_axe = axe;
             intersection = axe_intersection;
         }
@@ -889,8 +894,8 @@ void GlGameStateDungeon::ProcessMessage(std::string event_string)
     ss >> info;
     //size_t first = info.find_first_not_of(' ');
     //size_t last = info.find_last_not_of(' ');
-    std::cout<<"prefix:"<<info<<"\n";
-    std::cout<<"source:"<<event_string<<"\n";
+    //std::cout<<"prefix:"<<info<<"\n";
+    //std::cout<<"source:"<<event_string<<"\n";
     //std::cout<<"trim prefix: "<<info.substr(first, (last-first+1))<<"\n";
     //str.erase(std::remove(info.begin(), info.end(), ' '), info.end());
     try
@@ -912,6 +917,7 @@ bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr)
     {
        if(ReactObjectToEvent(*hero_ptr,*event.get(),event_return_string) == InteractionResult::PostMessage)
        {
+           std::cout<<"\n"<<event_return_string<<"\n"<< hero_ptr->position<<"\n";
            ProcessMessage(event_return_string);
            return true;
        }
@@ -937,7 +943,14 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     if((time_now - time)>(1.0/30.0))
     {
         MapObjectsEventsInteract();
-        if(HeroEventsInteract(hero_ptr)) return this;
+        hero.position = hero_position;
+        if(HeroEventsInteract(hero_ptr)) 
+        {
+           
+            hero.position = glm::vec3(0.0f,0.0f,0.0f);
+            return this;
+        }
+        hero.position = glm::vec3(0.0f,0.0f,0.0f);
         
 
         m_antialiase_enabled = !inputs[GLFW_KEY_F1];
@@ -1081,7 +1094,11 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(attack)
         {
             hero.UseSequence("strike");
+            hero.position = hero_position;
+            
             mob_events.push_back(AddStrike(hero,render_target));
+            hero.position = glm::vec3(0.0f,0.0f,0.0f);
+            
         }
         else
         {

@@ -32,7 +32,7 @@ void main()
     float val = length(normal);
 
 	gAlbedoSpec = vec4(texColor.xyz, 0.06 + utility.z*0.94);//texColor;
-	//gAlbedoSpec = vec4(val,val,val, 0.06 + utility.z*0.94);//texColor;
+	//gAlbedoSpec = vec4(normal, 0.06 + utility.z*0.94);//texColor;
 	
 	//gAlbedoSpec = gNormal;
 }

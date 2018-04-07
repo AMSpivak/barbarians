@@ -38,7 +38,7 @@ bool MapEventGeneral::IsLight(glm::vec4 &light_position,glm::vec3 &color)
 std::pair<float, float> MapEventGeneral::ProjectOnAxe(const glm::vec3 & axe)
 {
     float position_on_axe = glm::dot(axe, position);
-
+    //std::cout << position<< "\n";
     std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
 
     return ret_value;

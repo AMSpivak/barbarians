@@ -225,7 +225,7 @@ void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * 
         {
 
             float scaler = (BillboardPos_screenspace.z + m_projection[2].z)/m_projection[3].z;
-            std::cout<<BillboardPos_screenspace.w<<" 2 "<<scaler<<"\n";
+            //std::cout<<BillboardPos_screenspace.w<<" 2 "<<scaler<<"\n";
             
 
             radius_screen_x *= scaler;
@@ -386,7 +386,7 @@ void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint
 
 		int faces_count = vertex_count;
 		vertex_count *= 3;
-		std::cout << vertex_count;
+		//std::cout << vertex_count;
 		//std::cout << "\n";
 		getline(ModelFile, tmp_string);
 		getline(ModelFile, tmp_string);
@@ -656,5 +656,17 @@ std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)
 		is>>glm_vector[i];
 	}
 	return is;
+}
+
+std::ostream& operator << ( std::ostream& os, glm::vec3 & glm_vector)
+{
+	//float tmp[3];
+	const size_t max = 3;
+	for(size_t i =0; i<max; i++)
+	{
+		os<<glm_vector[i];
+		if(i!=max-1) os<<" ";
+	}
+	return os;
 }
 

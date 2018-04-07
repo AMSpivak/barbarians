@@ -102,6 +102,8 @@ void main()
     float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
     float res = shadow_res *(diffuse*norm_l/M_PI);
 
+    //gAlbedoSpec =vec4(vec3(1.0,1.0,1.0),1.0);
+    //gNormal =vec4(0.0 * vec3(1.0,1.0,1.0),1.0); 
     gAlbedoSpec =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);
     gNormal =vec4(((shadow_res*spec) )* LightColor * vec3(1.0,1.0,1.0),1.0);
 }

@@ -27,7 +27,7 @@ public:
     {
         for(auto resource_ptr : m_map)
         {
-            std::cout <<"Delete resource: "<<resource_ptr.first<<"\n";
+            //std::cout <<"Delete resource: "<<resource_ptr.first<<"\n";
             EmptyResource(resource_ptr.second.get());
             //glDeleteTextures(1,textyre_ptr.second.get());
         }
@@ -38,7 +38,7 @@ public:
         typename std::map<std::string,std::shared_ptr<T>>::iterator  it = m_map.find(FileName);
         if( it != m_map.end() )
         {
-            std::cout<<"repeat\n"<<FileName<<"\n";
+            //std::cout<<"repeat\n"<<FileName<<"\n";
             return it->second;
         }
         //GLuint * texture = new;
@@ -46,7 +46,7 @@ public:
         m_map.insert( std::pair<std::string,std::shared_ptr<T>>(FileName,resource));
         FillResource(m_resourse_folder + FileName,resource.get());
         //LoadTexture(m_resourse_folder + FileName,*(resource.get()));
-        std::cout<<"load:\n"<<FileName<<":"<<m_resourse_folder +FileName<<"\n";
+        //std::cout<<"load:\n"<<FileName<<":"<<m_resourse_folder +FileName<<"\n";
         
         return resource;
 

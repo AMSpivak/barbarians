@@ -1,3 +1,10 @@
+﻿libraries:
+opengl
+glew
+glfw
+SOIL
+
+credits:
 hand painted lamp(https://sketchfab.com/models/a2954459f2724f0e940e41652bee3115) by Jenioss(https://sketchfab.com/Jenioss) is licensed under CC Attribution-NonCommercial-ShareAlike(http://creativecommons.org/licenses/by-nc-sa/4.0/)
 Fantasy Walls and Floors 2(https://sketchfab.com/models/d25f445d9dd0432e87907a9b0606f74b) by Théo Lerbeil(https://sketchfab.com/supertheo) is licensed under CC Attribution(http://creativecommons.org/licenses/by/4.0/)
 Stylized Tileable Stone Floor Texture(https://sketchfab.com/models/554b688435e14a5bb13087f79214087b) by Igor Skuhar(https://sketchfab.com/igorskuhar) is licensed under CC Attribution(http://creativecommons.org/licenses/by/4.0/)

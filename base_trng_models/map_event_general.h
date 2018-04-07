@@ -17,9 +17,6 @@ private:
     std::string m_message;  
 
 public:
-    glm::mat4 model_matrix;
-
-    glm::vec3 position;
     int frames_lifetime;
     MapEventGeneral(GLuint current_shader, GLuint depthmap,const GLuint * texture,
 						 float width, float height):IMapEvent()

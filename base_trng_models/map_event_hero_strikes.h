@@ -14,11 +14,11 @@ private:
     float m_height;   
 
 public:
-    glm::mat4 model_matrix;
-    float radius;
+
+
     float damage;
-    float mobs_dependence;
-    glm::vec3 position;
+
+
     int frames_lifetime;
     IMapEventHeroStrike(GLuint current_shader, GLuint depthmap,const GLuint * texture,
 						 float width, float height):IMapEvent()

@@ -16,9 +16,7 @@ private:
     float m_alpha_dec;   
 
 public:
-    glm::mat4 model_matrix;
 
-    glm::vec3 position;
     int frames_lifetime;
     MapEventValhalla(GLuint current_shader, GLuint depthmap,const GLuint * texture,
 						 float width, float height):IMapEvent()
