@@ -39,7 +39,7 @@ std::istream& operator>> ( std::istream& is, Bone& bone) ;
 std::istream& operator>> ( std::istream& is, glm::vec3 & fill_vector) ;
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector);
-
+std::ostream& operator << ( std::ostream& os, glm::vec3 & glm_vector);
 std::string readShaderFile(std::string FileName);
 
 GLuint LoadShader(std::string FileName,GLenum shaderType);

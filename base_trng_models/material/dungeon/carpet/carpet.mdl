@@ -1,6 +1,6 @@
-dungeon/walls/plane.jal
+dungeon/carpet/carpet.jal
 wall.jub
-wall_plane.png
+dungeon/carpet.png
 wall_l.png
 base_normal.png
 -1 -1

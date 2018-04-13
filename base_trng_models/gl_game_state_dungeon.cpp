@@ -676,6 +676,8 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
 
 float GlGameStateDungeon::FitObjectToMap(IGlModel& object, glm::vec3 & position)
 {
+    if(object.mass_inv < 0.001)
+        return 0.0f;
     float hero_radius = object.radius;
 
     int x = static_cast<int>(position[0]*0.5f);
