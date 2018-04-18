@@ -1,20 +1,20 @@
 #ifndef GL_RESOURCES_MANAGER
 #define GL_RESOURCES_MANAGER
 
+#include "glresourses.h"
+
 #include "i_gl_jub_struct.h"
+#include "i_gl_jal_struct.h"
+#include "i_gl_texture_struct.h"
 #include "gl_atlas.h"
 
-#include "gl_texture_atlas.h"
-#include "gl_jal_mesh_atlas.h"
-#include "gl_bones_atlas.h"
-#include "gl_animation_atlas.h"
 #include <string>
 class GLResourcesManager
 {
 public:
-GLTextureAtlas m_texture_atlas;
-GLJalMeshAtlas m_mesh_atlas;
-GLAnimationAtlas m_animation_atlas;
+GLAtlas<IGlTextureStruct> m_texture_atlas;
+GLAtlas<IGlJalStruct> m_mesh_atlas;
+GLAtlas<Animation> m_animation_atlas;
 GLAtlas<IGlJubStruct> m_bones_atlas;
 GLResourcesManager(const std::string & textures_folder,
                     const std::string & meshes_folder,
