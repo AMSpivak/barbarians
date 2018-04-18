@@ -3,14 +3,13 @@
 
 
 #include "gl_atlas.h"
+#include "i_gl_texture_struct.h"
 
 
-class GLTextureAtlas: public GLAtlas<GLuint>
+class GLTextureAtlas: public GLAtlas<IGlTextureStruct>
 {
 
-private:
-    void FillResource(std::string filename,GLuint * resource);
-    void EmptyResource(GLuint * resource);
+
 public:
     GLTextureAtlas(const std::string & ResourseFolder);
     

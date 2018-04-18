@@ -7,14 +7,6 @@
 
 class GLBonesAtlas: public GLAtlas<IGlJubStruct>
 {
-
-private:
-    void FillResource(std::string filename,IGlJubStruct * resource)
-    { 
-        LoadBonesArray(filename,resource->bones,resource->bonescount);
-    }
-
-    void EmptyResource(IGlJubStruct * resource){}
 public:
     GLBonesAtlas(const std::string & ResourseFolder):GLAtlas<IGlJubStruct>(ResourseFolder)
     {}

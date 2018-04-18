@@ -8,9 +8,7 @@
 class GLJalMeshAtlas: public GLAtlas<IGlJalStruct>
 {
 
-private:
-    void FillResource(std::string filename,IGlJalStruct * resource);
-    void EmptyResource(IGlJalStruct * resource);
+
 public:
     GLJalMeshAtlas(const std::string & ResourseFolder);
     

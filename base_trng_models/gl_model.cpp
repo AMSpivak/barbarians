@@ -34,15 +34,15 @@ void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, *diffuse_texture.get());
+	glBindTexture(GL_TEXTURE_2D, diffuse_texture.get()->m_texture);
 
 	glUniform1i(glGetUniformLocation(shaderProgram, "UtilityTexture"), 1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, *utility_texture.get());
+	glBindTexture(GL_TEXTURE_2D, utility_texture.get()->m_texture);
     
 	glUniform1i(glGetUniformLocation(shaderProgram, "NormalTexture"), 2);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, *normal_texture.get());
+	glBindTexture(GL_TEXTURE_2D, normal_texture.get()->m_texture);
 
 	glUniformMatrix4fv(boneLoc, jub_bones.get()->bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));
     Draw();

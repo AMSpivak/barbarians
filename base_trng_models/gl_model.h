@@ -9,7 +9,7 @@
 #include <iostream>
 #include "i_gl_jal_struct.h"
 #include "i_gl_jub_struct.h"
-
+#include "i_gl_texture_struct.h"
 
 #include "gl_resources_manager.h"
 
@@ -27,9 +27,9 @@ public:
 	int parent_bone;
 
 	glm::mat4 model;
-	std::shared_ptr<GLuint> diffuse_texture;
-    std::shared_ptr<GLuint> utility_texture;
-    std::shared_ptr<GLuint> normal_texture;
+	std::shared_ptr<IGlTextureStruct> diffuse_texture;
+    std::shared_ptr<IGlTextureStruct> utility_texture;
+    std::shared_ptr<IGlTextureStruct> normal_texture;
 	std::shared_ptr<IGlJubStruct> jub_bones;
 
 	glModel(GLResourcesManager &resources_manager)

@@ -204,7 +204,7 @@ void GlGameStateArena::Draw()
             glUniformMatrix4fv(model_matrix, 1, GL_FALSE, glm::value_ptr(model_m));
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D,*sky_texture.get());
+            glBindTexture(GL_TEXTURE_2D,sky_texture.get()->m_texture);
 
             renderQuad();
         }

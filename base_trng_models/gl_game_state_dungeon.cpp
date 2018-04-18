@@ -62,7 +62,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
 std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(IGlModel &model,glRenderTargetDeffered &render_target)
 {
 
-    std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
+    std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture.get()->m_texture),1.0f,1.4f));
     IMapEventHeroStrike & event = *(e_ptr.get());
     event.model_matrix = model.model_matrix;
     event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
@@ -585,7 +585,7 @@ void GlGameStateDungeon::Draw()
 		    //glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 		    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(model_m));
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, *skybox.get());
+            glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get()->m_texture);
             renderQuad();
             
 
@@ -858,7 +858,7 @@ bool GlGameStateDungeon::MobKilled(std::shared_ptr<IGlModel> obj)
 
     if (o_ptr->GetLifeValue() < 0.0f)
         {
-            std::shared_ptr<MapEventValhalla>e_ptr(new MapEventValhalla(m_shader_map["sprite2d"],render_target.depthMap,fx_texture.get(),1.0f,1.4f));
+            std::shared_ptr<MapEventValhalla>e_ptr(new MapEventValhalla(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture.get()->m_texture),1.0f,1.4f));
                         
                         MapEventValhalla & event = *(e_ptr.get());
                         
