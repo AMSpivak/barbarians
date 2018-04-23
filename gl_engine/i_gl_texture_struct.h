@@ -7,7 +7,7 @@ struct IGlTextureStruct
 {
     GLuint m_texture;
 
-    IGlTextureStruct(std::string filename)
+    IGlTextureStruct(const std::string & filename)
     {
         LoadTexture(filename,m_texture);
     }

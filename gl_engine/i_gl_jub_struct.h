@@ -9,7 +9,7 @@ struct IGlJubStruct
     std::vector <Bone> bones;
 	int bonescount;
 
-    IGlJubStruct(std::string filename)
+    IGlJubStruct(const std::string & filename)
     {
         LoadBonesArray(filename,bones,bonescount);
     }

@@ -8,7 +8,7 @@ struct IGlJalStruct
     GLuint VBO, VBO_BONES, VBO_BONES_IDX, VAO;
 	int vertexcount;
 
-    IGlJalStruct(std::string filename)
+    IGlJalStruct(const std::string & filename)
     {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);

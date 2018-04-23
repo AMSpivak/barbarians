@@ -33,7 +33,7 @@ public:
 
     }
 
-    SetLight(bool is_light,glm::vec3 light_color,glm::vec3 light_position,float light_radius)
+    void SetLight(bool is_light,glm::vec3 light_color,glm::vec3 light_position,float light_radius)
     {
         m_is_light = is_light;
         m_light_radius = light_radius;
