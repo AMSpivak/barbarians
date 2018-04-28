@@ -4,12 +4,12 @@
 
 
 
-void glModel::LoadModelBones(std::string FileName)
+/*void glModel::LoadModelBones(std::string FileName)
 {
 	IGlJubStruct * bone_ptr = jub_bones.get();
 	LoadBonesArray(FileName,bone_ptr->bones,bone_ptr->bonescount);
 
-}
+}*/
 
 void glModel::Draw()
 {
