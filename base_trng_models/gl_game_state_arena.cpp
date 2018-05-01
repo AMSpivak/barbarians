@@ -22,7 +22,7 @@ GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
                                                         ,now_frame(3)
                                                         ,key_angle(0.0f)
 {
-    Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl",Animations));
+    Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl"));
     Models[0]->model = glm::translate(Models[0]->model, glm::vec3(0.0f, 0.92f, 0.0f));
 
     Models[0]->model = glm::rotate(Models[0]->model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -276,7 +276,7 @@ IGlGameState *  GlGameStateArena::Process(std::map <int, bool> &inputs, float jo
 
                     key_angle = 0;
                     now_frame++;
-                    if(now_frame == Animations[0]->frames.size()) now_frame = 3;
+                    if(now_frame == Models[0]->animation->frames.size()) now_frame = 3;
                     hero.Process();
                 }
             return this;

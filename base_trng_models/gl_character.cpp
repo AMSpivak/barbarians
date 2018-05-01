@@ -153,7 +153,8 @@ void GlCharacter::RefreshMatrixes()
     {
         IGlJubStruct * bone_ptr = Models[Models[i]->parent_idx]->jub_bones.get();
         Models[i]-> model = Models[Models[i]->parent_idx]->model *
-            Animations[Models[i]->parent_idx]->frames[now_frame].bones[Models[i]->parent_bone] *
+            Models[Models[i]->parent_idx]->GetBoneMatrix(now_frame,Models[i]->parent_bone) *
+           // Models[Models[i]->parent_idx]->animation->frames[now_frame].bones[Models[i]->parent_bone] *
            bone_ptr->bones[Models[i]->parent_bone].matrix *
             glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix)
             ;
@@ -190,7 +191,7 @@ void GlCharacter::Damage(float damage)
 
 void GlCharacter::AddModel(std::string name)
 {
-    Models.emplace_back(std::make_shared<glModel>(name,Animations));
+    Models.emplace_back(std::make_shared<glModel>(name));
 }
 
 int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)

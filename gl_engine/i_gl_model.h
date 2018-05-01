@@ -14,6 +14,8 @@ private:
     float life_value;
     float armor_value;
     bool ghost;
+    std::string m_name;
+
 public:
 	int parent;
 	int parent_attach_point;
@@ -28,7 +30,17 @@ public:
     glm::vec3 m_light_color;
     glm::vec3 m_light_position;
 
-    IGlModel():life_value(1.0),armor_value(1.0),ghost(false),model_matrix(),mass_inv(0),radius(1.0f), position(0.0f,0.0f,0.0f),m_is_light(false)
+    void SetName(const std::string &name)
+    {
+        m_name = name;
+    }
+
+    const std::string & GetName()
+    {
+        return m_name;
+    }
+
+    IGlModel():life_value(1.0),armor_value(1.0),ghost(false),model_matrix(),mass_inv(0),radius(1.0f), position(0.0f,0.0f,0.0f),m_is_light(false),m_name("unnamed")
     {
 
     }

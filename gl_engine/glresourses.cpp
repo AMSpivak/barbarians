@@ -1,5 +1,5 @@
 #include "glresourses.h"
-
+#include <stdexcept>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -296,11 +296,14 @@ std::istream& operator >> ( std::istream& is, Bone& bone)
 }
 
 
-std::string readShaderFile(std::string FileName)
+std::string readShaderFile(std::string file_name)
 {
 	std::string ShaderString = "";
 	std::ifstream shaderFile;
-	shaderFile.open(FileName);
+	shaderFile.open(file_name);
+	if (!shaderFile)
+        throw std::runtime_error("Could not open file "+ file_name);
+		
 	while(!shaderFile.eof())
 	{
 		std::string tempholder;
@@ -367,12 +370,14 @@ glm::vec3 CalculateTangent(const std::array<glm::vec3 , 3> &pos,const std::array
 	return  glm::normalize(tangent);
 }
 
-void LoadVertexArray(std::string FileName,GLuint &VBO, GLuint &VBO_BONES, GLuint &VBO_BONES_IDX, int &vertex_count)
+void LoadVertexArray(std::string file_name,GLuint &VBO, GLuint &VBO_BONES, GLuint &VBO_BONES_IDX, int &vertex_count)
 {
 
 	std::string tmp_string = "";
 	std::ifstream ModelFile;
-	ModelFile.open(FileName);
+	ModelFile.open(file_name);
+	if (!ModelFile)
+        throw std::runtime_error("Could not open file "+file_name);
 	if(ModelFile.is_open())
 	{
 		//ModelFile >> tmp_string;
@@ -489,16 +494,16 @@ Bone LoadBone(std::ifstream &source)
 }
 
 
-void LoadBonesArray(std::string FileName,std::vector <Bone> &bones,int &bones_count)
+void LoadBonesArray(std::string file_name,std::vector <Bone> &bones,int &bones_count)
 {
 	std::string tmp_string = "";
 	std::ifstream ModelFile;
-	ModelFile.open(FileName);
+	ModelFile.open(file_name);
+	if (!ModelFile)
+        throw std::runtime_error("Could not open file " + file_name);	
 	getline(ModelFile, tmp_string);
 	ModelFile>>tmp_string>>bones_count>>tmp_string;
-	//getline(ModelFile, tmp_string);
-	//getline(ModelFile, tmp_string);
-	//getline(ModelFile, tmp_string);
+
 	Bone bone;
 	bones.clear();
 
@@ -557,14 +562,15 @@ void LoadTexture(std::string FileName,GLuint &texture)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void LoadCubemap(const std::string FileName,GLuint &texture)
+void LoadCubemap(const std::string file_name,GLuint &texture)
 {
-	size_t pos = FileName.rfind("/");
+	size_t pos = file_name.rfind("/");
 	
-	std::ifstream modelfile;
+	/*std::ifstream modelfile;
 	modelfile.open(FileName);
-
-	std::string path = pos == std::string::npos ? "" : FileName;
+	if (!modelfile)
+        throw std::runtime_error("Could not open file");*/
+	std::string path = pos == std::string::npos ? "" : file_name;
 	if(pos != std::string::npos)
 	{
 		path.erase(pos+1,std::string::npos);
@@ -572,7 +578,9 @@ void LoadCubemap(const std::string FileName,GLuint &texture)
 	std::string tmp_string = "";
 	std::vector<std::string> faces;
 	std::ifstream texture_descriptor_file;
-	texture_descriptor_file.open(FileName);
+	texture_descriptor_file.open(file_name);
+	if (!texture_descriptor_file)
+        throw std::runtime_error("Could not open file " + file_name);
 	while(faces.size()<6 && !texture_descriptor_file.eof())
 	{
 		getline(texture_descriptor_file, tmp_string);
@@ -580,7 +588,7 @@ void LoadCubemap(const std::string FileName,GLuint &texture)
 	}
 	if(faces.size()<6)
 	{
-		std::cout << "Wrong cubemap descriptor: " <<FileName;
+		std::cout << "Wrong cubemap descriptor: " <<file_name;
 	}
 
 	texture_descriptor_file.close();
@@ -619,12 +627,20 @@ void LoadCubemap(const std::string FileName,GLuint &texture)
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void Animation::LoadAnimation(std::string FileName, std::vector <Bone> &bones)
+Animation::Animation(const std::string &file_name)
+{
+	LoadAnimation(file_name);
+}
+
+
+void Animation::LoadAnimation(const std::string &file_name, std::vector <Bone> &bones)
 {
 	int bon_count = 0;
 	std::string tmp_string = "";
 	std::ifstream ModelFile;
-	ModelFile.open(FileName);
+	ModelFile.open(file_name);
+	if (!ModelFile)
+        throw std::runtime_error("Could not open file " + file_name);
 	getline(ModelFile, tmp_string);
 	ModelFile>>tmp_string>>bon_count>>tmp_string>>tmp_string>>framescount;
 	frames.clear();
@@ -646,6 +662,73 @@ void Animation::LoadAnimation(std::string FileName, std::vector <Bone> &bones)
 		frames.push_back(a_frame);
 	}
 	ModelFile.close();
+	m_precalculated = true;	
+}
+
+void Animation::LoadAnimation(const std::string & file_name)
+{
+	int bon_count = 0;
+	std::string tmp_string = "";
+	std::ifstream ModelFile;
+	ModelFile.open(file_name);
+	if (!ModelFile)
+        throw std::runtime_error("Could not open file "+ file_name);
+	getline(ModelFile, tmp_string);
+	ModelFile>>tmp_string>>bon_count>>tmp_string>>tmp_string>>framescount;
+	frames.clear();
+	int current_frame;
+	glm::mat4 tmp_matrix;
+	for(int i_frame = 0; i_frame < framescount; i_frame++)
+	{
+		ModelFile>>tmp_string>>current_frame;
+		AnimationFrame a_frame;
+		for(int i = 0; i < bon_count; i++)
+		{
+
+			ModelFile>>tmp_string>>tmp_matrix;
+			a_frame.bones.push_back( tmp_matrix);
+
+		}
+		frames.push_back(a_frame);
+	}
+	ModelFile.close();
+	m_cashe_animation.bones.resize(bon_count);
+	m_precalculated = false;
+}
+
+GLfloat * Animation::GetDrawValues(size_t frame,const std::vector <Bone> &bones)
+{
+	if(m_precalculated) 
+	{
+		return glm::value_ptr(frames[frame].bones[0]);
+	}
+
+	CalculateCache(bones, frame);
+	return glm::value_ptr(m_cashe_animation.bones[0]);
+}
+
+const glm::mat4 & Animation::GetBoneMatrix(size_t frame,size_t bone,const std::vector <Bone> &bones)
+{
+	if(m_precalculated) 
+	{
+		return frames[frame].bones[bone];
+	}
+
+	CalculateCache(bones, frame);
+	return m_cashe_animation.bones[bone];
+}
+
+void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
+{
+	if(m_cache_frame == frame) 
+		return;
+	//std::cout <<"Caching " << frame <<" frame\n";
+	size_t bon_count = m_cashe_animation.bones.size();
+	for(int i = 0; i < bon_count; i++)
+	{
+		m_cashe_animation.bones[i] = frames[frame].bones[i] * glm::inverse(bones[i].matrix);
+	}
+	m_cache_frame = frame;
 }
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)

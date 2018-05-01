@@ -25,11 +25,24 @@ struct AnimationFrame
 	}
 };
 
-struct Animation
+class Animation
 {
-	int framescount;
+public:
+	size_t framescount;
 	std::vector <AnimationFrame> frames;
-	void LoadAnimation(std::string FileName, std::vector <Bone> &bones);
+	void LoadAnimation(const std::string &file_name, std::vector <Bone> &bones);
+	void LoadAnimation(const std::string &file_name);
+	void CalculateCache(const std::vector <Bone> &bones,size_t frame);
+	Animation():m_precalculated(false)
+	{}
+	Animation(const std::string &file_name);
+	GLfloat * GetDrawValues(size_t frame,const std::vector <Bone> &bones);
+	const glm::mat4 & GetBoneMatrix(size_t frame,size_t bone,const std::vector <Bone> &bones);
+	
+private:
+	bool m_precalculated;
+	size_t m_cache_frame;
+	AnimationFrame m_cashe_animation;
 };
 
 

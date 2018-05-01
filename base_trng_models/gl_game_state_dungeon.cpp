@@ -247,7 +247,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
                                         {
                                             for(auto line : lines)
                                             {
-                                                Models.emplace_back(std::make_shared<glModel>(line, Animations));
+                                                Models.emplace_back(std::make_shared<glModel>(line));
                                             }
                                             ResetModels(Models);
                                         }));
@@ -259,7 +259,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     execute_funcs.insert(std::make_pair("hero_event",[this](std::vector<std::string> &lines){LoadMapEvent(lines);}));
 
     Models.clear();
-    Animations.clear();
+    
     
     std::vector<std::string> lines;
     std::string sufix ="";

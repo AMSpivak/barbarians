@@ -18,8 +18,8 @@ class glModel
 
 	std::shared_ptr<IGlJalStruct> jal_mesh;
 
-	std::shared_ptr<Animation> animation;
-	std::string name;
+
+
 	//GLResourcesManager &m_resources_manager;
 
 public:
@@ -31,6 +31,7 @@ public:
     std::shared_ptr<IGlTextureStruct> utility_texture;
     std::shared_ptr<IGlTextureStruct> normal_texture;
 	std::shared_ptr<IGlJubStruct> jub_bones;
+	std::shared_ptr<Animation> animation;
 
 	glModel(GLResourcesManager &resources_manager)
 	{}
@@ -40,10 +41,7 @@ public:
 		LoadAll(FileName);
 	}
 
-	glModel(std::string FileName,std::vector <std::shared_ptr<Animation> > &animations)
-	{
-		LoadAll(FileName,animations);
-	}
+	const glm::mat4 &GetBoneMatrix(size_t frame, size_t bone);
 
 
 
@@ -64,7 +62,6 @@ public:
 
 	void LoadModelBones(std::string FileName);
 	void LoadAll(std::string FileName);
-	void LoadAll(std::string FileName,std::vector <std::shared_ptr<Animation> > &animations);
 	void Draw();
 	void Draw(GLuint shaderProgram, Animation &animation, int now_frame);
 	void Draw(GLuint shaderProgram, int now_frame);

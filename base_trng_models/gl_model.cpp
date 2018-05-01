@@ -43,8 +43,9 @@ void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 	glUniform1i(glGetUniformLocation(shaderProgram, "NormalTexture"), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, normal_texture.get()->m_texture);
-
-	glUniformMatrix4fv(boneLoc, jub_bones.get()->bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));
+	const std::vector <Bone> &bones = jub_bones.get()->bones;
+	glUniformMatrix4fv(boneLoc, bones.size(), GL_FALSE, animation.GetDrawValues(now_frame,bones));
+	//glUniformMatrix4fv(boneLoc, jub_bones.get()->bones.size(), GL_FALSE, glm::value_ptr(animation.frames[now_frame].bones[0]));
     Draw();
 }
 
@@ -56,44 +57,17 @@ void glModel::Draw(GLuint shaderProgram, int now_frame)
 void glModel::AttachAnimation(std::vector <std::shared_ptr<Animation> > &animations, std::string Filename)
 {
 	animations.emplace_back(std::make_shared<Animation>());
-	animations.back()->LoadAnimation(Filename,jub_bones.get()->bones);
+	animations.back()->LoadAnimation(Filename);
 	animation = animations.back();
 }
+	
+const glm::mat4 &glModel::GetBoneMatrix(size_t frame, size_t bone)
+{
+	animation->GetBoneMatrix(frame,bone,jub_bones.get()->bones);//frames[now_frame].bones[Models[i]->parent_bone];
+}
+
 
 void glModel::LoadAll(std::string FileName)
-{
-	size_t pos = FileName.rfind("/");
-	std::ifstream modelfile;
-	modelfile.open(FileName);
-
-	std::string path = pos == std::string::npos ? "" : FileName.erase(pos+1,std::string::npos);
-	std::string tmp_str;
-	std::string jal_name;
-	std::string jub_name;
-	std::string png_name;
-	std::string frames_name = "";
-
-	getline(modelfile, tmp_str);
-	jal_name = /*path + */tmp_str;
-	getline(modelfile, tmp_str);
-	jub_name = path + tmp_str;
-	getline(modelfile, tmp_str);
-	png_name = /*path + */tmp_str;
-	modelfile >> parent_idx >> parent_bone;
-	std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n";
-	modelfile.close();
-	GLResourcesManager * resources = GetResourceManager();
-	//LoadModel(jal_name);
-	name = jal_name;	
-	jal_mesh = resources->m_mesh_atlas.Assign(jal_name);
-	diffuse_texture = resources->m_texture_atlas.Assign(png_name);
-	jub_bones = resources->m_bones_atlas.Assign(jub_name);
-	
-	//LoadModelBones(jub_name);
-
-
-}
-void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animation> > &animations)
 {
 	size_t pos = FileName.rfind("/");
 	std::ifstream modelfile;
@@ -122,7 +96,7 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
     //std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<png_utility_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n"<<frames_name<<"\n";
 
 	modelfile.close();
-	name = jal_name;
+	//name = jal_name;
 
 	GLResourcesManager * resources = GetResourceManager();
 	//LoadModel(jal_name);
@@ -131,8 +105,9 @@ void glModel::LoadAll(std::string FileName,std::vector <std::shared_ptr<Animatio
 	utility_texture = resources->m_texture_atlas.Assign(png_utility_name);
 	normal_texture = resources->m_texture_atlas.Assign(png_normal_name);
 	jub_bones = resources->m_bones_atlas.Assign(jub_name);
+	if(frames_name.compare("")) animation = resources->m_animation_atlas.Assign(frames_name);
 
-	if(frames_name.compare("")) AttachAnimation(animations,path + frames_name);
+	//if(frames_name.compare("")) AttachAnimation(animations,path + frames_name);
 
 
 }

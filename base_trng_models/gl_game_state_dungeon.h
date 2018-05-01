@@ -32,7 +32,6 @@ public:
 private:
 
     std::vector <std::shared_ptr<glModel> > Models;
-    std::vector <std::shared_ptr<Animation> > Animations;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
     std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
     std::shared_ptr<IGlTextureStruct> fx_texture, skybox, debug_texture;

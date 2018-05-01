@@ -29,7 +29,6 @@ private:
 
     size_t now_frame;
     std::vector <std::shared_ptr<glModel> > Models;
-	std::vector <std::shared_ptr<Animation> > Animations;
     //std::map<std::string, GLuint> &shader_map;
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;

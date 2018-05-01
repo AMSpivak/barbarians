@@ -104,7 +104,7 @@ int main(int argc, char const *argv[])
 
 	
 
-	GLResourcesManager resources_atlas("material/textures/","material/meshes/","","");
+	GLResourcesManager resources_atlas("material/textures/","material/meshes/","material/animations/","");
 
 	SetResourceManager(&resources_atlas);
 
@@ -139,9 +139,8 @@ int main(int argc, char const *argv[])
 
 
 	std::vector <std::shared_ptr<glModel> > Models;
-	std::vector <std::shared_ptr<Animation> > Animations;
 
-	Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl",Animations));
+	Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl"));
 
     std::map<std::string,std::shared_ptr<IGlModel>> m_glmodels_map;
 
@@ -152,7 +151,7 @@ int main(int argc, char const *argv[])
 
 	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
 
-	UpdateCharacterFromFile("material/hero.chr",hero);
+	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",hero);
 
 
 	glEnable(GL_DEPTH_TEST);
