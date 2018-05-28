@@ -24,7 +24,7 @@ void main()
 
 	Diffuse.w = 1.0;
 	vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
-
+/*
 	vec2 offset = TexCoords+ vec2(-1, -1)* texelSize;
 	Light = texture(LightMap, offset);
     Spec = texture(SpecMap, offset);
@@ -75,7 +75,8 @@ void main()
 	d_depth /= d_depth +0.01;
 
 	float blur = (1.0-v_n )*(1.0 - d_depth);
-	blur = clamp(blur,0.0,1.0);
+	blur = clamp(blur,0.0,1.0);*/
 
-    FragColor = vec4(blur*texColor.xyz + (1.0 - blur)*BlurColor.xyz, 1.0);
+    //FragColor = vec4(blur*texColor.xyz + (1.0 - blur)*BlurColor.xyz, 1.0);
+    FragColor = vec4(texColor.xyz, 1.0);
 }

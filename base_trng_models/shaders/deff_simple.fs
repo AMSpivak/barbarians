@@ -28,6 +28,11 @@ float GGX_Distribution(float cosThetaNH, float alpha) {
     return alpha2 / ( M_PI * den * den );
 }
 
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (vec3(1.0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 void main()
 {
     float rad = LightLocation.w;
@@ -50,20 +55,25 @@ void main()
     vec3 halfwayDir = normalize(LightDir + viewDir); 
     float dotHV = max(dot(viewDir, halfwayDir), 0.0);
     float dotNH = max(dot(texNormal, halfwayDir), 0.0);
-    float dotNV = max(dot(texNormal, viewDir), 0.0);
+    float dotNV = max(dot(texNormal, viewDir), 0.1);
 
-    float f0 = mix(0.004,0.7,texColor.a);
-    float shlick =f0 + (1.0-f0)*pow((1.0 -norm_l),5);
+    //float f0 = mix(0.004,0.7,texColor.a);
+    //float shlick =f0 + (1.0-f0)*pow((1.0 -norm_l),5);
+
+    vec3 F0 = vec3(0.04);
+    F0      = mix(F0, texColor.rgb, texColor.a);
+
+    vec3 shlick =fresnelSchlick(dotNV,F0);
     float roug_sqr = normal_map.w*normal_map.w;
     float G = GGX_PartialGeometry(dotNV, roug_sqr) * GGX_PartialGeometry(norm_l, roug_sqr);
     float D = GGX_Distribution(dotNH, roug_sqr);    
 
-    float spec = G*shlick*D*0.25/(max(0.0, dotNV)+0.001);
-    spec =max(0.0, spec);
+    vec3 spec = G*shlick*D*0.25/(max(0.0, dotNV)+0.001);
+    spec =max(vec3(0.0), spec);
 
 
     float intensivity = 1.0 - smoothstep(rad*0.3,rad,length(LightVec));
-    float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
+    vec3 diffuse = clamp(vec3(1.0) - shlick, 0.0, 1.0);
 
     float res = intensivity *(diffuse*norm_l/M_PI);
     gAlbedoSpec =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);

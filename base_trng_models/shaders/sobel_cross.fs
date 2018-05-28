@@ -23,28 +23,35 @@ void main()
 	vec2 texelSize = 0.7 / textureSize(NormalMap, 0);
 
 	Diffuse.w = 1.0;
-	vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+	vec3 color = Diffuse*Light.xyz+ Spec.xyz;
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0/2.2));
 
-	vec2 offset = TexCoords+ vec2(-1, -1)* texelSize;
-	Light = texture(LightMap, offset);
-    Spec = texture(SpecMap, offset);
-	vec4 texColor1 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+	vec4 texColor = vec4(color,1.0);
 
-	offset = TexCoords+ vec2(1, -1)* texelSize;
-	Light = texture(LightMap, offset);
-    Spec = texture(SpecMap, offset);
-	vec4 texColor2 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+	//vec2 offset = TexCoords+ vec2(-1, -1)* texelSize;
+	//Light = texture(LightMap, offset);
+    //Spec = texture(SpecMap, offset);
+	//vec4 texColor1 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
 
-	offset = TexCoords+ vec2(-1, 1)* texelSize;
-	Light = texture(LightMap, offset);
-    Spec = texture(SpecMap, offset);
-	vec4 texColor3 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+	//offset = TexCoords+ vec2(1, -1)* texelSize;
+	//Light = texture(LightMap, offset);
+    //Spec = texture(SpecMap, offset);
+	//vec4 texColor2 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
 
-	offset = TexCoords+ vec2(1, 1)* texelSize;
-	Light = texture(LightMap, offset);
-    Spec = texture(SpecMap, offset);
-	vec4 texColor4 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
-	vec4 BlurColor = (texColor1 + texColor2 + texColor3 + texColor4 + texColor)*0.2;
+	//offset = TexCoords+ vec2(-1, 1)* texelSize;
+	//Light = texture(LightMap, offset);
+    //Spec = texture(SpecMap, offset);
+	//vec4 texColor3 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+
+	//offset = TexCoords+ vec2(1, 1)* texelSize;
+	//Light = texture(LightMap, offset);
+    //Spec = texture(SpecMap, offset);
+
+
+	 
+	//vec4 texColor4 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+	vec4 BlurColor = texColor;//(texColor1 + texColor2 + texColor3 + texColor4 + texColor)*0.2;
 
 
 

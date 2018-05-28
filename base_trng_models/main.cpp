@@ -180,7 +180,18 @@ int main(int argc, char const *argv[])
 		ypos = (ypos * 2.0f - height)/height;
 		int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
         inputs[GLFW_MOUSE_BUTTON_LEFT] = (state != GLFW_RELEASE) ?  true : false;
-        
+
+		
+        static size_t counter = 0;
+        static double time_r  = 0;
+
+		if(counter++ == 0) time_r = glfwGetTime();
+		if(counter > 30)
+		{
+			std::cout<<(1.0f*counter/(glfwGetTime() - time_r))<<"\n";
+			counter = 0;
+		}
+		
 		game_state->Process(inputs, xpos, ypos);
         game_state->Draw();
 		glfwSwapBuffers(window);
@@ -204,6 +215,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (key == GLFW_KEY_LEFT || key == GLFW_KEY_A )
         inputs[GLFW_KEY_LEFT] = (action != GLFW_RELEASE) ?  true : false;
+
+
 
 	if (key == GLFW_KEY_RIGHT || key == GLFW_KEY_D )
 		inputs[GLFW_KEY_RIGHT] = (action != GLFW_RELEASE) ?  true : false;

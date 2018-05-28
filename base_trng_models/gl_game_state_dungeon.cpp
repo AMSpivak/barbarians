@@ -534,9 +534,9 @@ void GlGameStateDungeon::Draw()
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
 
-		glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
+		/*glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
 		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, Light.depthMap);
+		glBindTexture(GL_TEXTURE_2D, Light.depthMap);*/
 
 
 		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
@@ -548,6 +548,11 @@ void GlGameStateDungeon::Draw()
         
         GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
+
+
+        glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Light.depthMap);
 
 		GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
 		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
@@ -1082,6 +1087,10 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
 
         Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        
+        glm::vec3 light_orientation = glm::normalize(glm::vec3(-camera_position.x,0.0f,-camera_position.z));
+        Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
+        //Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
 
         //glm::vec3  light_dir_vector = glm::normalize(light_position);
 

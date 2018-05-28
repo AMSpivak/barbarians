@@ -27,11 +27,15 @@ float ShadowCalculation(vec4 PosLight, vec3 tNormal)
 
 
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    if(fragPosLightSpace.x<-1.0||fragPosLightSpace.x>1.0||fragPosLightSpace.y<-1.0||fragPosLightSpace.y>1.0)
+        discard;
+    //    return 0.0;
 	projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-	float bias = max(0.01 * smoothstep(0.65,0.85,(1.0 - max(dot(tNormal,LightDir),0.0))), 0.005);
+	//float bias = max(0.01 * smoothstep(0.65,0.85,(1.0 - max(dot(tNormal,LightDir),0.0))), 0.005);
 
     vec2 shift = texelSize*vec2(0.0,1.0);
     //float res = (textureProj(shadowMap,vec4(projCoords,1.0)));
@@ -68,6 +72,47 @@ float GGX_Distribution(float cosThetaNH, float alpha) {
     return alpha2 / ( M_PI * den * den );
 }
 
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (vec3(1.0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a      = roughness*roughness;
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+
+	
+    float num   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = M_PI * denom * denom;
+	
+    return num / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float num   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
+}
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.10);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2  = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1  = GeometrySchlickGGX(NdotL, roughness);
+	
+    return ggx1 * ggx2;
+}
+
+
 void main()
 {
 	vec4 texColor = texture(DiffuseMap, TexCoords);
@@ -77,33 +122,50 @@ void main()
 	vec3 texNormal= normal_map.xyz;
     //texNormal = normalize(texNormal * 2.0 - 1.0); 
 	vec3 FragPos= texture(PositionMap, TexCoords).xyz;
-	float norm_l = max(dot(texNormal,LightDir),0);
+	float norm_l = max(dot(texNormal,LightDir),0.01);
 	//vec3 reflectDir= reflect(-LightDir, texNormal).xyz;
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec3 halfwayDir = normalize(LightDir + viewDir); 
     float dotHV = max(dot(viewDir, halfwayDir), 0.0);
     float dotNH = max(dot(texNormal, halfwayDir), 0.0);
-    float dotNV = max(dot(texNormal, viewDir), 0.0);
+    float dotNV = max(dot(texNormal, viewDir), 0.10);
 
-    float f0 = mix(0.004,0.7,texColor.a);//texColor.a;
-    float shlick =f0 + (1.0-f0)*pow((1.0 -norm_l),5);
+    vec3 F0 = vec3(0.04);
+    F0      = mix(F0, texColor.rgb, texColor.a);
+
+    vec3 shlick =fresnelSchlick(dotNV,F0);
+
     float roug_sqr = (normal_map.w)*(normal_map.w);
-    float G = GGX_PartialGeometry(dotNV, roug_sqr) * GGX_PartialGeometry(norm_l, roug_sqr);
-    float D = GGX_Distribution(dotNH, roug_sqr);    
+    //float G = GeometrySchlickGGX(dotNV, roug_sqr) * GeometrySchlickGGX(norm_l, roug_sqr);
+//    float G = GGX_PartialGeometry(dotNV, roug_sqr) * GGX_PartialGeometry(norm_l, roug_sqr);
+    //float D = GGX_Distribution(dotNH, roug_sqr);    
 
-    float spec = G*shlick*D*0.25/(max(0.0, dotNV)+0.001);//*dotNV);
-    spec =max(0.0, spec);
+    float D =  DistributionGGX(texNormal, halfwayDir, roug_sqr);       
+    float G   = GeometrySmith(texNormal, viewDir, LightDir, roug_sqr); 
+
 
 
 	float shadow_res =(ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
     float shadow_norm =1.0 -  smoothstep(0.6,1.0,1.0-norm_l);//norm_l;//smoothstep(shadow_res,1.0,norm_l);
     shadow_res = 1.0 - (1.0 - shadow_res) * norm_l;
-    float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
-    float res = shadow_res *(diffuse*norm_l/M_PI);
+    //float diffuse = clamp(1.0 - shlick, 0.0, 1.0);
+    //float res = shadow_res *(diffuse*norm_l/M_PI);
 
     //gAlbedoSpec =vec4(vec3(1.0,1.0,1.0),1.0);
-    //gNormal =vec4(0.0 * vec3(1.0,1.0,1.0),1.0); 
-    gAlbedoSpec =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);
-    gNormal =vec4(((shadow_res*spec) )* LightColor * vec3(1.0,1.0,1.0),1.0);
+    //gNormal =vec4(0.0 * vec3(1.0,1.0,1.0),1.0);
+    vec3 numerator    = D * G * shlick;
+    float denominator = 4.0 * max(dotNV, 0.0);
+    vec3 specular     = numerator / max(denominator, 0.001);
+    vec3 kS = shlick;
+    vec3 kD = vec3(1.0) - kS;
+    //vec3 kD = vec3(1.0) - shlick;
+    //kD *= 1.0 - texColor.a;
+    vec3 diffuse =kD/M_PI;
+    //vec3 ShadowLightColor = shadow_res* LightColor;
+    vec3 ShadowLightColor = LightColor;
+    gAlbedoSpec =vec4(ShadowLightColor *norm_l* diffuse,1.0);
+    //gAlbedoSpec =vec4(0.0);
+    gNormal =vec4(ShadowLightColor * specular,1.0);
+    //gNormal =vec4(0.0);
 }
