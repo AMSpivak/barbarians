@@ -26,6 +26,7 @@ glRenderTarget::~glRenderTarget()
 	glDeleteTextures(1,&depthMap);
 	glDeleteTextures(1,&NormalMap);
 	glDeleteTextures(1,&AlbedoMap);
+	glDeleteBuffers(1, &StencilBuffer);
 	glDeleteBuffers(1, &FBO);
 	std::cout << "RenderTarget cleared!" << std::endl;
 }
@@ -38,6 +39,18 @@ void glRenderTarget::set()
 
 void glRenderTarget::GenerateBuffers()
 {
+	glGenRenderbuffers(1, &StencilBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, StencilBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+                      width, height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER,      // 1. fbo target: GL_FRAMEBUFFER
+                          GL_STENCIL_ATTACHMENT, // 2. attachment point
+                          GL_RENDERBUFFER,     // 3. rbo target: GL_RENDERBUFFER
+                          StencilBuffer);
+
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -68,6 +81,9 @@ void glRenderTarget::GenerateBuffers()
 
 	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
 	glDrawBuffers(2, attachments);
+
+
+
 }
 
 

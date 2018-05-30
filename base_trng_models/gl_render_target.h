@@ -17,6 +17,7 @@ public:
 	GLuint depthMap;
 	GLuint NormalMap;
 	GLuint AlbedoMap;
+	GLuint StencilBuffer;
 
 	void InitBuffer(unsigned int WIDTH, unsigned int HEIGHT);
 

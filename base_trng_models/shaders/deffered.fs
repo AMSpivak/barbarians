@@ -162,8 +162,8 @@ void main()
     //vec3 kD = vec3(1.0) - shlick;
     //kD *= 1.0 - texColor.a;
     vec3 diffuse =kD/M_PI;
-    //vec3 ShadowLightColor = shadow_res* LightColor;
-    vec3 ShadowLightColor = LightColor;
+    vec3 ShadowLightColor = shadow_res* LightColor;
+    //vec3 ShadowLightColor = LightColor;
     gAlbedoSpec =vec4(ShadowLightColor *norm_l* diffuse,1.0);
     //gAlbedoSpec =vec4(0.0);
     gNormal =vec4(ShadowLightColor * specular,1.0);

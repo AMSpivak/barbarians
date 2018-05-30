@@ -75,7 +75,7 @@ void main()
     float intensivity = 1.0 - smoothstep(rad*0.3,rad,length(LightVec));
     vec3 diffuse = clamp(vec3(1.0) - shlick, 0.0, 1.0);
 
-    float res = intensivity *(diffuse*norm_l/M_PI);
+    vec3 res = intensivity *(diffuse*norm_l/M_PI);
     gAlbedoSpec =vec4(((res) )* LightColor * vec3(1.0,1.0,1.0),1.0);
    // gAlbedoSpec =vec4(((norm_l) )* LightColor * vec3(1.0,1.0,1.0),1.0);
     gNormal =vec4(((intensivity*spec) )* LightColor * vec3(1.0,1.0,1.0),1.0);

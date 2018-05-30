@@ -169,6 +169,8 @@ int main(int argc, char const *argv[])
     game_state = &game_state_dungeon;
 
 
+	glfwSwapInterval(1);
+
 	while(!glfwWindowShouldClose(window))
 	{
 		GLuint current_shader;
@@ -194,8 +196,9 @@ int main(int argc, char const *argv[])
 		
 		game_state->Process(inputs, xpos, ypos);
         game_state->Draw();
-		glfwSwapBuffers(window);
+		
 		glfwPollEvents();
+		glfwSwapBuffers(window);
 	}
 
 	std::cout << "exit";

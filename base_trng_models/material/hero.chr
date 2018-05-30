@@ -3,4 +3,4 @@ radius 0.5
 model material/barb/barb.mdl
 sequence strike 92 116
 sequence walk 53 83
-sequence stance 10 37
+sequence stance 37 37

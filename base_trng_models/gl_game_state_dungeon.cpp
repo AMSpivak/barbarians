@@ -173,6 +173,8 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
                                         float size = 20.0f;
                                         sstream >> size >> f_near >> f_far; 
                                         Light.SetCameraLens_Orto(-size, size,-size, size,f_near,f_far);                                         
+                                        Light2.SetCameraLens_Orto(-size*2, size*2,-size*2, size*2,f_near,f_far);                                         
+                                    
                                     }));
 
     execute_funcs.insert(std::make_pair("light_color",[this](std::stringstream &sstream)
@@ -188,6 +190,8 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 
     light_dir_vector = glm::normalize(light_position);
     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    Light2.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
 }
 
 
@@ -444,6 +448,24 @@ void GlGameStateDungeon::Draw2D(GLuint depth_map)
           event.get()->Show(hero_position,Camera);
       }
 }
+void GlGameStateDungeon::PrerenderLight(glLight &Light,GlCharacter &hero)
+{
+    Light.SetLigtRender();
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(1.1,4000.0);
+
+    glClear( GL_DEPTH_BUFFER_BIT);
+    GLuint current_shader = m_shader_map["shadowmap"];
+    glUseProgram(current_shader);
+    unsigned int cameraLoc  = glGetUniformLocation(current_shader, "camera");
+    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
+
+    DrawDungeon(current_shader);
+    hero.Draw(current_shader);
+
+    glDisable(GL_POLYGON_OFFSET_FILL);
+}
+
 
 void GlGameStateDungeon::Draw()
 {
@@ -461,20 +483,9 @@ void GlGameStateDungeon::Draw()
 
 		unsigned int cameraLoc;
 
-		Light.SetLigtRender();
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(1.1,4000.0);
+		PrerenderLight(Light,hero);
 
-        glClear( GL_DEPTH_BUFFER_BIT);
-		GLuint current_shader = m_shader_map["shadowmap"];
-		glUseProgram(current_shader);
-		cameraLoc  = glGetUniformLocation(current_shader, "camera");
-		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
-
-        DrawDungeon(current_shader);
-		hero.Draw(current_shader);
-
-        glDisable(GL_POLYGON_OFFSET_FILL);
+		PrerenderLight(Light2,hero);
 
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
@@ -533,10 +544,6 @@ void GlGameStateDungeon::Draw()
 		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
-
-		/*glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, Light.depthMap);*/
 
 
 		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
@@ -1090,6 +1097,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         
         glm::vec3 light_orientation = glm::normalize(glm::vec3(-camera_position.x,0.0f,-camera_position.z));
         Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
+        Light2.SetCameraLocation(light_position+glm::vec3(10.0f, 0.0f, 0.0f),glm::vec3(10.0f, 0.0f, 0.0f), light_orientation);
         //Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
 
         //glm::vec3  light_dir_vector = glm::normalize(light_position);

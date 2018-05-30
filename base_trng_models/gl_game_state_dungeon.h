@@ -43,7 +43,7 @@ private:
     
     bool m_antialiase_enabled;
     std::string m_start_place;
-    glLight Light;
+    glLight Light,Light2;
     float light_angle;
     float light_radius;
     glCamera Camera;
@@ -64,6 +64,8 @@ private:
     void SetDungeonSize(std::vector<std::string> &lines);
     void LoadMapEvent(std::vector<std::string> &lines);
     
+
+    void PrerenderLight(glLight &Light,GlCharacter &hero);
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
     void Draw2D(GLuint depth_map);
