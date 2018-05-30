@@ -500,7 +500,7 @@ void GlGameStateDungeon::Draw()
 
 
 
-		current_shader = m_shader_map["deff_1st_pass"];
+		GLuint current_shader = m_shader_map["deff_1st_pass"];
 		glUseProgram(current_shader);
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
