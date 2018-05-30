@@ -465,7 +465,17 @@ void GlGameStateDungeon::PrerenderLight(glLight &Light,GlCharacter &hero)
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
+void GlGameStateDungeon::DrawGlobalLight(GLuint current_shader, glLight &Light)
+{
+        glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Light.depthMap);
 
+		GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
+		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
+
+		renderQuad();
+}
 
 void GlGameStateDungeon::Draw()
 {
@@ -494,7 +504,7 @@ void GlGameStateDungeon::Draw()
 		//*------------------------------
 		render_target.set();
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_BACK);
         glDepthFunc(GL_LEQUAL);
 
@@ -556,20 +566,18 @@ void GlGameStateDungeon::Draw()
         GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 
+        glEnable(GL_STENCIL_TEST);
+        glClear(GL_STENCIL_BUFFER_BIT); 
+        glStencilMask(0xFF);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);   
+        DrawGlobalLight(current_shader,Light);
+        DrawGlobalLight(current_shader,Light2);
 
-        glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, Light.depthMap);
+        glDisable(GL_STENCIL_TEST); 
 
-		GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
-		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
-
-		renderQuad();
 
         current_shader = m_shader_map["deffered_simple"];
-
-
-
         DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
         
 
@@ -1097,7 +1105,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         
         glm::vec3 light_orientation = glm::normalize(glm::vec3(-camera_position.x,0.0f,-camera_position.z));
         Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
-        Light2.SetCameraLocation(light_position+glm::vec3(10.0f, 0.0f, 0.0f),glm::vec3(10.0f, 0.0f, 0.0f), light_orientation);
+        Light2.SetCameraLocation(light_position+light_orientation*10.0f,light_orientation*10.0f, light_orientation);
         //Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
 
         //glm::vec3  light_dir_vector = glm::normalize(light_position);

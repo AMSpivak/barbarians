@@ -66,6 +66,8 @@ private:
     
 
     void PrerenderLight(glLight &Light,GlCharacter &hero);
+    void DrawGlobalLight(GLuint current_shader, glLight &Light);
+
     void DrawDungeon(GLuint current_shader);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
     void Draw2D(GLuint depth_map);
