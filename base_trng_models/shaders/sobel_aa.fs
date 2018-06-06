@@ -45,11 +45,11 @@ void main()
     Spec = texture(SpecMap, offset);
 	vec4 texColor4 = texture(texMap, offset)*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
 	vec4 BlurColor = (texColor1 + texColor2 + texColor3 + texColor4 + texColor)*0.2;
-
+*/
 	//Light = texture(LightMap, TexCoords);
     //Spec = texture(SpecMap, TexCoords);
 
-	vec3 vt = (texture(NormalMap, TexCoords.xy + vec2(-1, -1)* texelSize).xyz
+	/*vec3 vt = (texture(NormalMap, TexCoords.xy + vec2(-1, -1)* texelSize).xyz
 					-texture(NormalMap, TexCoords.xy + vec2(1, 1)* texelSize ).xyz
 					);
 	vec3 vt2 = (texture(NormalMap, TexCoords.xy + vec2(-1, 1)* texelSize).xyz
@@ -60,7 +60,7 @@ void main()
 	float v_n =dot(vt,vt2);
 
 
-	float d_depth = abs(
+	//float d_depth = abs(
 						texture(DepthMap, TexCoords.xy + vec2(-1, -1) * texelSize).x -
 						texture(DepthMap, TexCoords.xy + vec2(1, 1) * texelSize).x
 					);
@@ -72,11 +72,11 @@ void main()
 
 	v_n /=v_n + 0.1;
 
-	d_depth /= d_depth +0.01;
+	d_depth /= d_depth +0.01;*/
 
-	float blur = (1.0-v_n )*(1.0 - d_depth);
-	blur = clamp(blur,0.0,1.0);*/
-
+	float blur = 1.0f;//(1.0-v_n )*(1.0 - d_depth);
+	//blur = clamp(blur,0.0,1.0);
+	//blur =smoothstep(0.0,0.2, blur* blur);
     //FragColor = vec4(blur*texColor.xyz + (1.0 - blur)*BlurColor.xyz, 1.0);
-    FragColor = vec4(texColor.xyz, 1.0);
+    FragColor = blur*vec4(texColor.xyz, 1.0);
 }

@@ -15,6 +15,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include "glscene.h"
+#include "gl_physics.h"
 #include "gl_game_state_dungeon.h"
 #include "map_event_hero_strikes.h"
 #include "map_event_valhalla.h"
@@ -731,7 +732,7 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     if(mass_summ < std::numeric_limits<float>::min())
             return 0.0f;
 
-    std::vector < glm::vec3 > axes;
+    /*std::vector < glm::vec3 > axes;
     axes.push_back(glm::normalize(object2.position - object1.position));
     object1.AddAxes(axes);
     object2.AddAxes(axes);
@@ -753,29 +754,31 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
             compensate_axe = axe;
             intersection = axe_intersection;
         }
-    }
+    }*/
+    std::pair<float,glm::vec3> intersection = Physics::Intersection(object1,object2);
+    if (intersection.first < std::numeric_limits<float>::min()) return 0.0f;
 
-    float pos2_axe = glm::dot(object2.position - object1.position,compensate_axe);
-    compensate_axe[1] = 0.0f;
+    float pos2_axe = glm::dot(object2.position - object1.position,intersection.second);
+    intersection.second[1] = 0.0f;
     if(pos2_axe < 0.0f)
     {
-        intersection = -intersection;
+        intersection.first = -intersection.first;
     }
 
     float obj1_part = object1.mass_inv/mass_summ;
     float obj2_part = 1.0f - obj1_part;
 
 
-    object2.position += obj2_part * intersection * compensate_axe;
-    object1.position -= obj1_part * intersection * compensate_axe;
+    object2.position += obj2_part * intersection.first * intersection.second;
+    object1.position -= obj1_part * intersection.first * intersection.second;
     
-    return intersection;
+    return intersection.first;
     
 }
 
 InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value)
 {
-    std::vector < glm::vec3 > axes;
+    /*std::vector < glm::vec3 > axes;
     axes.push_back(glm::normalize(object.position - event.position));
     object.AddAxes(axes);
     event.AddAxes(axes);
@@ -794,17 +797,12 @@ InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEv
 
         if(axe_intersection < intersection)
         {
-            std::cout << axe_intersection<<" " << axe
-                        <<" " << object.position
-                        <<" " << event.position << "\n";
-            std::cout << projection1.first<<" " << projection1.second<< "\n";
-            std::cout << projection2.first<<" " << projection2.second<< "\n";
             compensate_axe = axe;
             intersection = axe_intersection;
         }
-    }
-    
-    return event.Interact(object,return_value);
+    }*/
+    std::pair<float,glm::vec3> intersection = Physics::Intersection(object,event);
+    return intersection.first < std::numeric_limits<float>::min() ? InteractionResult::Nothing : event.Interact(object,return_value);
 }
 
 void GlGameStateDungeon::FitObjects(int steps, float accuracy)
@@ -1106,9 +1104,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         glm::vec3 light_orientation = glm::normalize(glm::vec3(-camera_position.x,0.0f,-camera_position.z));
         Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
         Light2.SetCameraLocation(light_position+light_orientation*10.0f,light_orientation*10.0f, light_orientation);
-        //Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
 
-        //glm::vec3  light_dir_vector = glm::normalize(light_position);
 
         time = time_now;
 

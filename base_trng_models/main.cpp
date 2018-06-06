@@ -140,7 +140,7 @@ int main(int argc, char const *argv[])
 
 	std::vector <std::shared_ptr<glModel> > Models;
 
-	Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl"));
+	//Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl"));
 
     std::map<std::string,std::shared_ptr<IGlModel>> m_glmodels_map;
 
@@ -169,7 +169,7 @@ int main(int argc, char const *argv[])
     game_state = &game_state_dungeon;
 
 
-	glfwSwapInterval(1);
+	//glfwSwapInterval(1);
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -196,9 +196,9 @@ int main(int argc, char const *argv[])
 		
 		game_state->Process(inputs, xpos, ypos);
         game_state->Draw();
-		
-		glfwPollEvents();
 		glfwSwapBuffers(window);
+		glfwPollEvents();
+		
 	}
 
 	std::cout << "exit";
