@@ -15,7 +15,7 @@ void glRenderTarget::InitBuffer(unsigned int WIDTH, unsigned int HEIGHT)
 
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
+		std::cout << "Framebuffer not complete!" << std::endl<<std::hex<<glCheckFramebufferStatus(GL_FRAMEBUFFER)<<std::dec<<std::endl;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -40,20 +40,19 @@ void glRenderTarget::set()
 void glRenderTarget::GenerateBuffers()
 {
 	glGenRenderbuffers(1, &StencilBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, StencilBuffer);
+	/*glBindRenderbuffer(GL_RENDERBUFFER, StencilBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
                       width, height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);*/
 
 
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER,      // 1. fbo target: GL_FRAMEBUFFER
-                          GL_STENCIL_ATTACHMENT, // 2. attachment point
-                          GL_RENDERBUFFER,     // 3. rbo target: GL_RENDERBUFFER
-                          StencilBuffer);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_STENCIL_ATTACHMENT,GL_RENDERBUFFER,StencilBuffer);/**/
+					  
 
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -75,6 +74,7 @@ void glRenderTarget::GenerateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, AlbedoMap, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, NormalMap, 0);
 

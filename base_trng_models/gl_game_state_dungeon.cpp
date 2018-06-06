@@ -732,29 +732,7 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     if(mass_summ < std::numeric_limits<float>::min())
             return 0.0f;
 
-    /*std::vector < glm::vec3 > axes;
-    axes.push_back(glm::normalize(object2.position - object1.position));
-    object1.AddAxes(axes);
-    object2.AddAxes(axes);
-
-    glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
-    float intersection = std::numeric_limits<float>::max();
-
-    for(auto axe : axes)
-    {
-        std::pair<float,float> projection1 = object1.ProjectOnAxe(axe);
-        std::pair<float,float> projection2 = object2.ProjectOnAxe(axe);
-       float axe_intersection = CollisionOnAxe(projection1,projection2);
-
-        if(axe_intersection < std::numeric_limits<float>::min())
-            return 0.0f;
-
-        if(axe_intersection < intersection)
-        {
-            compensate_axe = axe;
-            intersection = axe_intersection;
-        }
-    }*/
+    
     std::pair<float,glm::vec3> intersection = Physics::Intersection(object1,object2);
     if (intersection.first < std::numeric_limits<float>::min()) return 0.0f;
 
@@ -778,29 +756,6 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
 
 InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value)
 {
-    /*std::vector < glm::vec3 > axes;
-    axes.push_back(glm::normalize(object.position - event.position));
-    object.AddAxes(axes);
-    event.AddAxes(axes);
-
-    glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
-    float intersection = std::numeric_limits<float>::max();
-
-    for(auto axe : axes)
-    {
-        std::pair<float,float> projection1 = object.ProjectOnAxe(axe);
-        std::pair<float,float> projection2 = event.ProjectOnAxe(axe);
-        float axe_intersection = CollisionOnAxe(projection1,projection2);
-
-        if(axe_intersection < std::numeric_limits<float>::min())
-            return InteractionResult::Nothing;
-
-        if(axe_intersection < intersection)
-        {
-            compensate_axe = axe;
-            intersection = axe_intersection;
-        }
-    }*/
     std::pair<float,glm::vec3> intersection = Physics::Intersection(object,event);
     return intersection.first < std::numeric_limits<float>::min() ? InteractionResult::Nothing : event.Interact(object,return_value);
 }
