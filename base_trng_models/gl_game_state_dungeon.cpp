@@ -300,7 +300,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
 }
 
 
-void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
+void GlGameStateDungeon::DrawDungeon(GLuint current_shader, const GlCharacter &hero)
 {
     glm::mat4 model_matrix = Models[0]->model;
     glm::mat4 pos_matrix;
@@ -352,6 +352,8 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader)
         ptr->Draw(current_shader);
         ptr->model_matrix = model_matrix;
     }
+
+    hero.Draw(current_shader);
                
     
 }
@@ -440,15 +442,12 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 
 void GlGameStateDungeon::Draw2D(GLuint depth_map)
 {
-      /*  renderBillBoardDepth(m_shader_map["sprite2d"],depth_map,fx_texture.get(),
-        1.0f,1.45f,glm::vec3(2.0f,2.0f,3.0f),hero_position,Camera);
-    */
-
       for(std::shared_ptr<IMapEvent> event :map_events) 
       {
           event.get()->Show(hero_position,Camera);
       }
 }
+
 void GlGameStateDungeon::PrerenderLight(glLight &Light,GlCharacter &hero)
 {
     Light.SetLigtRender();
@@ -461,21 +460,64 @@ void GlGameStateDungeon::PrerenderLight(glLight &Light,GlCharacter &hero)
     unsigned int cameraLoc  = glGetUniformLocation(current_shader, "camera");
     glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
-    DrawDungeon(current_shader);
-    hero.Draw(current_shader);
+    DrawDungeon(current_shader,hero);
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
-void GlGameStateDungeon::DrawGlobalLight(GLuint current_shader, glLight &Light)
+
+void GlGameStateDungeon::DrawGlobalLight(const GLuint light_loc, const glLight &Light)
 {
-        glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, Light.depthMap);
-
-		GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
-		glUniformMatrix4fv(LightLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
-
+		glUniformMatrix4fv(light_loc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 		renderQuad();
+}
+
+void GlGameStateDungeon::DrawGlobalCascade(const glRenderTargetDeffered &render_target)
+{
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        GLuint current_shader = m_shader_map["deffered"];
+
+		glUseProgram(current_shader);
+
+		glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
+
+		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
+
+		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
+
+
+		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
+		glUniform3fv(light_dir, 1, glm::value_ptr(light_dir_vector));
+
+		GLuint view_pos  = glGetUniformLocation(current_shader, "viewPos");
+		glUniform3fv(view_pos, 1, glm::value_ptr(Camera.m_position));
+
+        
+        GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
+        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
+        
+
+        glEnable(GL_STENCIL_TEST);
+        glClear(GL_STENCIL_BUFFER_BIT); 
+        glStencilMask(0xFF);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); 
+
+        GLuint shadow_map = glGetUniformLocation(current_shader, "shadowMap");
+		GLuint light_loc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
+        glUniform1i(shadow_map, 3);
+
+        DrawGlobalLight(light_loc,Light);
+        DrawGlobalLight(light_loc,Light2);
+
+        glDisable(GL_STENCIL_TEST); 
 }
 
 void GlGameStateDungeon::Draw()
@@ -487,7 +529,7 @@ void GlGameStateDungeon::Draw()
 
     size_t width = IGlGameState::m_screen_width;
     size_t height = IGlGameState::m_screen_height;
-    int models_count = Models.size();
+    
 
 		glDisable(GL_MULTISAMPLE);
 		glDisable(GL_CULL_FACE);
@@ -516,10 +558,12 @@ void GlGameStateDungeon::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
-        DrawDungeon(current_shader);
+        DrawDungeon(current_shader,hero);
 
 
-        hero.Draw(current_shader);
+        //hero.Draw(current_shader);
+
+
      
 		final_render_target.set();
         glEnable(GL_BLEND);
@@ -541,50 +585,11 @@ void GlGameStateDungeon::Draw()
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-        current_shader = m_shader_map["deffered"];
-
-		glUseProgram(current_shader);
-
-		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, render_target.AlbedoMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "NormalMap"), 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, render_target.NormalMap);
-
-		glUniform1i(glGetUniformLocation(current_shader, "PositionMap"), 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, render_target.PositionMap);
-
-
-		GLuint light_dir  = glGetUniformLocation(current_shader, "LightDir");
-		glUniform3fv(light_dir, 1, glm::value_ptr(light_dir_vector));
-
-		GLuint view_pos  = glGetUniformLocation(current_shader, "viewPos");
-		glUniform3fv(view_pos, 1, glm::value_ptr(Camera.m_position));
-
-        
-        GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
-        glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
-
-        glEnable(GL_STENCIL_TEST);
-        glClear(GL_STENCIL_BUFFER_BIT); 
-        glStencilMask(0xFF);
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);   
-        DrawGlobalLight(current_shader,Light);
-        DrawGlobalLight(current_shader,Light2);
-
-        glDisable(GL_STENCIL_TEST); 
+        DrawGlobalCascade(render_target);
 
 
         current_shader = m_shader_map["deffered_simple"];
         DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
-        
-
-    /**/
-
-
         glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
@@ -867,12 +872,6 @@ void GlGameStateDungeon::ProcessMessage(std::string event_string)
     std::string info;                               
     std::stringstream ss(event_string);
     ss >> info;
-    //size_t first = info.find_first_not_of(' ');
-    //size_t last = info.find_last_not_of(' ');
-    //std::cout<<"prefix:"<<info<<"\n";
-    //std::cout<<"source:"<<event_string<<"\n";
-    //std::cout<<"trim prefix: "<<info.substr(first, (last-first+1))<<"\n";
-    //str.erase(std::remove(info.begin(), info.end(), ' '), info.end());
     try
         {
             execute_funcs.at(info)(ss);
@@ -912,7 +911,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(hero_ptr.get()));
     GLuint current_shader;
 
-    int models_count = Models.size();
+    
     double time_now = glfwGetTime();
     //std::cout<<(time_now - time)<<'\n';
     if((time_now - time)>(1.0/30.0))
@@ -940,9 +939,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             if(std::abs(joy_axes[0])+std::abs(joy_axes[1])>0.6f)
             {
                 moving = true;
-            }
-            
-            
+            }  
         }
 
         if(moving)

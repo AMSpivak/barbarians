@@ -63,12 +63,12 @@ private:
     void LoadObject(std::vector<std::string> &lines);
     void SetDungeonSize(std::vector<std::string> &lines);
     void LoadMapEvent(std::vector<std::string> &lines);
-    
 
+    void DrawGlobalCascade(const glRenderTargetDeffered &render_target);
     void PrerenderLight(glLight &Light,GlCharacter &hero);
-    void DrawGlobalLight(GLuint current_shader, glLight &Light);
+    void DrawGlobalLight(const GLuint light_loc, const glLight &Light);
 
-    void DrawDungeon(GLuint current_shader);
+    void DrawDungeon(GLuint current_shader, const GlCharacter &hero);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
     void Draw2D(GLuint depth_map);
     void MoveHero(const glm::vec3 & hero_move);

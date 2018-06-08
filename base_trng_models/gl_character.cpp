@@ -139,7 +139,7 @@ void GlCharacter::AddSequence(const std::string & name, const AnimationSequence 
     sequence.insert( std::pair<std::string, AnimationSequence>(name,in_sequence));
 }
 
-void GlCharacter::Draw(GLuint shader)
+void GlCharacter::Draw(GLuint shader) const
 {
 
     int models_count = Models.size();
@@ -199,7 +199,7 @@ int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
     return 0;
 }
 
-std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe)
+std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe) const
 {
     float position_on_axe = glm::dot(axe, position);
 

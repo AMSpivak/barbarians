@@ -13,7 +13,7 @@ class GlCharacter: public IGlModel
 public:
     GlCharacter();
     ~GlCharacter();
-    void Draw(GLuint shader) ;
+    void Draw(GLuint shader) const;
     int Process();
     void AddModel(std::string name);
     void AddSequence(const std::string & name, const AnimationSequence & in_sequence);
@@ -22,7 +22,7 @@ public:
     void RefreshMatrixes();
 
     int AddAxes(std::vector<glm::vec3> &axes);
-    std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe);
+    std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe) const;
     void UpdateFromLines(std::vector<std::string> &lines);
 
 private:
