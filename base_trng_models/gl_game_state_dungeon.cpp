@@ -516,10 +516,8 @@ void GlGameStateDungeon::Draw()
         glDepthFunc(GL_LEQUAL);
 
 
-        glEnable(GL_STENCIL_TEST);
-        //glClear(GL_STENCIL_BUFFER_BIT); 
-        glStencilMask(0xFF);
-        
+  
+
 		GLuint current_shader = m_shader_map["deff_1st_pass"];
 		glUseProgram(current_shader);
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
@@ -537,10 +535,19 @@ void GlGameStateDungeon::Draw()
 
 		glViewport(0, 0, width, height);
 
+
+
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		current_shader = m_shader_map["luminocity"];
+
+        glEnable(GL_STENCIL_TEST);
+        glClear(GL_STENCIL_BUFFER_BIT); 
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE); 
+
 
 		glUseProgram(current_shader);
 		glActiveTexture(GL_TEXTURE0);
@@ -576,11 +583,11 @@ void GlGameStateDungeon::Draw()
         GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 
-        glEnable(GL_STENCIL_TEST);
+        //glEnable(GL_STENCIL_TEST);
         //glClear(GL_STENCIL_BUFFER_BIT); 
         glStencilMask(0xFF);
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);   
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        glStencilOp(GL_INCR, GL_KEEP, GL_INCR);   
         DrawGlobalLight(current_shader,Light);
         DrawGlobalLight(current_shader,Light2);
 
