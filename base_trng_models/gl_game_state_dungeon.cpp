@@ -52,6 +52,9 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
 {
+    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
     //debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
@@ -387,9 +390,12 @@ void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_co
         renderQuad();
 }
 
-void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target )
+void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,glRenderTargetDeffered &render_target )
 {
         //DrawSimpleLight(light_pos_vector,light_color_vector,current_shader,render_target );
+
+    GLuint current_shader = m_shader_map["deffered_simple"];
+
     glm::vec4 light_position;
     glm::vec3 light_color;
     
@@ -466,6 +472,7 @@ void GlGameStateDungeon::PrerenderLight(glLight &Light,GlCharacter &hero)
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
+
 void GlGameStateDungeon::DrawGlobalLight(GLuint current_shader, glLight &Light)
 {
         glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
@@ -495,8 +502,7 @@ void GlGameStateDungeon::Draw()
 		unsigned int cameraLoc;
 
 		PrerenderLight(Light,hero);
-
-		PrerenderLight(Light2,hero);
+        PrerenderLight(Light2,hero);
 
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
@@ -510,7 +516,10 @@ void GlGameStateDungeon::Draw()
         glDepthFunc(GL_LEQUAL);
 
 
-
+        glEnable(GL_STENCIL_TEST);
+        //glClear(GL_STENCIL_BUFFER_BIT); 
+        glStencilMask(0xFF);
+        
 		GLuint current_shader = m_shader_map["deff_1st_pass"];
 		glUseProgram(current_shader);
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
@@ -568,7 +577,7 @@ void GlGameStateDungeon::Draw()
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 
         glEnable(GL_STENCIL_TEST);
-        glClear(GL_STENCIL_BUFFER_BIT); 
+        //glClear(GL_STENCIL_BUFFER_BIT); 
         glStencilMask(0xFF);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);   
@@ -578,8 +587,8 @@ void GlGameStateDungeon::Draw()
         glDisable(GL_STENCIL_TEST); 
 
 
-        current_shader = m_shader_map["deffered_simple"];
-        DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),current_shader,render_target);
+        
+        DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),render_target);
         
 
     /**/
@@ -732,31 +741,10 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     if(mass_summ < std::numeric_limits<float>::min())
             return 0.0f;
 
-    /*std::vector < glm::vec3 > axes;
-    axes.push_back(glm::normalize(object2.position - object1.position));
-    object1.AddAxes(axes);
-    object2.AddAxes(axes);
-
-    glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
-    float intersection = std::numeric_limits<float>::max();
-
-    for(auto axe : axes)
-    {
-        std::pair<float,float> projection1 = object1.ProjectOnAxe(axe);
-        std::pair<float,float> projection2 = object2.ProjectOnAxe(axe);
-       float axe_intersection = CollisionOnAxe(projection1,projection2);
-
-        if(axe_intersection < std::numeric_limits<float>::min())
-            return 0.0f;
-
-        if(axe_intersection < intersection)
-        {
-            compensate_axe = axe;
-            intersection = axe_intersection;
-        }
-    }*/
     std::pair<float,glm::vec3> intersection = Physics::Intersection(object1,object2);
-    if (intersection.first < std::numeric_limits<float>::min()) return 0.0f;
+    
+    if (intersection.first < std::numeric_limits<float>::min()) 
+        return 0.0f;
 
     float pos2_axe = glm::dot(object2.position - object1.position,intersection.second);
     intersection.second[1] = 0.0f;
@@ -778,29 +766,6 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
 
 InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value)
 {
-    /*std::vector < glm::vec3 > axes;
-    axes.push_back(glm::normalize(object.position - event.position));
-    object.AddAxes(axes);
-    event.AddAxes(axes);
-
-    glm::vec3 compensate_axe(0.0f,0.0f,0.0f);
-    float intersection = std::numeric_limits<float>::max();
-
-    for(auto axe : axes)
-    {
-        std::pair<float,float> projection1 = object.ProjectOnAxe(axe);
-        std::pair<float,float> projection2 = event.ProjectOnAxe(axe);
-        float axe_intersection = CollisionOnAxe(projection1,projection2);
-
-        if(axe_intersection < std::numeric_limits<float>::min())
-            return InteractionResult::Nothing;
-
-        if(axe_intersection < intersection)
-        {
-            compensate_axe = axe;
-            intersection = axe_intersection;
-        }
-    }*/
     std::pair<float,glm::vec3> intersection = Physics::Intersection(object,event);
     return intersection.first < std::numeric_limits<float>::min() ? InteractionResult::Nothing : event.Interact(object,return_value);
 }

@@ -37,15 +37,23 @@ void main()
 {
     float rad = LightLocation.w;
 	vec4 texColor = texture(DiffuseMap, TexCoords);
+    
     if(texColor.a < 0.05)
         discard;
 
     vec3 FragPos= texture(PositionMap, TexCoords).xyz;
+    vec3 LightVec = LightLocation.xyz - FragPos;
+
+    float length_to_source = length(LightVec);
+    
+    if(length_to_source>rad)
+        discard;
+
 
 	vec4 normal_map = texture(NormalMap, TexCoords);
 
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 LightVec = LightLocation.xyz - FragPos;
+    
     vec3 LightDir = normalize(LightVec);
 	vec3 texNormal= normal_map.xyz;
     //texNormal = normalize(texNormal * 2.0 - 1.0); 
@@ -72,7 +80,7 @@ void main()
     spec =max(vec3(0.0), spec);
 
 
-    float intensivity = 1.0 - smoothstep(rad*0.3,rad,length(LightVec));
+    float intensivity = 1.0 - smoothstep(rad*0.3,rad,length_to_source);
     vec3 diffuse = clamp(vec3(1.0) - shlick, 0.0, 1.0);
 
     vec3 res = intensivity *(diffuse*norm_l/M_PI);

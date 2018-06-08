@@ -69,7 +69,7 @@ private:
     void DrawGlobalLight(GLuint current_shader, glLight &Light);
 
     void DrawDungeon(GLuint current_shader);
-    void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,GLuint current_shader,glRenderTargetDeffered &render_target );
+    void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,glRenderTargetDeffered &render_target );
     void Draw2D(GLuint depth_map);
     void MoveHero(const glm::vec3 & hero_move);
     void FitObjects(int steps, float accuracy);

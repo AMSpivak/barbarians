@@ -153,17 +153,6 @@ int main(int argc, char const *argv[])
 
 	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",hero);
 
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-
-
-
-	//hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-
-   // GlGameStateArena game_state_arena(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
     GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
     IGlGameState * game_state = nullptr;//&game_state_arena;
     game_state = &game_state_dungeon;
