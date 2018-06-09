@@ -580,10 +580,10 @@ void GlGameStateDungeon::Draw()
         GLuint light_color  = glGetUniformLocation(current_shader, "LightColor");
         glUniform3fv(light_color, 1, glm::value_ptr(light_color_vector));
 
-        glEnable(GL_STENCIL_TEST);
-        glClear(GL_STENCIL_BUFFER_BIT); 
+        //glEnable(GL_STENCIL_TEST);
+        //glClear(GL_STENCIL_BUFFER_BIT); 
         glStencilMask(0xFF);
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); 
 
         GLuint ligh_loc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
