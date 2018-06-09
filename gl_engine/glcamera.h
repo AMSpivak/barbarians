@@ -12,7 +12,7 @@ class glCamera
 	glm::mat4 full_matrix;
 public:
 	glm::vec3 m_position;
-	const glm::mat4 &CameraMatrix()
+	const glm::mat4 &CameraMatrix() const
 	{
 		//full_matrix =  projection * view;
 		//return projection * view;
@@ -20,12 +20,12 @@ public:
         
 	}
 
-	const glm::mat4 &CameraViewMatrix()
+	const glm::mat4 &CameraViewMatrix() const
 	{
 		return view;
 	}
 
-	const glm::mat4 &CameraProjectionMatrix()
+	const glm::mat4 &CameraProjectionMatrix() const
 	{
 		return projection;
 	}
