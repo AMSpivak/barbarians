@@ -19,7 +19,7 @@ namespace Physics
         {
             std::pair<float,float> projection1 = object1.ProjectOnAxe(axe);
             std::pair<float,float> projection2 = object2.ProjectOnAxe(axe);
-            float axe_intersection = CollisionOnAxe(projection1,projection2);
+            float axe_intersection = Collision::CollisionOnAxe(projection1,projection2);
 
             if(axe_intersection < std::numeric_limits<float>::min())
                 return std::make_pair((float)0.0f,compensate_axe);

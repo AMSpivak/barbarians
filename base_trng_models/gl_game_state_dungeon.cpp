@@ -135,11 +135,9 @@ void GlGameStateDungeon::LoadDungeonObjects(std::vector<std::string> &lines)
 
 void GlGameStateDungeon::LoadObject(std::vector<std::string> &lines)
 {
-        std::shared_ptr<IGlModel> object_ptr(new GlCharacter());
+        std::shared_ptr<GlCharacter> object_ptr(new GlCharacter());
         dungeon_objects.push_back(object_ptr);
-        GlCharacter & barrel_model =  *(dynamic_cast<GlCharacter*>(object_ptr.get()));
-        barrel_model.UpdateFromLines(lines);
- 
+        object_ptr->UpdateFromLines(lines);
 }
 
 void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
@@ -667,7 +665,7 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
     glm::vec3 return_value = glm::vec3(0.0f,0.0f,0.0f);
     float minimum = std::numeric_limits<float>::min();
     
-    float intersect_x = CollisionOnAxe(position_cube[0] -1.0f,
+    float intersect_x = Collision::CollisionOnAxe(position_cube[0] -1.0f,
                                         position_cube[0] + 1.0f,
                                         position_circle[0]  - radius,
                                         position_circle[0]  + radius
@@ -678,7 +676,7 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
 
     return_value = glm::vec3(intersection[0] > 0 ? intersect_x : -intersect_x,0.0f,0.0f);
 
-    float intersect_z = CollisionOnAxe( position_cube[2] -1.0f,
+    float intersect_z = Collision::CollisionOnAxe( position_cube[2] -1.0f,
                                         position_cube[2] + 1.0f,
                                         position_circle[2]  - radius,
                                         position_circle[2]  + radius
@@ -694,7 +692,7 @@ glm::vec3 IntersectionProjection(const glm::vec3 & position_cube, const glm::vec
 
     float pos2_axe = glm::dot(position_circle - position_cube,axe);
 
-    float intersect_xz = CollisionOnAxe( -1.414f,
+    float intersect_xz = Collision::CollisionOnAxe( -1.414f,
                                         + 1.414f,
                                         pos2_axe  - radius,
                                         pos2_axe  + radius
