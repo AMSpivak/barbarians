@@ -22,6 +22,7 @@
 #include "map_event_general.h"
 #include "collision.h"
 #include "loader.h"
+#include "engine_settings.h"
 
 
 
@@ -552,7 +553,7 @@ void GlGameStateDungeon::Draw()
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-        current_shader = m_shader_map["deffered"];
+        current_shader = m_shader_map[EngineSettings::GetEngineSettings()->IsPbrON()?"deffered":"deffered_cheap"];
 
 		glUseProgram(current_shader);
 

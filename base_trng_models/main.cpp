@@ -20,6 +20,7 @@
 #include "gl_game_state_arena.h"
 #include "gl_game_state_dungeon.h"
 #include "animation_sequence.h"
+#include "engine_settings.h"
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
@@ -106,6 +107,9 @@ int main(int argc, char const *argv[])
 
 	GLResourcesManager resources_atlas("material/textures/","material/meshes/","material/animations/","");
 
+	EngineSettings::Settings main_settings;
+	EngineSettings::SetEngineSettings(&main_settings);
+
 	SetResourceManager(&resources_atlas);
 
     std::map<std::string,GLuint> m_shader_map;
@@ -133,6 +137,8 @@ int main(int argc, char const *argv[])
 	m_shader_map.insert ( std::pair<std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
+	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deffered_cheap.fs")) );
+    m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple_cheap.fs")) );
     m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
 	m_shader_map.insert ( std::pair<std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
 
@@ -229,5 +235,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         inputs[GLFW_KEY_RIGHT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;
     
 	if (key == GLFW_KEY_F1 )
+	{
         inputs[GLFW_KEY_F1] = (action != GLFW_RELEASE) ?  true : false;
+		if(action == GLFW_RELEASE)
+		{
+			EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+			settings->SetPbr(!settings->IsPbrON());
+		}
+	}
+	
 }
