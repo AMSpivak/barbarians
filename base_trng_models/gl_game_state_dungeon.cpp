@@ -457,6 +457,9 @@ void GlGameStateDungeon::Draw2D(GLuint depth_map)
 void GlGameStateDungeon::PrerenderLight(glLight &Light,GlCharacter &hero)
 {
     Light.SetLigtRender();
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.1,4000.0);
 

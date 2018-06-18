@@ -4,7 +4,8 @@
 
 
 GlCharacter::GlCharacter():
-                         now_frame(0)
+                         engine_frame(0)
+                         ,now_frame(0)
                         ,current_animation(nullptr)
 {
 

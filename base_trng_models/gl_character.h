@@ -26,6 +26,7 @@ public:
     void UpdateFromLines(std::vector<std::string> &lines);
 
 private:
+    size_t engine_frame;
 
     size_t now_frame;
     std::vector <std::shared_ptr<glModel> > Models;

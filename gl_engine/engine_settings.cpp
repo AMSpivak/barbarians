@@ -12,6 +12,13 @@ namespace EngineSettings
         pbr_light = value;
     }
 
+    void Settings::BeginNewFrame()
+    {
+        ++frame_number;
+    }
+
+    unsigned short Settings::GetFrame(){return frame_number;}
+
     static Settings * main_settings = nullptr;
 
     Settings * GetEngineSettings()

@@ -53,6 +53,10 @@ int main(int argc, char const *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	//Минорная
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+/*
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	//Минорная
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);*/
 	//Установка профайла для которого создается контекст
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//Выключение возможности изменения размера окна
@@ -190,6 +194,7 @@ int main(int argc, char const *argv[])
 		}
 		
 		game_state->Process(inputs, xpos, ypos);
+		EngineSettings::GetEngineSettings()->BeginNewFrame();
         game_state->Draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();

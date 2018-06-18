@@ -58,8 +58,8 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 void main()
 {
 	vec4 texColor = texture(DiffuseMap, TexCoords);
-    if(texColor.a < 0.05)
-        discard;
+    //if(texColor.a < 0.05)
+    //    discard;
     vec4 normal_map = texture(NormalMap, TexCoords);
 	vec3 texNormal= normal_map.xyz;
 
