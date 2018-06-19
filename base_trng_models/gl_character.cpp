@@ -146,6 +146,15 @@ void GlCharacter::Draw(GLuint shader) const
     int models_count = Models.size();
     for(int i = 0; i < models_count; i++) Models[i]->Draw(shader,now_frame);
 }
+
+
+void Draw(GLuint shader,const glm::mat4 &draw_matrix)
+{
+    Draw(GLuint shader);
+}
+
+
+
 void GlCharacter::RefreshMatrixes()
 {
     int models_count = Models.size();

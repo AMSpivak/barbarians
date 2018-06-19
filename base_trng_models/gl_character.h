@@ -14,6 +14,7 @@ public:
     GlCharacter();
     ~GlCharacter();
     void Draw(GLuint shader) const;
+    void Draw(GLuint shader,const glm::mat4 &draw_matrix);
     int Process();
     void AddModel(std::string name);
     void AddSequence(const std::string & name, const AnimationSequence & in_sequence);
