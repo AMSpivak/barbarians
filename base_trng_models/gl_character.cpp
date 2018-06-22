@@ -148,9 +148,9 @@ void GlCharacter::Draw(GLuint shader) const
 }
 
 
-void Draw(GLuint shader,const glm::mat4 &draw_matrix)
+void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)
 {
-    Draw(GLuint shader);
+    Draw(shader);
 }
 
 

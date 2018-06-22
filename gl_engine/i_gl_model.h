@@ -85,7 +85,7 @@ public:
 
     virtual ~IGlModel(){}
     virtual void Draw(GLuint shader) const = 0;
-    virtual void Draw(GLuint shader,const glm::mat4 &draw_matrix);
+    virtual void Draw(GLuint shader,const glm::mat4 &draw_matrix) = 0;
     virtual int Process() = 0;
     virtual void RefreshMatrixes() = 0;
     virtual int AddAxes(std::vector<glm::vec3> &axes) = 0;
