@@ -101,7 +101,7 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             float a_z = 0.0f;
 
                                             sstream >> a_x >> a_y >> a_z; 
-                                            position = glm::vec3(a_x,a_y,a_z);                                    
+                                            SetPosition(glm::vec3(a_x,a_y,a_z));                                    
                                             
                                         }));  
 
@@ -211,7 +211,7 @@ int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
 
 std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe) const
 {
-    float position_on_axe = glm::dot(axe, position);
+    float position_on_axe = glm::dot(axe, m_position);
 
     std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
 

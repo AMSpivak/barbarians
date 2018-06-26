@@ -15,6 +15,8 @@ private:
     float armor_value;
     bool ghost;
     std::string m_name;
+protected:
+    glm::vec3 m_position;
 
 public:
 	int parent;
@@ -23,12 +25,22 @@ public:
     glm::mat4 model_matrix;
     float mass_inv;
     float radius;
-    glm::vec3 position;
+    
 
     bool m_is_light;
     float m_light_radius;
     glm::vec3 m_light_color;
     glm::vec3 m_light_position;
+
+    void SetPosition(const glm::vec3 &position)
+    {
+        m_position = position;
+    }
+
+    const glm::vec3 &GetPosition()
+    {
+        return m_position;
+    }
 
     void SetName(const std::string &name)
     {
@@ -40,7 +52,7 @@ public:
         return m_name;
     }
 
-    IGlModel():life_value(1.0),armor_value(1.0),ghost(false),model_matrix(),mass_inv(0),radius(1.0f), position(0.0f,0.0f,0.0f),m_is_light(false),m_name("unnamed")
+    IGlModel():life_value(1.0),armor_value(1.0),ghost(false),model_matrix(),mass_inv(0),radius(1.0f), m_position(0.0f,0.0f,0.0f),m_is_light(false),m_name("unnamed")
     {
 
     }
@@ -58,7 +70,7 @@ public:
         if(!m_is_light)
             return false;
 
-        ret_position = glm::vec4(position[0],position[1],position[2],m_light_radius) 
+        ret_position = glm::vec4(m_position[0],m_position[1],m_position[2],m_light_radius) 
                         + model_matrix * glm::vec4(m_light_position[0],m_light_position[1],m_light_position[2],0.0);
         ret_color = m_light_color;
         return true;

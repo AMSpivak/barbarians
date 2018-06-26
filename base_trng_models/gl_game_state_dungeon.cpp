@@ -307,7 +307,7 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,const GlCharacter &he
     glm::mat4 model_matrix = Models[0]->model;
     glm::mat4 pos_matrix;
     size_t iz = 0;
-    for(int iy = 0; iy < m_dungeon.Height(); iy++)
+    /*for(int iy = 0; iy < m_dungeon.Height(); iy++)
     {
         pos_matrix = glm::mat4();
         pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
@@ -340,19 +340,19 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,const GlCharacter &he
             }
             pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
         }
-    }
+    }*/
                 
     for(auto object : dungeon_objects)
     {  
         auto ptr = object.get();
 
         pos_matrix = glm::mat4();
-        pos_matrix = glm::translate(pos_matrix, ptr->position - hero_position);
-        model_matrix = ptr->model_matrix;
-        ptr->model_matrix = pos_matrix * model_matrix;
-        ptr->RefreshMatrixes();
-        ptr->Draw(current_shader);
-        ptr->model_matrix = model_matrix;
+        pos_matrix = glm::translate(pos_matrix, object->GetPosition() - hero_position);
+        model_matrix = object->model_matrix;
+        object->model_matrix = pos_matrix * model_matrix;
+        object->RefreshMatrixes();
+        object->Draw(current_shader,pos_matrix);
+        object->model_matrix = model_matrix;
     }
                
     hero.Draw(current_shader);
