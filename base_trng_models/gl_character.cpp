@@ -1,6 +1,7 @@
 #include "gl_character.h"
 #include <sstream>
 #include "loader.h"
+#include "engine_settings.h"
 
 
 GlCharacter::GlCharacter():
@@ -150,7 +151,23 @@ void GlCharacter::Draw(GLuint shader) const
 
 void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)
 {
-    Draw(shader);
+    unsigned short frame = EngineSettings::GetEngineSettings()->GetFrame();
+    if(engine_frame != frame)
+    {
+        glm::mat4 model_matrix_tmp(model_matrix);
+        model_matrix = draw_matrix * model_matrix_tmp;
+        RefreshMatrixes();
+        Draw(shader);
+        model_matrix = model_matrix_tmp;
+        engine_frame = frame;
+        //std::cout<<"slow_draw\n";
+    }
+    else
+    {
+        Draw(shader);
+        //std::cout<<"fast_draw\n";
+    }
+    
 }
 
 

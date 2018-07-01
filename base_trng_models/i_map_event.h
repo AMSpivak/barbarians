@@ -25,7 +25,17 @@ public:
     {
 
     }
+    void SetPosition(const glm::vec3 &value)
+    {
+        position = value;
+    }
+
+    const glm::vec3 &GetPosition()
+    {
+        return position;
+    }
     virtual ~IMapEvent(){}
+
     virtual InteractionResult Interact(IGlModel &model,std::string &return_value) = 0;
     virtual EventProcessResult Process() = 0;
     virtual bool IsLight(glm::vec4 &light_position,glm::vec3 &color) {return false;}

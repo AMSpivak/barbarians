@@ -73,7 +73,7 @@ private:
     void Draw2D(GLuint depth_map);
     void MoveHero(const glm::vec3 & hero_move);
     void FitObjects(int steps, float accuracy);
-    float FitObjectToMap(IGlModel& object, glm::vec3 & position);
+    std::pair<float,const glm::vec3>  FitObjectToMap(IGlModel& object, const glm::vec3 & position);
     float FitObjectToObject(IGlModel& object1,IGlModel& object2);
     InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value);
 
