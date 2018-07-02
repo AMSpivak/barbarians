@@ -36,7 +36,7 @@ void main()
     // Light += 0.1 * (texture(LightMap,TexCoords + shift));
     // Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
 
-	texelSize = 0.7 / textureSize(NormalMap, 0);
+	texelSize = 1.0 / textureSize(NormalMap, 0);
 
 	Diffuse.w = 1.0;
 	vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
@@ -45,6 +45,7 @@ void main()
 
 	//Light = texture(LightMap, TexCoords);
     //Spec = texture(SpecMap, TexCoords);
+
 
 	vec3 vt = (texture(NormalMap, TexCoords.xy + vec2(-1, -1)* texelSize).xyz
 					-texture(NormalMap, TexCoords.xy + vec2(1, 1)* texelSize ).xyz
@@ -56,23 +57,33 @@ void main()
 
 	float v_n =dot(vt,vt2);
 
+	float d1 = texture(DepthMap, TexCoords.xy + vec2(-1, -1) * texelSize).x ;
+	float d2 = texture(DepthMap, TexCoords.xy + vec2(1, 1) * texelSize).x ;
+	float d3 = texture(DepthMap, TexCoords.xy + vec2(-1, 1) * texelSize).x ;
+	float d4 = texture(DepthMap, TexCoords.xy + vec2(1, -1) * texelSize).x ;
+	float d = texture(DepthMap, TexCoords.xy).x ;
+	float dif1 = (d1 - d);
+	float dif2 = (d - d2);
+	float dif3 = (d3 - d);
+	float dif4 = (d - d4);
 
-	float d_depth = abs(
-						texture(DepthMap, TexCoords.xy + vec2(-1, -1) * texelSize).x -
-						texture(DepthMap, TexCoords.xy + vec2(1, 1) * texelSize).x
-					);
-	d_depth += abs(
-						texture(DepthMap, TexCoords.xy + vec2(-1, 1) * texelSize).x -
-						texture(DepthMap, TexCoords.xy + vec2(1, -1) * texelSize).x
-					);
+	float dif12 = 0.5*(dif1+dif2);
+	float dif34 = 0.5*(dif3+dif4);
+
+	float d_depth = abs(dif1 - dif12)+abs(dif2 - dif12)+abs(dif3 - dif34)+abs(dif4 - dif34);
+	//d_depth*=d;
+	//d_depth += abs((dif3 + dif4));
+	
 
 
-	v_n /=v_n + 0.05;
+	//v_n /=v_n + 0.8;
 
-	d_depth /= d_depth +0.01;
+	d_depth /= d_depth +0.001;
 
-	float blur = (1.0-v_n )*(1.0 - d_depth);
-	blur = clamp(blur,0.0,1.0);
+	float blur1 = clamp(1.0-v_n,0.0,1.0);//*(1.0 - d_depth);
+	
+	float blur = 1.0 - clamp(d_depth,0.0,1.0);
+	blur = (blur1*blur1*blur*blur);
 	//blur =smoothstep(0.0,0.2, blur* blur);
 	if(blur< 0.5)
 	{
@@ -93,10 +104,9 @@ void main()
 		vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
 		blur =smoothstep(0.0,0.2, blur* blur);
 
-		texColor *= (1.0 - blur);
 
 	}
-	
-	FragColor = vec4(texColor.xyz, 1.0);
+	blur =smoothstep(0.0,0.2, blur* blur);
+	FragColor = vec4((blur)*texColor.xyz, 1.0);
 
 }
