@@ -1,9 +1,9 @@
 #include "gl_render_target.h"
 
-void glRenderTarget::InitBuffer(unsigned int WIDTH, unsigned int HEIGHT)
+void glRenderTarget::InitBuffer(unsigned int WIDTH, unsigned int HEIGHT,float buffer_scale)
 {
-	width = WIDTH;
-	height = HEIGHT;
+	width = buffer_scale * WIDTH;
+	height = buffer_scale * HEIGHT;
 
 
 

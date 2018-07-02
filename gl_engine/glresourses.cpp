@@ -741,7 +741,7 @@ std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)
 	return is;
 }
 
-std::ostream& operator << ( std::ostream& os, glm::vec3 & glm_vector)
+std::ostream& operator << ( std::ostream& os, const glm::vec3 & glm_vector)
 {
 	//float tmp[3];
 	const size_t max = 3;

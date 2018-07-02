@@ -307,40 +307,40 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,const GlCharacter &he
     glm::mat4 model_matrix = Models[0]->model;
     glm::mat4 pos_matrix;
     size_t iz = 0;
-    // for(int iy = 0; iy < m_dungeon.Height(); iy++)
-    // {
-    //     pos_matrix = glm::mat4();
-    //     pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
+    for(int iy = 0; iy < m_dungeon.Height(); iy++)
+    {
+        pos_matrix = glm::mat4();
+        pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
 
-    //     for(int ix = 0; ix < m_dungeon.Width(); ix++)
-    //     {
-    //         int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
-    //         //m_dungeon_map_tiles[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+        for(int ix = 0; ix < m_dungeon.Width(); ix++)
+        {
+            int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
+            //m_dungeon_map_tiles[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
            
-    //         if(index>=0)
-    //         {
+            if(index>=0)
+            {
 
-    //             model_matrix = Models[index]->model;
-    //             Models[index]->model = pos_matrix * model_matrix;
-    //             Models[index]->Draw(current_shader,now_frame);
-    //             Models[index]->model = model_matrix;
-    //         }
+                model_matrix = Models[index]->model;
+                Models[index]->model = pos_matrix * model_matrix;
+                Models[index]->Draw(current_shader,now_frame);
+                Models[index]->model = model_matrix;
+            }
             
-    //         index = m_dungeon.GetMapObjectIndex(ix,iy,iz);//m_dungeon_map_objects[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
-    //         if(index>0)
-    //         {
-    //             int mod_index = index>>2;
-    //             int rot = index - (mod_index<<2);
-    //             model_matrix = Models[mod_index]->model;
-    //             //model_matrix =  * model_matrix;
-    //             glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 1.0f, 0.0f));
-    //             Models[mod_index]->model = pos_matrix * glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 0.0f, 1.0f));//model_matrix;
-    //             Models[mod_index]->Draw(current_shader,now_frame);
-    //             Models[mod_index]->model = model_matrix;
-    //         }
-    //         pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-    //     }
-    // }
+            index = m_dungeon.GetMapObjectIndex(ix,iy,iz);//m_dungeon_map_objects[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+            if(index>0)
+            {
+                int mod_index = index>>2;
+                int rot = index - (mod_index<<2);
+                model_matrix = Models[mod_index]->model;
+                //model_matrix =  * model_matrix;
+                glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 1.0f, 0.0f));
+                Models[mod_index]->model = pos_matrix * glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 0.0f, 1.0f));//model_matrix;
+                Models[mod_index]->Draw(current_shader,now_frame);
+                Models[mod_index]->model = model_matrix;
+            }
+            pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+        }
+    }
                 
     for(auto object : dungeon_objects)
     {  
@@ -528,7 +528,7 @@ void GlGameStateDungeon::Draw()
         glBlendFunc(GL_ONE, GL_ONE);
 
 
-		glViewport(0, 0, width, height);
+		//glViewport(0, 0, width, height);
 
 
 
@@ -628,7 +628,7 @@ void GlGameStateDungeon::Draw()
         }
         glClear(GL_DEPTH_BUFFER_BIT);
         
-		current_shader = m_shader_map[m_antialiase_enabled?"sobel_aa":"sobel"];
+		current_shader = m_shader_map[/*m_antialiase_enabled?"sobel_aa":*/"sobel_aa"];
 
 		glUseProgram(current_shader);
 

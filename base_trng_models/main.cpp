@@ -120,15 +120,20 @@ int main(int argc, char const *argv[])
 
     std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
 
-    m_render_target_map.insert( std::make_pair("base_deffered",std::make_shared<glRenderTargetDeffered>()));
-    m_render_target_map.insert( std::make_pair("final",std::make_shared<glRenderTarget>()));
-
+	{
+		auto base = std::make_pair("base_deffered",std::make_shared<glRenderTargetDeffered>());
+    	m_render_target_map.insert( base);
+		base.second->InitBuffer(width, height,1.0f);
+    	auto fin = std::make_pair("final",std::make_shared<glRenderTarget>());
+		m_render_target_map.insert( fin);
+		fin.second->InitBuffer(width, height,0.5f);
+	}
   
 
-	for(auto prt : m_render_target_map)
-	{
-		prt.second.get()->InitBuffer(width, height);
-	}
+	// for(auto prt : m_render_target_map)
+	// {
+	// 	prt.second.get()->InitBuffer(width, height);
+	// }
 
     // Build and compile our shader program
 

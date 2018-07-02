@@ -19,7 +19,7 @@ public:
 	GLuint AlbedoMap;
 	GLuint StencilBuffer;
 
-	void InitBuffer(unsigned int WIDTH, unsigned int HEIGHT);
+	void InitBuffer(unsigned int WIDTH, unsigned int HEIGHT, float buffer_scale);
 
 	virtual ~glRenderTarget();
 
