@@ -78,35 +78,37 @@ void main()
 
 	//v_n /=v_n + 0.8;
 
-	d_depth /= d_depth +0.001;
+	d_depth /= d_depth +0.0001;
 
-	float blur1 = clamp(1.0-v_n,0.0,1.0);//*(1.0 - d_depth);
+	float blur1 =1.0-clamp(v_n,0.0,1.0);//*(1.0 - d_depth);
+	blur1*=blur1*blur1;
 	
 	float blur = 1.0 - clamp(d_depth,0.0,1.0);
-	blur = (blur1*blur1*blur*blur);
+	blur = min(blur1,blur);
+
 	//blur =smoothstep(0.0,0.2, blur* blur);
-	if(blur< 0.5)
-	{
-	//blur =smoothstep(0.0,0.2, blur* blur);
-		vec2 shift = texelSize * vec2(0.0, 1.0);
-		Light += 0.1 * (texture(LightMap,TexCoords + shift));
-		Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
-		shift =texelSize * vec2(0.0,-1.0);
-		Light += 0.1 * (texture(LightMap,TexCoords + shift));
-		Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
-		shift =texelSize * vec2(1.0, 0.0);
-		Light += 0.1 * (texture(LightMap,TexCoords + shift));
-		Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
-		shift = texelSize * vec2(-1.0, 0.0);
-		Light += 0.1 * (texture(LightMap,TexCoords + shift));
-		Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
+	// if(blur< 0.5)
+	// {
+	// //blur =smoothstep(0.0,0.2, blur* blur);
+	// 	vec2 shift = texelSize * vec2(0.0, 1.0);
+	// 	Light += 0.1 * (texture(LightMap,TexCoords + shift));
+	// 	Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
+	// 	shift =texelSize * vec2(0.0,-1.0);
+	// 	Light += 0.1 * (texture(LightMap,TexCoords + shift));
+	// 	Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
+	// 	shift =texelSize * vec2(1.0, 0.0);
+	// 	Light += 0.1 * (texture(LightMap,TexCoords + shift));
+	// 	Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
+	// 	shift = texelSize * vec2(-1.0, 0.0);
+	// 	Light += 0.1 * (texture(LightMap,TexCoords + shift));
+	// 	Spec  += 0.15 * (texture(SpecMap,TexCoords + shift));
 
-		vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
-		blur =smoothstep(0.0,0.2, blur* blur);
+	// 	vec4 texColor = Diffuse*vec4(Light.xyz,1.0)+ vec4(Spec.xyz,0.0);
+	// 	blur =smoothstep(0.0,0.2, blur* blur);
 
 
-	}
-	blur =smoothstep(0.0,0.2, blur* blur);
+	// }
+	blur =1.0f;//smoothstep(0.0,0.4, blur*blur);
 	FragColor = vec4((blur)*texColor.xyz, 1.0);
 
 }

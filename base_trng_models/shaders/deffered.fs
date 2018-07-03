@@ -166,5 +166,5 @@ void main()
     vec3 ShadowLightColor = shadow_res* LightColor;
     gAlbedoSpec =vec4(ShadowLightColor *norm_l* diffuse,1.0);
     gNormal =vec4(ShadowLightColor * specular,1.0);
-    gNormal =vec4(0.0);
+    //gNormal =vec4(0.0);
 }

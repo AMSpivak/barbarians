@@ -126,7 +126,10 @@ int main(int argc, char const *argv[])
 		base.second->InitBuffer(width, height,1.0f);
     	auto fin = std::make_pair("final",std::make_shared<glRenderTarget>());
 		m_render_target_map.insert( fin);
-		fin.second->InitBuffer(width, height,0.5f);
+		fin.second->InitBuffer(width, height,1.0f);
+		auto post = std::make_pair("postprocess",std::make_shared<glRenderTarget>());
+		m_render_target_map.insert( post);
+		post.second->InitBuffer(width, height,1.0f);
 	}
   
 
