@@ -1,7 +1,7 @@
 <sky>
 skybox skybox/violent.cub
 light_pos 10.0 30.0 -15.0
-light_color 3.0 3.0 3.0
+light_color 4.0 4.0 4.0
 camera_lens 20.0 1.0 45.0
 <!sky>
 <models>
@@ -26,16 +26,8 @@ material/dungeon/walls/wallcross/wallcross.mdl
 <!dungeon_tiles>
 
 <dungeon_objects>
-0 0 0 5 0 0 5 0 0 0 
-0 11 4 9 0 0 10 4 8 0
-0 5 0 0 0 0 0 0 5 0
-4 9 0 0 0 0 0 0 10 4
-0 0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0 0
-4 8 0 0 0 0 0 0 11 4
-0 5 0 0 0 0 0 0 5 0
-0 10 4 8 0 0 11 4 9 0
-0 0 0 5 0 0 5 0 0 0
+0 0 
+0 0
 <!dungeon_objects>
 <object>
 mass_inv 1.0
@@ -55,16 +47,7 @@ light 3.0 2.0 1.0 0.0 0.0 1.5 4.0
 sequence damage 2 3
 sequence base 0 1
 <!object>
-<object>
-mass_inv 0.0
-radius 0.01
-position 9.0 0.0 0.0
-orientation 0.0 90.0 0.0
-model material/sign/sign.mdl
-armor 0.0
-sequence damage 2 3
-sequence base 0 1
-<!object>
+
 <object>
 mass_inv 0.0
 radius 0.01
@@ -75,16 +58,7 @@ armor 0.0
 sequence damage 2 3
 sequence base 0 1
 <!object>
-<object>
-mass_inv 0.0
-radius 0.01
-position 17.5 0.0 9.0
-orientation 0.0 0.0 0.0
-model material/sign/sign.mdl
-armor 0.0
-sequence damage 2 3
-sequence base 0 1
-<!object>
+
 <object>
 mass_inv 0.0
 radius 0.01
@@ -95,11 +69,7 @@ armor 0.0
 sequence damage 2 3
 sequence base 0 1
 <!object>
-<hero_event>
-radius 0.05
-position 9.0 0.0 0.0
-message teleport levels/test2.lvl start_top
-<!hero_event>
+
 <hero_event>
 radius 0.05
 position 9.0 0.0 17.5

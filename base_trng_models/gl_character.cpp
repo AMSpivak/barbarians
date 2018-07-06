@@ -201,7 +201,9 @@ int GlCharacter::Process()
     }
     else
     {
-        now_frame++;
+        ++now_frame;
+        ++now_frame;
+
 
         if(now_frame > current_animation->end_frame || now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
     }

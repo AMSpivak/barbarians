@@ -109,6 +109,9 @@ void main()
 
 	// }
 	blur =1.0f;//smoothstep(0.0,0.4, blur*blur);
+	float intens = length(texColor.xyz);
+
+	blur =  intens/(intens+0.01);
 	FragColor = vec4((blur)*texColor.xyz, 1.0);
 
 }
