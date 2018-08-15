@@ -16,19 +16,18 @@ private:
 
     //std::map<std::string,GLuint> &m_shader_map;
 protected:
-    std::map<std::string,GLuint> &m_shader_map;
+    std::map<const std::string,GLuint> &m_shader_map;
     GLResourcesManager &m_resources_manager;
     
     size_t m_screen_width;
     size_t m_screen_height;
 public:
-    IGlGameState(std::map<std::string,GLuint> &shader_map,GLResourcesManager &resources_manager,
+    IGlGameState(std::map<const std::string,GLuint> &shader_map,GLResourcesManager &resources_manager,
 
                     size_t screen_width, size_t screen_height):
                     m_shader_map(shader_map)
                     ,m_resources_manager(resources_manager)
-    {
-        
+    {        
         m_screen_width = screen_width;
         m_screen_height = screen_height;
     }

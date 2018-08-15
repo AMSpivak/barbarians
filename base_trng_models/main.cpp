@@ -116,7 +116,7 @@ int main(int argc, char const *argv[])
 
 	SetResourceManager(&resources_atlas);
 
-    std::map<std::string,GLuint> m_shader_map;
+    std::map<const std::string,GLuint> m_shader_map;
 
     std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
 
@@ -133,26 +133,21 @@ int main(int argc, char const *argv[])
 	}
   
 
-	// for(auto prt : m_render_target_map)
-	// {
-	// 	prt.second.get()->InitBuffer(width, height);
-	// }
-
-    // Build and compile our shader program
 
 
-    m_shader_map.insert ( std::pair<std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
-    m_shader_map.insert ( std::pair<std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
-    m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deffered_cheap.fs")) );
-    m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple_cheap.fs")) );
-    m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
+
+    m_shader_map.insert ( std::pair<const std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
+    m_shader_map.insert ( std::pair<const std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
+	m_shader_map.insert ( std::pair<const std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
+	m_shader_map.insert ( std::pair<const std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
+	m_shader_map.insert ( std::pair<const std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
+	m_shader_map.insert ( std::pair<const std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
+	m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
+    m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
+	m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deffered_cheap.fs")) );
+    m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple_cheap.fs")) );
+    m_shader_map.insert ( std::pair<const std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
+	m_shader_map.insert ( std::pair<const std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
 
 
 

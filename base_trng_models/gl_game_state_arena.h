@@ -10,7 +10,7 @@
 class GlGameStateArena: public IGlGameState
 {
 public:
-    GlGameStateArena(std::map<std::string,GLuint> &shader_map,
+    GlGameStateArena(std::map<const std::string,GLuint> &shader_map,
         std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
         std::map<std::string,std::shared_ptr<IGlModel>> &models_map,
         GLResourcesManager &resources_manager,

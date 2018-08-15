@@ -14,7 +14,7 @@
 class GlGameStateDungeon: public IGlGameState
 {
 public:
-    GlGameStateDungeon(std::map<std::string,GLuint> &shader_map,
+    GlGameStateDungeon(std::map<const std::string,GLuint> &shader_map,
         std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
         std::map<std::string,std::shared_ptr<IGlModel>> &models_map,
         GLResourcesManager &resources_manager,

@@ -81,7 +81,17 @@ void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_dept
 	const glm::vec4 & corrector_v,
 	const GLuint * texture 
 );
-
+/** @brief Prints character ch with the specified color
+ *         at position (row, col).
+ *
+ *  If any argument is invalid, the function has no effect.
+ *
+ *  @param row The row in which to display the character.
+ *  @param col The column in which to display the character.
+ *  @param ch The character to display.
+ *  @param color The color to use to display the character.
+ *  @return Void.
+ */
 void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * texture,
 						 float width, float height,const glm::vec4 & corrector,
 						 const glm::vec3 & position, const glm::vec3 & offset, 
