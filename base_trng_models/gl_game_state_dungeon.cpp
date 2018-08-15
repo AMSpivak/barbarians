@@ -792,15 +792,15 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
             
         }
 
-        // auto result = FitObjectToMap(hero,hero.GetPosition());
+        auto result = FitObjectToMap(hero,hero.GetPosition());
 
-        // hero.SetPosition(result.second);
-        // for(auto object : dungeon_objects)
-        // {  
-        //     auto ptr = object.get();
-        //     auto res = FitObjectToMap(*ptr,ptr->GetPosition());
-        //     object->SetPosition(res.second);
-        // }
+        hero.SetPosition(result.second);
+        for(auto object : dungeon_objects)
+        {  
+            auto ptr = object.get();
+            auto res = FitObjectToMap(*ptr,ptr->GetPosition());
+            object->SetPosition(res.second);
+        }
 
         for(auto object1 : dungeon_objects)
         {  
@@ -944,7 +944,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         hero.SetPosition(glm::vec3(0.0f,0.0f,0.0f));
         
 
-        m_antialiase_enabled = !inputs[GLFW_KEY_F1];
+        // m_antialiase_enabled = !inputs[GLFW_KEY_F1];
         static float distance = 12.f;
         bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
 
@@ -1083,7 +1083,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(moving&&!attack)
         {
             hero.UseSequence("walk");
-            glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.071f,0.0f,1.0f);
+            // glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.071f,0.0f,1.0f);
+            glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.142f,0.0f,1.0f);
             MoveHero(glm::vec3(move_h));
         }else
         if(attack)
