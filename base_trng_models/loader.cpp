@@ -49,7 +49,7 @@ namespace LoaderUtility
 
             if (std::regex_search(tempholder, match, search_regexp) && match.size() > 1) 
             {
-                is_block_endline = 1;
+                is_block_endline = true;
                 std::cout<<match.str(1)<<"\n";
             }
 

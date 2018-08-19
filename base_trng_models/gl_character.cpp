@@ -54,7 +54,14 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             AddSequence(name,sequence);
                                             UseSequence(name);
                                         }));
-
+    execute_funcs.insert(std::make_pair("run_sequence",[this](std::stringstream &sstream)
+                                        {
+                                            size_t start =0;
+                                            size_t end =0;
+                                            std::string name;
+                                            sstream >> name;
+                                            UseSequence(name);
+                                        }));
     execute_funcs.insert(std::make_pair("orientation",[this](std::stringstream &sstream)
                                         {
                                             float a_x = 0.0f;

@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <map>
+
 #include "glm/glm.hpp"
 #include "glm/trigonometric.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -27,9 +28,35 @@ GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
 
 float key_angle = 0.0f;
 
+// float clamp(float value, float min, float max)
+// {
+// 	return 
+// }
 
 std::map <int, bool> inputs;
 
+void SetRenderTargets(
+					std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
+					float width,
+					float height)
+{
+	render_target_map.clear();
+	EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+	float quality = settings->GetQualityFactor();
+
+	std::cout << "Set RT quality "<<quality<<"\n";
+	auto base = std::make_pair("base_deffered",std::make_shared<glRenderTargetDeffered>());
+	render_target_map.insert( base);
+	base.second->InitBuffer(width, height,quality);
+	auto fin = std::make_pair("final",std::make_shared<glRenderTarget>());
+	render_target_map.insert( fin);
+	fin.second->InitBuffer(width, height,quality);
+	auto post = std::make_pair("postprocess",std::make_shared<glRenderTarget>());
+	render_target_map.insert( post);
+	post.second->InitBuffer(width, height,quality);
+}
+
+std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
 
 int main(int argc, char const *argv[])
 {
@@ -118,23 +145,11 @@ int main(int argc, char const *argv[])
 
     std::map<const std::string,GLuint> m_shader_map;
 
-    std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
-
-	{
-		auto base = std::make_pair("base_deffered",std::make_shared<glRenderTargetDeffered>());
-    	m_render_target_map.insert( base);
-		base.second->InitBuffer(width, height,0.7f);
-    	auto fin = std::make_pair("final",std::make_shared<glRenderTarget>());
-		m_render_target_map.insert( fin);
-		fin.second->InitBuffer(width, height,0.7f);
-		auto post = std::make_pair("postprocess",std::make_shared<glRenderTarget>());
-		m_render_target_map.insert( post);
-		post.second->InitBuffer(width, height,1.0f);
-	}
-  
+    
 
 
-
+	SetRenderTargets(m_render_target_map,width,height);
+	 
 
     m_shader_map.insert ( std::pair<const std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
     m_shader_map.insert ( std::pair<const std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
@@ -222,8 +237,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_LEFT || key == GLFW_KEY_A )
         inputs[GLFW_KEY_LEFT] = (action != GLFW_RELEASE) ?  true : false;
 
-
-
 	if (key == GLFW_KEY_RIGHT || key == GLFW_KEY_D )
 		inputs[GLFW_KEY_RIGHT] = (action != GLFW_RELEASE) ?  true : false;
 
@@ -250,6 +263,46 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
 			settings->SetPbr(!settings->IsPbrON());
 		}
+	}
+
+	
+
+	switch (key)
+	{
+
+		case GLFW_KEY_F3:	
+			if(action == GLFW_RELEASE)
+			{
+				EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+				float qf = settings->GetQualityFactor();
+				qf = glm::clamp(qf*1.25f,0.5f,1.0f);
+				settings->SetQualityFactor(qf);
+				SetRenderTargets(m_render_target_map,SCR_WIDTH, SCR_HEIGHT);
+			}
+		break;
+		case GLFW_KEY_F4:	
+			if(action == GLFW_RELEASE)
+			{
+				EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+				float qf = settings->GetQualityFactor();
+				qf = glm::clamp(qf*0.8f,0.5f,1.0f);
+				settings->SetQualityFactor(qf);
+				SetRenderTargets(m_render_target_map,SCR_WIDTH, SCR_HEIGHT);
+			}
+		break;
+
+		case GLFW_KEY_F2:	
+			if(action == GLFW_RELEASE)
+			{
+				EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+				settings->SetQualityFactor(1.0);
+				SetRenderTargets(m_render_target_map,SCR_WIDTH, SCR_HEIGHT);
+			}
+		break;
+
+		default:
+		break;
+
 	}
 	
 }

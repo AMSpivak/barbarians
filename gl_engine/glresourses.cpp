@@ -539,10 +539,19 @@ void EmptyShaders(GLuint * shaders, int shaders_count)
 
 void LoadTexture(std::string FileName,GLuint &texture)
 {
-	if(FileName.substr(FileName.find_last_of(".")+1) == "cub")
+	std::string extention = FileName.substr(FileName.find_last_of(".")+1);
+	if(extention == "cub")
 	{
 		LoadCubemap(FileName,texture);
 		return;
+	}
+
+	if(extention == "tex")
+	{
+		std::ifstream tex_file;
+		tex_file.open(FileName);
+		if (!tex_file)
+        	throw std::runtime_error("Could not open file");
 	}
 	glGenTextures(1, &texture);
 
@@ -588,7 +597,7 @@ void LoadCubemap(const std::string file_name,GLuint &texture)
 	}
 	if(faces.size()<6)
 	{
-		std::cout << "Wrong cubemap descriptor: " <<file_name;
+		std::cout << "Wrong cubemap descriptor: " << file_name;
 	}
 
 	texture_descriptor_file.close();

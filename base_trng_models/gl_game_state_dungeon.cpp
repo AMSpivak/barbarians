@@ -136,7 +136,8 @@ void GlGameStateDungeon::LoadDungeonObjects(std::vector<std::string> &lines)
 
 void GlGameStateDungeon::LoadObject(std::vector<std::string> &lines)
 {
-        std::shared_ptr<GlCharacter> object_ptr(new GlCharacter());
+        //std::shared_ptr<GlCharacter> object_ptr(new GlCharacter());
+        auto object_ptr = std::make_shared<GlCharacter>();
         dungeon_objects.push_back(object_ptr);
         object_ptr->UpdateFromLines(lines);
 }

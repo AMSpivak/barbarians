@@ -12,6 +12,15 @@ namespace EngineSettings
         pbr_light = value;
     }
 
+    void Settings::SetQualityFactor(float value)
+    {
+        m_quality_factor = value;
+    }
+    float Settings::GetQualityFactor()
+    {
+        return m_quality_factor;
+    }
+
     void Settings::BeginNewFrame()
     {
         ++frame_number;
