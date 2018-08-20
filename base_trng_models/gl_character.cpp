@@ -74,6 +74,10 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             model_matrix = glm::rotate(model_matrix, glm::radians(a_y), glm::vec3(0.0f, 1.0f, 0.0f));
                                             model_matrix = glm::rotate(model_matrix, glm::radians(a_z), glm::vec3(0.0f, 0.0f, 1.0f));
                                         }));
+    // execute_funcs.insert(std::make_pair("matrix",[this](std::stringstream &sstream)
+    //                                     {
+    //                                         sstream >> model_matrix; 
+    //                                     }));
     execute_funcs.insert(std::make_pair("mass_inv",[this](std::stringstream &sstream)
                                         {
                                             sstream >> mass_inv;
@@ -92,9 +96,7 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             float light_radius = 0.0f;
                                             glm::vec3 color;
                                             glm::vec3 l_position;
-                                            //std::cout<<"\nlight!\n\n\n";
                                             sstream >> color >> l_position >> light_radius; 
-
                                             SetLight(true,color,l_position,light_radius);
                                         }));
 
@@ -110,7 +112,6 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
 
                                             sstream >> a_x >> a_y >> a_z; 
                                             SetPosition(glm::vec3(a_x,a_y,a_z));                                    
-                                            
                                         }));  
 
     
@@ -132,8 +133,7 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
             std::cout<<"Unknown model parameter: "<<s<<"\n";
         } 
     }
-    model_matrix = glm::rotate(model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    
+    //model_matrix = glm::rotate(model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 
@@ -150,9 +150,7 @@ void GlCharacter::AddSequence(const std::string & name, const AnimationSequence 
 
 void GlCharacter::Draw(GLuint shader) const
 {
-
-    int models_count = Models.size();
-    for(int i = 0; i < models_count; i++) Models[i]->Draw(shader,now_frame);
+    for(auto model : Models) model->Draw(shader,now_frame);
 }
 
 
@@ -161,13 +159,11 @@ void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)
     unsigned short frame = EngineSettings::GetEngineSettings()->GetFrame();
     if(engine_frame != frame)
     {
-        glm::mat4 model_matrix_tmp(model_matrix);
-        model_matrix = draw_matrix * model_matrix_tmp;
-        RefreshMatrixes();
+      
+        for(auto model : Models) model->SetDrawMatrix(draw_matrix);
+        //RefreshMatrixes();
         Draw(shader);
-        model_matrix = model_matrix_tmp;
         engine_frame = frame;
-        //std::cout<<"slow_draw\n";
     }
     else
     {
@@ -189,9 +185,7 @@ void GlCharacter::RefreshMatrixes()
         Models[i]-> model = Models[Models[i]->parent_idx]->model *
             Models[Models[i]->parent_idx]->GetBoneMatrix(now_frame,Models[i]->parent_bone) *
            // Models[Models[i]->parent_idx]->animation->frames[now_frame].bones[Models[i]->parent_bone] *
-           bone_ptr->bones[Models[i]->parent_bone].matrix *
-            glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix)
-            ;
+           bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
     }
     else
     {

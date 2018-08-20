@@ -27,16 +27,18 @@ public:
 	int parent_bone;
 
 	glm::mat4 model;
+	glm::mat4 draw_matrix;
 	std::shared_ptr<IGlTextureStruct> diffuse_texture;
     std::shared_ptr<IGlTextureStruct> utility_texture;
     std::shared_ptr<IGlTextureStruct> normal_texture;
 	std::shared_ptr<IGlJubStruct> jub_bones;
 	std::shared_ptr<Animation> animation;
 
-	glModel(GLResourcesManager &resources_manager)
+	//glModel(GLResourcesManager &resources_manager):model(1.0f),draw_matrix(1.0f)
+	glModel(GLResourcesManager &resources_manager)//:draw_matrix(1.0f)
 	{}
 
-	glModel(std::string FileName)
+	glModel(std::string FileName)//:draw_matrix(1.0f)
 	{
 		LoadAll(FileName);
 	}
@@ -66,6 +68,7 @@ public:
 	void Draw(GLuint shaderProgram, Animation &animation, int now_frame);
 	void Draw(GLuint shaderProgram, int now_frame);
 	void AttachAnimation(std::vector <std::shared_ptr<Animation> > &animations, std::string Filename);
+	void SetDrawMatrix(const glm::mat4 &value);
 };
 
 #endif

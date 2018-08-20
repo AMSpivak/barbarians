@@ -136,10 +136,10 @@ void GlGameStateDungeon::LoadDungeonObjects(std::vector<std::string> &lines)
 
 void GlGameStateDungeon::LoadObject(std::vector<std::string> &lines)
 {
-        //std::shared_ptr<GlCharacter> object_ptr(new GlCharacter());
         auto object_ptr = std::make_shared<GlCharacter>();
         dungeon_objects.push_back(object_ptr);
         object_ptr->UpdateFromLines(lines);
+        object_ptr->model_matrix = glm::rotate(object_ptr->model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
@@ -1103,6 +1103,12 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         }
 
         hero.Process();
+
+        for(auto object : dungeon_objects)
+        {  
+            object->Process();
+        }
+
         FitObjects(10,0.0f);
     }
     return this;

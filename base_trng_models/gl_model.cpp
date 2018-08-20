@@ -23,15 +23,21 @@ void glModel::Draw()
 	    glBindVertexArray(0);
 	}
 }
+void glModel::SetDrawMatrix(const glm::mat4 &value)
+{
+	draw_matrix = value;
+}
 
 void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 {
 	//glUseProgram(shader);
 	unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+	unsigned int drawLoc = glGetUniformLocation(shaderProgram, "draw");
 	unsigned int boneLoc  = glGetUniformLocation(shaderProgram, "u_BoneMatrices");
 
 
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(drawLoc, 1, GL_FALSE, glm::value_ptr(draw_matrix));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuse_texture.get()->m_texture);

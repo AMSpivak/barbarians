@@ -13,6 +13,7 @@ out vec2 TexCoord;
 
 
 uniform mat4 model;
+uniform mat4 draw;
 uniform mat4 camera;
 //uniform mat4 projection;
 uniform mat4    u_BoneMatrices[128];
@@ -24,7 +25,7 @@ void main()
 	tv_Position = tv_Position + a_BoneWeights.y*(u_BoneMatrices[indexOfBone.y]* vec4(a_Position.xyz, 1.0));
 	tv_Position = tv_Position +a_BoneWeights.z*(u_BoneMatrices[indexOfBone.z]* vec4(a_Position.xyz, 1.0));
 	tv_Position = tv_Position +a_BoneWeights.w*(u_BoneMatrices[indexOfBone.w]* vec4(a_Position.xyz, 1.0));
-	tv_Position = model *(vec4(tv_Position.xyz, 1.0));
+	tv_Position = draw * model *(vec4(tv_Position.xyz, 1.0));
         v_Position = tv_Position.xyz;
 
 

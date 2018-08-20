@@ -56,6 +56,22 @@ void SetRenderTargets(
 	post.second->InitBuffer(width, height,quality);
 }
 
+void FillShaders(std::map<const std::string,GLuint> &shader_map, const std::string filename)
+{
+    shader_map.insert ( std::pair<const std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("deffered_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deffered_cheap.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple_cheap.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
+}
+
 std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
 
 int main(int argc, char const *argv[])
@@ -150,43 +166,18 @@ int main(int argc, char const *argv[])
 
 	SetRenderTargets(m_render_target_map,width,height);
 	 
-
-    m_shader_map.insert ( std::pair<const std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
-    m_shader_map.insert ( std::pair<const std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
-	m_shader_map.insert ( std::pair<const std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
-	m_shader_map.insert ( std::pair<const std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
-	m_shader_map.insert ( std::pair<const std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
-	m_shader_map.insert ( std::pair<const std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
-	m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
-    m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
-	m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deffered_cheap.fs")) );
-    m_shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple_cheap.fs")) );
-    m_shader_map.insert ( std::pair<const std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
-	m_shader_map.insert ( std::pair<const std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
-
-
-
-	std::vector <std::shared_ptr<glModel> > Models;
-
-	//Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl"));
+	FillShaders(m_shader_map,"shaders/list.shd");
 
     std::map<std::string,std::shared_ptr<IGlModel>> m_glmodels_map;
 
-    {
-        std::shared_ptr<IGlModel> r_model(new GlCharacter());
-        m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Hero",r_model));
-    }
 
-	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
-
-	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",hero);
+    auto hero = std::make_shared<GlCharacter>();
+    m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Hero",hero));
+	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",*hero);
 
     GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
-    IGlGameState * game_state = nullptr;//&game_state_arena;
+    IGlGameState * game_state = nullptr;
     game_state = &game_state_dungeon;
-
-
-	//glfwSwapInterval(1);
 
 	while(!glfwWindowShouldClose(window))
 	{
