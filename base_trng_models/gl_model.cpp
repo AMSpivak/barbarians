@@ -27,8 +27,11 @@ void glModel::SetDrawMatrix(const glm::mat4 &value)
 {
 	draw_matrix = value;
 }
-
 void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
+{
+	Draw(shaderProgram, animation,now_frame,draw_matrix);
+}
+void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame,const glm::mat4 &matrix)
 {
 	//glUseProgram(shader);
 	unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
@@ -37,7 +40,7 @@ void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
 
 
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(drawLoc, 1, GL_FALSE, glm::value_ptr(draw_matrix));
+	glUniformMatrix4fv(drawLoc, 1, GL_FALSE, glm::value_ptr(matrix));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuse_texture.get()->m_texture);
@@ -59,7 +62,10 @@ void glModel::Draw(GLuint shaderProgram, int now_frame)
 {
 	Draw(shaderProgram, *animation ,now_frame);
 }
-
+void glModel::Draw(GLuint shaderProgram, int now_frame,const glm::mat4 &matrix)
+{
+	Draw(shaderProgram, *animation ,now_frame,matrix);
+}
 void glModel::AttachAnimation(std::vector <std::shared_ptr<Animation> > &animations, std::string Filename)
 {
 	animations.emplace_back(std::make_shared<Animation>());

@@ -83,7 +83,7 @@ private:
     bool HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr);
     bool MobKilled(std::shared_ptr<IGlModel> obj);
     void ProcessMessage(std::string event_string);
-    std::shared_ptr<IMapEvent> AddStrike(IGlModel &model,glRenderTargetDeffered &render_target);
+    std::shared_ptr<IMapEvent> AddStrike(const glm::mat4 &matrix,const glm::vec3 &position,glRenderTargetDeffered &render_target);
     
     
     

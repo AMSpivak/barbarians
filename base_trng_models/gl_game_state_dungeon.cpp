@@ -6,6 +6,7 @@
 #include <fstream>
 #include <functional>
 #include <utility>
+#include <algorithm>
 //#define GLM_SWIZZLE_XYZW
 
 #include "glm/glm.hpp"
@@ -64,17 +65,17 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 
 }
 
-std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(IGlModel &model,glRenderTargetDeffered &render_target)
+std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix,const glm::vec3 &position,glRenderTargetDeffered &render_target)
 {
 
-    std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture.get()->m_texture),1.0f,1.4f));
+    std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),1.0f,1.4f));
     IMapEventHeroStrike & event = *(e_ptr.get());
-    event.model_matrix = model.model_matrix;
+    event.model_matrix = matrix;
     event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
     event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
     event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
     event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
-    event.position = model.GetPosition();
+    event.position = position;
     return e_ptr;
 }
 
@@ -308,6 +309,13 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,const GlCharacter &he
     glm::mat4 model_matrix = Models[0]->model;
     glm::mat4 pos_matrix;
     size_t iz = 0;
+    glm::mat4 rotation_matrixes[4];
+    for(int i =0; i<4; i++)
+    {
+        rotation_matrixes[i] = glm::rotate(rotation_matrixes[i], glm::radians(-90.0f * i), glm::vec3(0.0f, 1.0f, 0.0f));
+    }
+                
+
     for(int iy = 0; iy < m_dungeon.Height(); iy++)
     {
         pos_matrix = glm::mat4();
@@ -316,28 +324,18 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,const GlCharacter &he
         for(int ix = 0; ix < m_dungeon.Width(); ix++)
         {
             int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
-            //m_dungeon_map_tiles[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
-           
             if(index>=0)
             {
-
-                model_matrix = Models[index]->model;
-                Models[index]->model = pos_matrix * model_matrix;
-                Models[index]->Draw(current_shader,now_frame);
-                Models[index]->model = model_matrix;
+                Models[index]->Draw(current_shader,now_frame,pos_matrix);
             }
             
-            index = m_dungeon.GetMapObjectIndex(ix,iy,iz);//m_dungeon_map_objects[iz*m_dungeon_width*m_dungeon_height + m_dungeon_width*iy +ix];
+            index = m_dungeon.GetMapObjectIndex(ix,iy,iz);
             if(index>0)
             {
                 int mod_index = index>>2;
                 int rot = index - (mod_index<<2);
                 model_matrix = Models[mod_index]->model;
-                //model_matrix =  * model_matrix;
-                glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 1.0f, 0.0f));
-                Models[mod_index]->model = pos_matrix * glm::rotate(model_matrix, glm::radians(-90.0f * rot), glm::vec3(0.0f, 0.0f, 1.0f));//model_matrix;
-                Models[mod_index]->Draw(current_shader,now_frame);
-                Models[mod_index]->model = model_matrix;
+                Models[mod_index]->Draw(current_shader,now_frame,pos_matrix * rotation_matrixes[rot]);
             }
             pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
         }
@@ -345,11 +343,7 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,const GlCharacter &he
                 
     for(auto object : dungeon_objects)
     {  
-        auto ptr = object.get();
-
-        pos_matrix = glm::mat4();
-        pos_matrix = glm::translate(pos_matrix, object->GetPosition() - hero_position);
-        object->Draw(current_shader,pos_matrix);
+        object->Draw(current_shader,glm::translate(glm::mat4(), object->GetPosition() - hero_position));
     }
                
     hero.Draw(current_shader);
@@ -397,7 +391,7 @@ void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::
     
     for(std::shared_ptr<IMapEvent> event :map_events) 
     {
-        if(event.get()->IsLight(light_position,light_color))
+        if(event->IsLight(light_position,light_color))
         {
             DrawSimpleLight(light_position - light_pos_vector,light_color,Camera.m_position,current_shader,render_target );
         }
@@ -405,7 +399,7 @@ void GlGameStateDungeon::DrawLight(const glm::vec4 &light_pos_vector,const glm::
 
     for(auto object :dungeon_objects) 
     {
-        if(object.get()->IsLight(light_position,light_color))
+        if(object->IsLight(light_position,light_color))
         {
             DrawSimpleLight(light_position - light_pos_vector,light_color,Camera.m_position,current_shader,render_target );
         }
@@ -830,7 +824,7 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
     hero_position += 1.0f*hero_move;
 }
 
-bool IsKilled (std::shared_ptr<IMapEvent> value) { return value.get()->Process() == EventProcessResult::Kill; }
+bool IsKilled (std::shared_ptr<IMapEvent> value) { return value->Process() == EventProcessResult::Kill; }
 
 
 bool GlGameStateDungeon::MobKilled(std::shared_ptr<IGlModel> obj)
@@ -887,20 +881,15 @@ void GlGameStateDungeon::ProcessMessage(std::string event_string)
     std::string info;                               
     std::stringstream ss(event_string);
     ss >> info;
-    //size_t first = info.find_first_not_of(' ');
-    //size_t last = info.find_last_not_of(' ');
-    //std::cout<<"prefix:"<<info<<"\n";
-    //std::cout<<"source:"<<event_string<<"\n";
-    //std::cout<<"trim prefix: "<<info.substr(first, (last-first+1))<<"\n";
-    //str.erase(std::remove(info.begin(), info.end(), ' '), info.end());
+
     try
-        {
-            execute_funcs.at(info)(ss);
-        }
-        catch(const std::out_of_range& exp)
-        {
-            std::cout<<"Unknown prefix: "<<info<<"\n";
-        }
+    {
+        execute_funcs.at(info)(ss);
+    }
+    catch(const std::out_of_range& exp)
+    {
+        std::cout<<"Unknown prefix: "<<info<<"\n";
+    }
 }
 bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr)
 {
@@ -965,7 +954,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(moving)
         {
             glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
-
             glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
 
             if(joy_axes!=nullptr)
@@ -1019,8 +1007,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                 glm::vec4(0.0,0.0,0.0,1.0f)
                 );
 
-            //hero.model_matrix = glm::mat4();
-            //hero.model_matrix = glm::rotate(hero.model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             static const glm::mat4 hero_base_matrix = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             hero.model_matrix = rm * hero_base_matrix;
             
@@ -1042,8 +1028,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
         if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
 
-        if(distance<3.0f)distance=3.0f;
-        if(distance>14.0f)distance=14.0f;
+        distance = std::clamp(distance,3.0f,14.0f);
+
 
 
         float joy_diff = joy_x - old_joy_x;
@@ -1070,8 +1056,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             camera_rotation_angle +=  360.0f;
         }
         
+        
         glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
-
         Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         
         glm::vec3 light_orientation = glm::normalize(glm::vec3(-camera_position.x,0.0f,-camera_position.z));
@@ -1084,18 +1070,13 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(moving&&!attack)
         {
             hero.UseSequence("walk");
-            // glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.071f,0.0f,1.0f);
             glm::vec4 move_h = hero.model_matrix * glm::vec4(0.0f,0.142f,0.0f,1.0f);
             MoveHero(glm::vec3(move_h));
         }else
         if(attack)
         {
             hero.UseSequence("strike");
-            hero.SetPosition(hero_position);
-            
-            mob_events.push_back(AddStrike(hero,render_target));
-            hero.SetPosition(glm::vec3(0.0f,0.0f,0.0f));
-            
+            mob_events.push_back(AddStrike(hero.model_matrix,hero_position,render_target));
         }
         else
         {
