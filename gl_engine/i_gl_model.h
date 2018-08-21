@@ -6,6 +6,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include <string>
 #include <vector>
+#include <list>
 #include "glscene.h"
 
 class IGlModel
@@ -31,6 +32,27 @@ public:
     float m_light_radius;
     glm::vec3 m_light_color;
     glm::vec3 m_light_position;
+
+    void InfoList(std::list<std::string> & info)
+    {
+    //     info.push_back("matrix " << model_matrix);
+    //     info.push_back("mass_inv "<< mass_inv);
+    //     info.push_back("armor "<<armor_value);
+    //     info.push_back("life "<<life_value);
+    //     info.push_back("name "<<m_name);
+    //     info.push_back("life "<<life_value);
+    //     info.push_back("life "<<life_value);
+
+    // // <<"light" float light_radius = 0.0f;
+    // //                                         glm::vec3 color;
+    // //                                         glm::vec3 l_position;
+    // //                                         sstream >> color >> l_position >> light_radius; 
+    // //                                         SetLight(true,color,l_position,light_radius);
+
+
+    // <<"radius"<<character.radius<<"\n"
+    // <<"position"<<character.GetPosition()<<"\n";
+    }
 
     void SetPosition(const glm::vec3 &position)
     {
@@ -76,6 +98,8 @@ public:
         return true;
     }
 
+
+
     float GetLifeValue()
     {
         return life_value;
@@ -88,6 +112,11 @@ public:
      void SetArmorValue(float value)
     {
         armor_value= value;
+    }
+
+    float GetArmorValue()
+    {
+        return armor_value;
     }
 
     void Damage(float damage)

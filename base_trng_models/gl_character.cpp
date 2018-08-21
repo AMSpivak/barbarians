@@ -3,6 +3,58 @@
 #include "loader.h"
 #include "engine_settings.h"
 
+std::ostream& operator << ( std::ostream& os, const GlCharacter & character)
+{
+	//float tmp[3];
+    os<<"<object>\n";
+
+    /*execute_funcs.insert(std::make_pair("model",[this](std::stringstream &sstream)
+                                        {
+                                            std::string name;
+                                            sstream >> name;
+                                            AddModel(name);
+                                        }));*/
+
+    /*execute_funcs.insert(std::make_pair("sequence",[this](std::stringstream &sstream)
+                                        {
+                                            size_t start =0;
+                                            size_t end =0;
+                                            std::string name;
+                                            sstream >> name >> start >> end; 
+                                            AnimationSequence sequence(start,end);
+                                            AddSequence(name,sequence);
+                                            UseSequence(name);*/
+
+    /*execute_funcs.insert(std::make_pair("run_sequence",[this](std::stringstream &sstream)
+                                        {
+                                            size_t start =0;
+                                            size_t end =0;
+                                            std::string name;
+                                            sstream >> name;
+                                            UseSequence(name);
+                                        }));*/
+
+    // os<<"matrix "<<character.model_matrix<<"\n"
+    // <<"mass_inv "<<character.mass_inv<<"\n"
+    // <<"armor "<<character.GetArmorValue()<<"\n"
+    // <<"life " << character.GetLifeValue()<<"\n"
+    // <<"name " << character.GetName()<<"\n"
+    // // <<"light" float light_radius = 0.0f;
+    // //                                         glm::vec3 color;
+    // //                                         glm::vec3 l_position;
+    // //                                         sstream >> color >> l_position >> light_radius; 
+    // //                                         SetLight(true,color,l_position,light_radius);
+
+
+    // <<"radius"<<character.radius<<"\n"
+    // <<"position"<<character.GetPosition()<<"\n";
+
+
+
+
+    os<<"<!object>\n";
+	return os;
+}
 
 GlCharacter::GlCharacter():
                             engine_frame(0)
@@ -73,10 +125,10 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             model_matrix = glm::rotate(model_matrix, glm::radians(a_y), glm::vec3(0.0f, 1.0f, 0.0f));
                                             model_matrix = glm::rotate(model_matrix, glm::radians(a_z), glm::vec3(0.0f, 0.0f, 1.0f));
                                         }));
-    // execute_funcs.insert(std::make_pair("matrix",[this](std::stringstream &sstream)
-    //                                     {
-    //                                         sstream >> model_matrix; 
-    //                                     }));
+    execute_funcs.insert(std::make_pair("matrix",[this](std::stringstream &sstream)
+                                        {
+                                            sstream >> model_matrix; 
+                                         }));
     execute_funcs.insert(std::make_pair("mass_inv",[this](std::stringstream &sstream)
                                         {
                                             sstream >> mass_inv;
@@ -84,13 +136,19 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
 
     execute_funcs.insert(std::make_pair("armor",[this](std::stringstream &sstream)
                                         {
-                                            float armor = 1.0;
+                                            float armor = 1.0f;
                                             sstream >> armor;
                                             SetArmorValue(armor);
                                         }));
 
+    execute_funcs.insert(std::make_pair("life",[this](std::stringstream &sstream)
+                                        {
+                                            float life = 1.0f;
+                                            sstream >> life;
+                                            SetLifeValue(life);
+                                        }));
     execute_funcs.insert(std::make_pair("name",[this](std::stringstream &sstream)
-                                        {   std:: string name
+                                        {   std::string name;
                                             sstream >> name;
                                             SetName(name);
                                         }));

@@ -46,13 +46,16 @@ private:
 };
 
 
-std::istream& operator>> ( std::istream& is, glm::mat4& mat) ;
+std::istream& operator>> ( std::istream& is, glm::mat4& mat);
 
 std::istream& operator>> ( std::istream& is, Bone& bone) ;
 std::istream& operator>> ( std::istream& is, glm::vec3 & fill_vector) ;
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector);
 std::ostream& operator << ( std::ostream& os, const glm::vec3 & glm_vector);
+std::ostream& operator << ( std::ostream& os, const glm::mat4 & mat);
+
+
 std::string readShaderFile(std::string FileName);
 
 GLuint LoadShader(std::string FileName,GLenum shaderType);
