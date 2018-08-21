@@ -16,7 +16,7 @@ class GlGameStateDungeon: public IGlGameState
 public:
     GlGameStateDungeon(std::map<const std::string,GLuint> &shader_map,
         std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
-        std::map<std::string,std::shared_ptr<IGlModel>> &models_map,
+        std::map<std::string,std::shared_ptr<GlCharacter>> &models_map,
         GLResourcesManager &resources_manager,
         size_t screen_width,
         size_t screen_height);
@@ -33,13 +33,14 @@ private:
 
     std::vector <std::shared_ptr<glModel> > Models;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
-    std::map<std::string,std::shared_ptr<IGlModel>> & m_models_map;
+    std::map<std::string,std::shared_ptr<GlCharacter>> & m_models_map;
     std::shared_ptr<IGlTextureStruct> fx_texture, skybox, debug_texture;
     GlDungeon m_dungeon;
     std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
     std::list<std::shared_ptr<IMapEvent>> map_events;
     std::list<std::shared_ptr<IMapEvent>> hero_events;
     std::list<std::shared_ptr<IMapEvent>> mob_events;
+    GlCharacter &hero;
     
     bool m_antialiase_enabled;
     std::string m_start_place;

@@ -168,11 +168,11 @@ int main(int argc, char const *argv[])
 	 
 	FillShaders(m_shader_map,"shaders/list.shd");
 
-    std::map<std::string,std::shared_ptr<IGlModel>> m_glmodels_map;
+    std::map<std::string,std::shared_ptr<GlCharacter>> m_glmodels_map;
 
 
     auto hero = std::make_shared<GlCharacter>();
-    m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Hero",hero));
+    m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<GlCharacter>>("Hero",hero));
 	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",*hero);
 
     GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);

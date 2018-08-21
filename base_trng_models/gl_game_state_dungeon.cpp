@@ -39,13 +39,14 @@ void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
 
 GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
-                                    std::map<std::string,std::shared_ptr<IGlModel>> & models_map,
+                                    std::map<std::string,std::shared_ptr<GlCharacter>> & models_map,
                                     GLResourcesManager &resources_manager,
                                     size_t screen_width,
                                     size_t screen_height):
                                                         IGlGameState(shader_map,resources_manager,screen_width,screen_height)
                                                         ,m_render_target_map(render_target_map)
                                                         ,m_models_map(models_map)
+                                                        ,hero(*models_map["Hero"])
                                                         ,m_antialiase_enabled(true)
                                                         ,m_start_place("")
                                                         ,light_angle (90.0f)
@@ -289,7 +290,6 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     }
 
 
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
     hero.UseSequence("stance");
 
     
@@ -483,7 +483,6 @@ void GlGameStateDungeon::Draw()
 
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     glRenderTarget &final_render_target = *(m_render_target_map["final"].get());
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
 
     size_t width = IGlGameState::m_screen_width;
     size_t height = IGlGameState::m_screen_height;
@@ -775,7 +774,7 @@ InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEv
 
 void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 {
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_models_map["Hero"].get()));
+
     hero.SetPosition(hero_position);
 
     for(int i =0; i< steps; i++)
@@ -792,21 +791,21 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
         hero.SetPosition(result.second);
         for(auto object : dungeon_objects)
         {  
-            auto ptr = object.get();
-            auto res = FitObjectToMap(*ptr,ptr->GetPosition());
+            // auto ptr = object.get();
+            auto res = FitObjectToMap(*object,object->GetPosition());
             object->SetPosition(res.second);
         }
 
         for(auto object1 : dungeon_objects)
         {  
-            auto ptr1 = object1.get();
+            //auto ptr1 = object1.get();
 
             for(auto object2 : dungeon_objects)
             {  
-                auto ptr2 = object2.get();
+                //auto ptr2 = object2.get();
 
-                if(ptr1!=ptr2)
-                    FitObjectToObject(*ptr1,*ptr2);
+                if(object1!=object2)
+                    FitObjectToObject(*object1,*object2);
                 
             }
             
@@ -913,9 +912,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     static float camera_rotation_angle = 0.0f;
     static float hero_rotation_angle = 0.0f;
     static float old_joy_x = 0.0f;
-    std::shared_ptr<IGlModel> hero_ptr = m_models_map["Hero"];
+    std::shared_ptr<GlCharacter> hero_ptr = m_models_map["Hero"];
    
-    GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(hero_ptr.get()));
+    // GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(hero_ptr.get()));
     GLuint current_shader;
 
     int models_count = Models.size();
@@ -1028,7 +1027,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
         if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
 
-        distance = std::clamp(distance,3.0f,14.0f);
+        distance = glm::clamp(distance,3.0f,14.0f);
 
 
 

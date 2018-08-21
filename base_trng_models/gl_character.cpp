@@ -5,9 +5,9 @@
 
 
 GlCharacter::GlCharacter():
-                         engine_frame(0)
-                         ,now_frame(0)
-                        ,current_animation(nullptr)
+                            engine_frame(0)
+                            ,now_frame(0)
+                            ,current_animation(nullptr)
 {
 
 }
@@ -16,6 +16,7 @@ GlCharacter::~GlCharacter()
 {
 
 }
+
 void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character)
 {
     std::ifstream char_file;
@@ -23,9 +24,7 @@ void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character
     std::vector<std::string> lines;
     LoaderUtility::LoadLineBlock(char_file,"never_exists",lines);
     char_file.close(); 
-
-    character.UpdateFromLines(lines);
-       
+    character.UpdateFromLines(lines); 
 }
 
 
@@ -88,6 +87,12 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             float armor = 1.0;
                                             sstream >> armor;
                                             SetArmorValue(armor);
+                                        }));
+
+    execute_funcs.insert(std::make_pair("name",[this](std::stringstream &sstream)
+                                        {   std:: string name
+                                            sstream >> name;
+                                            SetName(name);
                                         }));
 
     execute_funcs.insert(std::make_pair("light",[this](std::stringstream &sstream)
