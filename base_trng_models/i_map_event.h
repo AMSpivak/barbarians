@@ -30,7 +30,7 @@ public:
         position = value;
     }
 
-    const glm::vec3 &GetPosition()
+    const glm::vec3 &GetPosition() const
     {
         return position;
     }

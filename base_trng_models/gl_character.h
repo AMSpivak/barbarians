@@ -25,13 +25,14 @@ public:
     int AddAxes(std::vector<glm::vec3> &axes);
     std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe) const;
     void UpdateFromLines(std::vector<std::string> &lines);
+    void ToStream(std::ostream& os) const;
 
 private:
     size_t engine_frame;
 
     size_t now_frame;
     std::vector <std::shared_ptr<glModel> > Models;
-    //std::map<std::string, GLuint> &shader_map;
+    std::list<std::string> model_list;
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;
 
@@ -41,4 +42,6 @@ private:
 };
 
 void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character);
+std::ostream& operator << ( std::ostream& os, const GlCharacter & character);
+
 #endif

@@ -36,11 +36,13 @@ private:
     std::map<std::string,std::shared_ptr<GlCharacter>> & m_models_map;
     std::shared_ptr<IGlTextureStruct> fx_texture, skybox, debug_texture;
     GlDungeon m_dungeon;
-    std::list<std::shared_ptr<IGlModel>>  dungeon_objects;
+    std::list<std::shared_ptr<GlCharacter>>  dungeon_objects;
     std::list<std::shared_ptr<IMapEvent>> map_events;
     std::list<std::shared_ptr<IMapEvent>> hero_events;
     std::list<std::shared_ptr<IMapEvent>> mob_events;
     GlCharacter &hero;
+    std::string m_level_file;
+
     
     bool m_antialiase_enabled;
     std::string m_start_place;
@@ -56,6 +58,7 @@ private:
     glm::vec3 light_dir_vector;
     glm::vec3 light_color_vector;
     
+    void SaveObjects(const std::string &filename);
 
     void LoadMap(const std::string &filename,const std::string &start_place);
     void SelectStart(std::vector<std::string> &lines);

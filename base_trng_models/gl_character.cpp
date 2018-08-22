@@ -7,7 +7,7 @@ std::ostream& operator << ( std::ostream& os, const GlCharacter & character)
 {
 	//float tmp[3];
     os<<"<object>\n";
-
+    character.ToStream(os);
     /*execute_funcs.insert(std::make_pair("model",[this](std::stringstream &sstream)
                                         {
                                             std::string name;
@@ -68,6 +68,44 @@ GlCharacter::~GlCharacter()
 {
 
 }
+
+void GlCharacter::ToStream(std::ostream& os) const
+{
+    
+    for(auto model_name : model_list)
+    {
+        os<<"model "<<model_name<<"\n";
+    }
+
+    for(auto seq : sequence)
+    {
+        os<<"sequence "<<seq.first<<" "<<seq.second.start_frame<<" "<<seq.second.end_frame<<"\n";
+    }
+    glm::mat4 tmp_matrix = glm::rotate(model_matrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    os<<"matrix "<<tmp_matrix<<"\n"
+    <<"mass_inv "<<mass_inv<<"\n"
+    <<"armor "<<GetArmorValue()<<"\n"
+    <<"life " << GetLifeValue()<<"\n"
+    <<"name " << GetName()<<"\n"
+    // // <<"light" float light_radius = 0.0f;
+    // //                                         glm::vec3 color;
+    // //                                         glm::vec3 l_position;
+    // //                                         sstream >> color >> l_position >> light_radius; 
+    // //                                         SetLight(true,color,l_position,light_radius);
+
+
+    <<"radius "<<radius<<"\n"
+    <<"position "<<GetPosition()<<"\n";
+    //glm::vec4 tm1;
+    //glm::vec3 tm2;
+
+    //if(IsLight(tm1,tm2))
+    if(m_is_light)
+    {
+        os<< "light "<<" "<< m_light_color <<" "<< m_light_position <<" "<< m_light_radius<<"\n";
+    }
+}
+
 
 void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character)
 {
@@ -284,6 +322,7 @@ void GlCharacter::Damage(float damage)
 
 void GlCharacter::AddModel(std::string name)
 {
+    model_list.emplace_back(name);
     Models.emplace_back(std::make_shared<glModel>(name));
 }
 

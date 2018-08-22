@@ -234,7 +234,26 @@ void GlGameStateDungeon::LoadMapEvent(std::vector<std::string> &lines)
     hero_events.push_back(e_ptr);
 
 }
+void GlGameStateDungeon::SaveObjects(const std::string &filename)
+{ 
+    if(!dungeon_objects.empty())
+    {
+        std::string tmp_filename(filename);
 
+        size_t ext_pos = tmp_filename.find_last_of(".") +1;
+        std::string extention = tmp_filename.replace(ext_pos,tmp_filename.length()- ext_pos,"sav");
+        std::ofstream savefile;
+        savefile.open (extention,std::ios::trunc);
+        
+        for(auto object:dungeon_objects)
+        {
+            savefile  << (*object);
+        }
+
+        savefile.close();
+    }
+    
+}
 
 void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
 {  
@@ -242,13 +261,24 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
 	level_file.open(filename); 
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     if(!level_file.is_open()) return;
+
+
+    SaveObjects(m_level_file);
+    m_level_file = filename;
+
+    std::string tmp_filename(filename);
+    size_t ext_pos = tmp_filename.find_last_of(".") +1;
+    std::string extention = tmp_filename.replace(ext_pos,tmp_filename.length()- ext_pos,"sav");
+    
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
     m_start_place = start_place;
     GLResourcesManager * resources_manager = GetResourceManager();
     hero_events.clear();
     mob_events.clear();
     map_events.clear();
+    
     dungeon_objects.clear();
+
 
     
     std::map<std::string,const std::function<void(std::vector<std::string> &lines)>> execute_funcs;
@@ -265,15 +295,38 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     execute_funcs.insert(std::make_pair("dungeon_params",[this](std::vector<std::string> &lines){SetDungeonSize(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadDungeonObjects(lines);}));
-    execute_funcs.insert(std::make_pair("object",[this](std::vector<std::string> &lines){LoadObject(lines);}));
     execute_funcs.insert(std::make_pair("hero_event",[this](std::vector<std::string> &lines){LoadMapEvent(lines);}));
+    
+
+    std::ifstream objects_file;
+	objects_file.open(extention); 
+    
+
+    if(objects_file.is_open())
+    {
+        std::vector<std::string> obj_lines;
+
+        while(!objects_file.eof())
+        {
+            LoaderUtility::LoadLineBlock(objects_file,LoaderUtility::FindPrefix(objects_file),obj_lines);
+            LoadObject(obj_lines);
+        }
+        objects_file.close();
+    }
+    else 
+    {
+        execute_funcs.insert(std::make_pair("object",[this](std::vector<std::string> &lines){LoadObject(lines);}));
+    }
+
+
+    
 
     Models.clear();
     
     
     std::vector<std::string> lines;
+    
     std::string sufix ="";
-
     while(!level_file.eof())
     {
         sufix = LoaderUtility::FindPrefix(level_file);

@@ -288,6 +288,17 @@ std::istream& operator>> ( std::istream& is, glm::mat4& mat)
 	return is;
 }
 
+std::ostream& operator << ( std::ostream& os, const glm::mat4 & mat)
+{
+	const float *p_mat = static_cast<const float*> (glm::value_ptr(mat));
+	os 	 << p_mat[0] 	<<" "<< p_mat[4]<<" "<< p_mat[8]	<<" "<< p_mat[12]
+	<<" "<< p_mat[1]	<<" "<< p_mat[5]<<" "<< p_mat[9] 	<<" "<< p_mat[13]
+	<<" "<< p_mat[2]	<<" "<< p_mat[6]<<" "<< p_mat[10]	<<" "<< p_mat[14]
+	<<" "<< p_mat[3]	<<" "<< p_mat[7]<<" "<< p_mat[11]	<<" "<< p_mat[15];
+
+	return os;
+}
+
 
 std::istream& operator >> ( std::istream& is, Bone& bone)
 {
@@ -762,13 +773,4 @@ std::ostream& operator << ( std::ostream& os, const glm::vec3 & glm_vector)
 	return os;
 }
 
-std::ostream& operator << ( std::ostream& os, const glm::mat4 & mat)
-{
-	//float tmp[3];
-	os << mat[0] <<" "<< mat[4]<<" "<< mat[8]<<" "<< mat[12]
-	<<" "<< mat[1]	<<" "<< mat[5]<<" "<< mat[9]<<" "<< mat[13]
-	<<" "<< mat[2]	<<" "<< mat[6]<<" "<< mat[10]<<" "<< mat[14]
-	<<" "<< mat[3]	<<" "<< mat[7]<<" "<< mat[11]<<" "<< mat[15];
 
-	return os;
-}

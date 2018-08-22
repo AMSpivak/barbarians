@@ -33,33 +33,14 @@ public:
     glm::vec3 m_light_color;
     glm::vec3 m_light_position;
 
-    void InfoList(std::list<std::string> & info)
-    {
-    //     info.push_back("matrix " << model_matrix);
-    //     info.push_back("mass_inv "<< mass_inv);
-    //     info.push_back("armor "<<armor_value);
-    //     info.push_back("life "<<life_value);
-    //     info.push_back("name "<<m_name);
-    //     info.push_back("life "<<life_value);
-    //     info.push_back("life "<<life_value);
-
-    // // <<"light" float light_radius = 0.0f;
-    // //                                         glm::vec3 color;
-    // //                                         glm::vec3 l_position;
-    // //                                         sstream >> color >> l_position >> light_radius; 
-    // //                                         SetLight(true,color,l_position,light_radius);
-
-
-    // <<"radius"<<character.radius<<"\n"
-    // <<"position"<<character.GetPosition()<<"\n";
-    }
+    
 
     void SetPosition(const glm::vec3 &position)
     {
         m_position = position;
     }
 
-    const glm::vec3 &GetPosition()
+    const glm::vec3 &GetPosition() const
     {
         return m_position;
     }
@@ -69,7 +50,7 @@ public:
         m_name = name;
     }
 
-    const std::string & GetName()
+    const std::string & GetName() const
     {
         return m_name;
     }
@@ -87,7 +68,7 @@ public:
         m_light_position = light_position;
     }
 
-    bool IsLight(glm::vec4 & ret_position, glm::vec3 &ret_color)
+    bool IsLight(glm::vec4 & ret_position, glm::vec3 &ret_color) const
     {
         if(!m_is_light)
             return false;
@@ -100,7 +81,7 @@ public:
 
 
 
-    float GetLifeValue()
+    float GetLifeValue() const
     {
         return life_value;
     }
@@ -114,7 +95,7 @@ public:
         armor_value= value;
     }
 
-    float GetArmorValue()
+    float GetArmorValue() const
     {
         return armor_value;
     }
