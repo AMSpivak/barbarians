@@ -9,7 +9,13 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glcamera.h"
+template <typename T1,typename T2>
+std::ostream& operator << ( std::ostream& os, const std::pair<T1,T2> & value)
+{
+    os<<value.first<<" "<<value.second;
 
+	return os;
+}
 struct Bone {
 	std::string name;
 	std::string parent;

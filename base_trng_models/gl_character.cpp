@@ -52,7 +52,7 @@ void GlCharacter::ToStream(std::ostream& os) const
 
     for(auto edge : m_edges)
     {
-        os<<"edge "<<edge.first<<" "<<edge.second<<"\n";
+        os<<"edge "<<edge<<"\n";
     }
     
 }

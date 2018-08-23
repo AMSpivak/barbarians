@@ -33,7 +33,7 @@ namespace Collision
         return start < end ? end - start : 0;   
     }
 
-    std::pair<float, float> ProjectEdgesOnAxe( const glm::mat4 &model_matrix,std::vector<std::pair<glm::vec3, glm::vec3>> &edges,const glm::vec3 &position,const glm::vec3 & axe);
+    std::pair<float, float> ProjectEdgesOnAxe( const glm::mat4 &model_matrix,const std::vector<std::pair<glm::vec3, glm::vec3>> &edges,const glm::vec3 &position,const glm::vec3 & axe);
 
     int AddAxes(std::vector<glm::vec3> &axes,
                 const std::vector<std::pair<glm::vec3, glm::vec3>> &m_edges,
