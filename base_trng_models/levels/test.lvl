@@ -29,6 +29,20 @@ material/dungeon/walls/wallcross/wallcross.mdl
 0 0 
 0 0
 <!dungeon_objects>
+
+<object>
+mass_inv 1.0
+radius 0.5
+position 12.0 0.0 12.0
+model material/barrel/barrel.mdl
+sequence damage 2 3
+sequence base 0 1
+edge 1.0 1.0 0.0 -1.0 1.0 0.0
+edge -1.0 1.0 0.0 -1.0 -1.0 0.0
+edge -1.0 -1.0 0.0 1.0 -1.0 0.0
+edge 1.0 -1.0 0.0 1.0 1.0 0.0
+
+<!object>
 <object>
 mass_inv 1.0
 radius 0.5

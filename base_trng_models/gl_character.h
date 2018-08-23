@@ -29,6 +29,7 @@ public:
     void ToStream(std::ostream& os) const;
 
 private:
+    //glm::mat4 m_draw_matrix;
     size_t engine_frame;
 
     size_t now_frame;

@@ -2,7 +2,7 @@
 #include <sstream>
 #include "loader.h"
 #include "engine_settings.h"
-
+#include "collision.h"
 std::ostream& operator << ( std::ostream& os, const GlCharacter & character)
 {
     os<<"<object>\n";
@@ -50,11 +50,11 @@ void GlCharacter::ToStream(std::ostream& os) const
         os<< "light "<<" "<< m_light_color <<" "<< m_light_position <<" "<< m_light_radius<<"\n";
     }
 
-    if(!m_edges.empty())
+    for(auto edge : m_edges)
     {
-
-        //os<< "light "<<" "<< m_light_color <<" "<< m_light_position <<" "<< m_light_radius<<"\n";
+        os<<"edge "<<edge.first<<" "<<edge.second<<"\n";
     }
+    
 }
 
 
@@ -291,7 +291,7 @@ void GlCharacter::AddModel(std::string name)
 
 int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
 {
-    if(m_edges.emty()) 
+    if(m_edges.empty()) 
         return 0;
     return Collision::AddAxes(axes,m_edges,model_matrix);
 
@@ -300,12 +300,14 @@ int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
 
 std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe) const
 {
-    if(m_edges.emty()) 
+    if(m_edges.empty()) 
     {
         float position_on_axe = glm::dot(axe, m_position);
         std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
         return ret_value;
     }
     else
-        return Collision::ProjectEdgesOnAxe(model_matrix,m_edges,position,axe);
+    {
+        return Collision::ProjectEdgesOnAxe(model_matrix,m_edges,m_position,axe);
+    }
 }
