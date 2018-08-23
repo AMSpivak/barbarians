@@ -24,6 +24,7 @@ public:
 
     int AddAxes(std::vector<glm::vec3> &axes);
     std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe) const;
+    void AddEdge(const std::pair<glm::vec3, glm::vec3> edge);
     void UpdateFromLines(std::vector<std::string> &lines);
     void ToStream(std::ostream& os) const;
 
@@ -33,9 +34,9 @@ private:
     size_t now_frame;
     std::vector <std::shared_ptr<glModel> > Models;
     std::list<std::string> model_list;
+    std::vector<std::pair<glm::vec3, glm::vec3>> m_edges; 
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;
-
 
     //void RefreshMatrixes();
 

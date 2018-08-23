@@ -12,13 +12,8 @@ private:
     const GLuint * m_texture;
     float m_width; 
     float m_height;   
-
 public:
-
-
     float damage;
-
-
     int frames_lifetime;
     IMapEventHeroStrike(GLuint current_shader, GLuint depthmap,const GLuint * texture,
 						 float width, float height):IMapEvent()
@@ -32,11 +27,9 @@ public:
 
     ~IMapEventHeroStrike(){}
 
-
     InteractionResult Interact(IGlModel &model,std::string &return_value);
     EventProcessResult Process();
     void Show(const glm::vec3 & offset, glCamera & camera);
-
     int AddAxes(std::vector<glm::vec3> &axes);
     void AddEdge(const std::pair<glm::vec3, glm::vec3> edge);
     std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe);

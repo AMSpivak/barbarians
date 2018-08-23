@@ -5,53 +5,8 @@
 
 std::ostream& operator << ( std::ostream& os, const GlCharacter & character)
 {
-	//float tmp[3];
     os<<"<object>\n";
     character.ToStream(os);
-    /*execute_funcs.insert(std::make_pair("model",[this](std::stringstream &sstream)
-                                        {
-                                            std::string name;
-                                            sstream >> name;
-                                            AddModel(name);
-                                        }));*/
-
-    /*execute_funcs.insert(std::make_pair("sequence",[this](std::stringstream &sstream)
-                                        {
-                                            size_t start =0;
-                                            size_t end =0;
-                                            std::string name;
-                                            sstream >> name >> start >> end; 
-                                            AnimationSequence sequence(start,end);
-                                            AddSequence(name,sequence);
-                                            UseSequence(name);*/
-
-    /*execute_funcs.insert(std::make_pair("run_sequence",[this](std::stringstream &sstream)
-                                        {
-                                            size_t start =0;
-                                            size_t end =0;
-                                            std::string name;
-                                            sstream >> name;
-                                            UseSequence(name);
-                                        }));*/
-
-    // os<<"matrix "<<character.model_matrix<<"\n"
-    // <<"mass_inv "<<character.mass_inv<<"\n"
-    // <<"armor "<<character.GetArmorValue()<<"\n"
-    // <<"life " << character.GetLifeValue()<<"\n"
-    // <<"name " << character.GetName()<<"\n"
-    // // <<"light" float light_radius = 0.0f;
-    // //                                         glm::vec3 color;
-    // //                                         glm::vec3 l_position;
-    // //                                         sstream >> color >> l_position >> light_radius; 
-    // //                                         SetLight(true,color,l_position,light_radius);
-
-
-    // <<"radius"<<character.radius<<"\n"
-    // <<"position"<<character.GetPosition()<<"\n";
-
-
-
-
     os<<"<!object>\n";
 	return os;
 }
@@ -87,22 +42,18 @@ void GlCharacter::ToStream(std::ostream& os) const
     <<"armor "<<GetArmorValue()<<"\n"
     <<"life " << GetLifeValue()<<"\n"
     <<"name " << GetName()<<"\n"
-    // // <<"light" float light_radius = 0.0f;
-    // //                                         glm::vec3 color;
-    // //                                         glm::vec3 l_position;
-    // //                                         sstream >> color >> l_position >> light_radius; 
-    // //                                         SetLight(true,color,l_position,light_radius);
-
-
     <<"radius "<<radius<<"\n"
     <<"position "<<GetPosition()<<"\n";
-    //glm::vec4 tm1;
-    //glm::vec3 tm2;
 
-    //if(IsLight(tm1,tm2))
     if(m_is_light)
     {
         os<< "light "<<" "<< m_light_color <<" "<< m_light_position <<" "<< m_light_radius<<"\n";
+    }
+
+    if(!m_edges.empty())
+    {
+
+        //os<< "light "<<" "<< m_light_color <<" "<< m_light_position <<" "<< m_light_radius<<"\n";
     }
 }
 
@@ -205,6 +156,15 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                         {
                                             sstream >> radius;
                                         }));
+                                        
+    execute_funcs.insert(std::make_pair("edge",[this](std::stringstream &sstream)
+                                        {
+                                            glm::vec3 start;
+                                            glm::vec3 stop;
+                                            sstream >> start>>stop;
+                                            AddEdge(std::make_pair(start,stop));
+                                        }));
+
     execute_funcs.insert(std::make_pair("position",[this](std::stringstream &sstream)
                                         {
                                             float a_x = 0.0f;
@@ -237,7 +197,10 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
     //model_matrix = glm::rotate(model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
-
+void GlCharacter::AddEdge(const std::pair<glm::vec3, glm::vec3> edge)
+{
+    m_edges.push_back(edge);
+}
 
 void GlCharacter::UseSequence(const std::string & name)
 {
@@ -328,15 +291,21 @@ void GlCharacter::AddModel(std::string name)
 
 int GlCharacter::AddAxes(std::vector<glm::vec3> &axes)
 {
-    return 0;
+    if(m_edges.emty()) 
+        return 0;
+    return Collision::AddAxes(axes,m_edges,model_matrix);
+
+    
 }
 
 std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe) const
 {
-    float position_on_axe = glm::dot(axe, m_position);
-
-    std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
-
-    return ret_value;
-
+    if(m_edges.emty()) 
+    {
+        float position_on_axe = glm::dot(axe, m_position);
+        std::pair<float, float> ret_value(position_on_axe - radius, position_on_axe + radius);
+        return ret_value;
+    }
+    else
+        return Collision::ProjectEdgesOnAxe(model_matrix,m_edges,position,axe);
 }
