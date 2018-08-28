@@ -796,7 +796,7 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     if(mass_summ < std::numeric_limits<float>::min())
             return 0.0f;
 
-    std::pair<float,glm::vec3> intersection = Physics::Intersection(object1,object2);
+    auto intersection = Physics::Intersection(object1,object2);
     
     if (intersection.first < std::numeric_limits<float>::min()) 
         return 0.0f;
@@ -821,7 +821,7 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
 
 InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value)
 {
-    std::pair<float,glm::vec3> intersection = Physics::Intersection(object,event);
+    auto intersection = Physics::Intersection(object,event);
     return intersection.first < std::numeric_limits<float>::min() ? InteractionResult::Nothing : event.Interact(object,return_value);
 }
 
@@ -829,44 +829,44 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 {
 
     hero.SetPosition(hero_position);
-
+    float summ = 0.0f;
     for(int i =0; i< steps; i++)
     {
-        for(auto object : dungeon_objects)
-        {  
-            auto ptr = object.get();
-            FitObjectToObject(*ptr,hero);
-            
+        summ = 0.0f;
+
+        for(auto it_object1 = dungeon_objects.begin();it_object1 != dungeon_objects.end();it_object1++)
+        {
+            if(!(*it_object1)->ghost)
+            {  
+                summ = std::max( summ,FitObjectToObject(**it_object1,hero));
+
+                for(auto it_object2 = it_object1 ;it_object2 != dungeon_objects.end();it_object2++)
+                {  
+                    if(!(*it_object2)->ghost)
+                    {
+                        summ = std::max( summ,FitObjectToObject(**it_object1,**it_object2));
+                    }  
+                }
+            }
         }
 
         auto result = FitObjectToMap(hero,hero.GetPosition());
-
+        summ = std::max( summ,result.first);
         hero.SetPosition(result.second);
         for(auto object : dungeon_objects)
         {  
-            // auto ptr = object.get();
             auto res = FitObjectToMap(*object,object->GetPosition());
             object->SetPosition(res.second);
+            summ =std::max( summ, res.first);
         }
-
-        for(auto object1 : dungeon_objects)
-        {  
-            //auto ptr1 = object1.get();
-
-            for(auto object2 : dungeon_objects)
-            {  
-                //auto ptr2 = object2.get();
-
-                if(object1!=object2)
-                    FitObjectToObject(*object1,*object2);
-                
-            }
-            
+        if(summ < accuracy)
+        {
+            //std::cout<<"!\n";
+            break; 
         }
-        
     }
+    //std::cout<<summ<<"!\n";
     hero_position = hero.GetPosition();
-
 }
 
 
@@ -1142,7 +1142,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             object->Process();
         }
 
-        FitObjects(10,0.0f);
+        FitObjects(10,0.01f);
     }
     return this;
 }

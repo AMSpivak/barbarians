@@ -50,6 +50,11 @@ void GlCharacter::ToStream(std::ostream& os) const
         os<< "light "<<" "<< m_light_color <<" "<< m_light_position <<" "<< m_light_radius<<"\n";
     }
 
+    if(ghost)
+    {
+        os<< "ghost\n";
+    }
+
     for(auto edge : m_edges)
     {
         os<<"edge "<<edge<<"\n";
@@ -102,6 +107,12 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             sstream >> name;
                                             UseSequence(name);
                                         }));
+
+    execute_funcs.insert(std::make_pair("ghost",[this](std::stringstream &sstream)
+                                        {
+                                            ghost = true;
+                                        }));
+
     execute_funcs.insert(std::make_pair("orientation",[this](std::stringstream &sstream)
                                         {
                                             float a_x = 0.0f;

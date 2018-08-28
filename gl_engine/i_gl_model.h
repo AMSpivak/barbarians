@@ -14,9 +14,9 @@ class IGlModel
 private:
     float life_value;
     float armor_value;
-    bool ghost;
     std::string m_name;
 protected:
+    bool ghost;
     glm::vec3 m_position;
 
 public:
