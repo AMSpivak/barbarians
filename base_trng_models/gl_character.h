@@ -8,10 +8,11 @@
 
 #include "gl_model.h"
 
+enum class CharacterTypes {hero,tile,map_object};
 class GlCharacter: public IGlModel
 {
 public:
-    GlCharacter();
+    GlCharacter(CharacterTypes type);
     ~GlCharacter();
     void Draw(GLuint shader) const;
     void Draw(GLuint shader,const glm::mat4 &draw_matrix);
@@ -27,8 +28,10 @@ public:
     void AddEdge(const std::pair<glm::vec3, glm::vec3> edge);
     void UpdateFromLines(std::vector<std::string> &lines);
     void ToStream(std::ostream& os) const;
+    CharacterTypes GetType() const;
 
 private:
+    CharacterTypes m_type;
     //glm::mat4 m_draw_matrix;
     size_t engine_frame;
 

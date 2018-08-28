@@ -11,10 +11,11 @@ std::ostream& operator << ( std::ostream& os, const GlCharacter & character)
 	return os;
 }
 
-GlCharacter::GlCharacter():
+GlCharacter::GlCharacter(CharacterTypes type):
                             engine_frame(0)
                             ,now_frame(0)
                             ,current_animation(nullptr)
+                            ,m_type(type)
 {
 
 }
@@ -23,6 +24,12 @@ GlCharacter::~GlCharacter()
 {
 
 }
+
+CharacterTypes GlCharacter::GetType() const
+{
+    return m_type;
+}
+
 
 void GlCharacter::ToStream(std::ostream& os) const
 {

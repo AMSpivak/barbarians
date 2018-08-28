@@ -171,7 +171,7 @@ int main(int argc, char const *argv[])
     std::map<std::string,std::shared_ptr<GlCharacter>> m_glmodels_map;
 
 
-    auto hero = std::make_shared<GlCharacter>();
+    auto hero = std::make_shared<GlCharacter>(CharacterTypes::hero);
     m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<GlCharacter>>("Hero",hero));
 	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",*hero);
 

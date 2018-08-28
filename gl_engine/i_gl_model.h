@@ -16,7 +16,7 @@ private:
     float armor_value;
     std::string m_name;
 protected:
-    bool ghost;
+    
     glm::vec3 m_position;
 
 public:
@@ -26,7 +26,7 @@ public:
     glm::mat4 model_matrix;
     float mass_inv;
     float radius;
-    
+    bool ghost;
 
     bool m_is_light;
     float m_light_radius;

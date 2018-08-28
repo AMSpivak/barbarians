@@ -138,7 +138,7 @@ void GlGameStateDungeon::LoadDungeonObjects(std::vector<std::string> &lines)
 
 void GlGameStateDungeon::LoadObject(std::vector<std::string> &lines)
 {
-        auto object_ptr = std::make_shared<GlCharacter>();
+        auto object_ptr = std::make_shared<GlCharacter>(CharacterTypes::map_object);
         dungeon_objects.push_back(object_ptr);
         object_ptr->UpdateFromLines(lines);
         object_ptr->model_matrix = glm::rotate(object_ptr->model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -247,7 +247,8 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
         
         for(auto object:dungeon_objects)
         {
-            savefile  << (*object);
+            if(object->GetType() ==CharacterTypes::map_object)
+                savefile  << (*object);
         }
 
         savefile.close();
@@ -278,6 +279,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     map_events.clear();
     
     dungeon_objects.clear();
+    dungeon_objects.push_back(m_models_map["Hero"]);
 
 
     
@@ -1135,7 +1137,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             hero.UseSequence("stance");
         }
 
-        hero.Process();
+        //hero.Process();
 
         for(auto object : dungeon_objects)
         {  
