@@ -1,8 +1,18 @@
 #include <stdexcept>
 #include "engine_settings.h"
+#include <iostream>
+#include <fstream>
 
 namespace EngineSettings
 {
+    Settings::~Settings()
+    {
+        std::ofstream savefile;
+        savefile.open ("engine.cfg");
+        SaveSettings(savefile);
+        savefile.close();
+    }
+
     bool Settings::IsPbrON()
     {
         return pbr_light;
@@ -25,6 +35,17 @@ namespace EngineSettings
     {
         ++frame_number;
     }
+
+    void Settings::SaveSettings(std::ostream &os)
+    {
+        os<<"pbr_light "<<pbr_light<<"\n"
+        <<"quality_factor "<<m_quality_factor<<"\n";
+    }
+    void Settings::LoadSettings(std::istream& os)
+    {
+        
+    }
+
 
     unsigned short Settings::GetFrame(){return frame_number;}
 

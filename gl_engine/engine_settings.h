@@ -11,6 +11,10 @@ class Settings
     unsigned short frame_number = 0;
     float m_quality_factor = 1.0;
     public:
+    ~Settings();
+    void LoadSettings(std::istream& os);
+    void SaveSettings(std::ostream& os);
+
     void SetQualityFactor(float value);
     float GetQualityFactor();
     bool IsPbrON();

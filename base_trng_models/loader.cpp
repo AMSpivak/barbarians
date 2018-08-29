@@ -26,17 +26,8 @@ namespace LoaderUtility
     void LoadLineBlock(std::ifstream &file,const std::string &sufix,std::vector<std::string> &lines)
     {
         lines.clear();
-
-        //std::string sufix_start("<"+sufix+">");
         std::string sufix_end("<!"+sufix+">");
         std::string tempholder("");
-/*
-        while(!file.eof()&&(tempholder.compare(sufix_start)))
-        {
-            getline(file, tempholder);
-            std::cout<<tempholder<<"\n";
-        }*/
-
         std::regex search_regexp("<([!]" + sufix + ")>");
         std::smatch match;
 
@@ -58,7 +49,28 @@ namespace LoaderUtility
                 lines.push_back(tempholder);
             }
         }
-        
+    }
 
+    void LinesProcessor::Process(std::vector<std::string> &lines)
+    {
+        for(auto s : lines)
+        {
+            std::stringstream ss(s);
+            std::string parameter;
+            ss >> parameter;
+            try
+            {
+                execute_funcs.at(parameter)(ss);               
+            }
+            catch(const std::out_of_range& exp)
+            {
+                std::cout<<"Unknown parameter: "<<s<<"\n";
+            } 
+        }
+    }
+
+    void LinesProcessor::AddProcessFunction(std::string tag,const std::function<void(std::stringstream&)> function)
+    {
+        execute_funcs.insert(std::make_pair(tag,function));
     }
 }

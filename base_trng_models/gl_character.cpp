@@ -87,40 +87,37 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
     if(lines.size()<=1) 
     return;
     
+    LoaderUtility::LinesProcessor processor;
 
-    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
-    execute_funcs.insert(std::make_pair("model",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("model",[this](std::stringstream &sstream)
                                         {
                                             std::string name;
                                             sstream >> name;
                                             AddModel(name);
-                                        }));
-
-    execute_funcs.insert(std::make_pair("sequence",[this](std::stringstream &sstream)
+                                        });
+    processor.AddProcessFunction("sequence",[this](std::stringstream &sstream)
                                         {
-                                            size_t start =0;
+                                            size_t start = 0;
                                             size_t end =0;
                                             std::string name;
                                             sstream >> name >> start >> end; 
                                             AnimationSequence sequence(start,end);
                                             AddSequence(name,sequence);
                                             UseSequence(name);
-                                        }));
-    execute_funcs.insert(std::make_pair("run_sequence",[this](std::stringstream &sstream)
+                                        });
+
+    processor.AddProcessFunction("run_sequence",[this](std::stringstream &sstream)
                                         {
                                             size_t start =0;
                                             size_t end =0;
                                             std::string name;
                                             sstream >> name;
                                             UseSequence(name);
-                                        }));
+                                        });
 
-    execute_funcs.insert(std::make_pair("ghost",[this](std::stringstream &sstream)
-                                        {
-                                            ghost = true;
-                                        }));
+    processor.AddProcessFunction("ghost",[this](std::stringstream &sstream){ ghost = true;});
 
-    execute_funcs.insert(std::make_pair("orientation",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("orientation",[this](std::stringstream &sstream)
                                         {
                                             float a_x = 0.0f;
                                             float a_y = 0.0f;
@@ -131,59 +128,54 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             model_matrix = glm::rotate(model_matrix, glm::radians(a_x), glm::vec3(1.0f, 0.0f, 0.0f));
                                             model_matrix = glm::rotate(model_matrix, glm::radians(a_y), glm::vec3(0.0f, 1.0f, 0.0f));
                                             model_matrix = glm::rotate(model_matrix, glm::radians(a_z), glm::vec3(0.0f, 0.0f, 1.0f));
-                                        }));
-    execute_funcs.insert(std::make_pair("matrix",[this](std::stringstream &sstream)
-                                        {
-                                            sstream >> model_matrix; 
-                                         }));
-    execute_funcs.insert(std::make_pair("mass_inv",[this](std::stringstream &sstream)
-                                        {
-                                            sstream >> mass_inv;
-                                        }));
+                                        });
 
-    execute_funcs.insert(std::make_pair("armor",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("matrix",[this](std::stringstream &sstream){ sstream >> model_matrix;});
+
+    processor.AddProcessFunction("mass_inv",[this](std::stringstream &sstream){ sstream >> mass_inv;});
+
+    processor.AddProcessFunction("armor",[this](std::stringstream &sstream)
                                         {
                                             float armor = 1.0f;
                                             sstream >> armor;
                                             SetArmorValue(armor);
-                                        }));
+                                        });
 
-    execute_funcs.insert(std::make_pair("life",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("life",[this](std::stringstream &sstream)
                                         {
                                             float life = 1.0f;
                                             sstream >> life;
                                             SetLifeValue(life);
-                                        }));
-    execute_funcs.insert(std::make_pair("name",[this](std::stringstream &sstream)
+                                        });
+    processor.AddProcessFunction("name",[this](std::stringstream &sstream)
                                         {   std::string name;
                                             sstream >> name;
                                             SetName(name);
-                                        }));
+                                        });
 
-    execute_funcs.insert(std::make_pair("light",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("light",[this](std::stringstream &sstream)
                                         {
-                                            
                                             float light_radius = 0.0f;
                                             glm::vec3 color;
                                             glm::vec3 l_position;
                                             sstream >> color >> l_position >> light_radius; 
                                             SetLight(true,color,l_position,light_radius);
-                                        }));
+                                        });
 
-    execute_funcs.insert(std::make_pair("radius",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("radius",[this](std::stringstream &sstream)
                                         {
                                             sstream >> radius;
-                                        }));
+                                        });
                                         
-    execute_funcs.insert(std::make_pair("edge",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("edge",[this](std::stringstream &sstream)
                                         {
                                             glm::vec3 start;
                                             glm::vec3 stop;
                                             sstream >> start>>stop;
                                             AddEdge(std::make_pair(start,stop));
-                                        }));
+                                        });
 
-    execute_funcs.insert(std::make_pair("position",[this](std::stringstream &sstream)
+    processor.AddProcessFunction("position",[this](std::stringstream &sstream)
                                         {
                                             float a_x = 0.0f;
                                             float a_y = 0.0f;
@@ -191,27 +183,10 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
 
                                             sstream >> a_x >> a_y >> a_z; 
                                             SetPosition(glm::vec3(a_x,a_y,a_z));                                    
-                                        }));  
+                                        }); 
 
-    
+    processor.Process(lines);
 
-
-    for(auto s : lines)
-    {
-        std::stringstream ss(s);
-        std::string parameter;
-        ss >> parameter;
-        try
-        {
-            execute_funcs.at(parameter)(ss);
-            //(execute_funcs[info])(ss);
-            
-        }
-        catch(const std::out_of_range& exp)
-        {
-            std::cout<<"Unknown model parameter: "<<s<<"\n";
-        } 
-    }
     //model_matrix = glm::rotate(model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
@@ -301,7 +276,7 @@ void GlCharacter::Damage(float damage)
     IGlModel::Damage(damage);
 }
 
-void GlCharacter::AddModel(std::string name)
+void GlCharacter::AddModel(const std::string name)
 {
     model_list.emplace_back(name);
     Models.emplace_back(std::make_shared<glModel>(name));

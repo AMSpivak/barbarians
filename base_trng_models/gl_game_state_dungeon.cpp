@@ -234,6 +234,7 @@ void GlGameStateDungeon::LoadMapEvent(std::vector<std::string> &lines)
     hero_events.push_back(e_ptr);
 
 }
+
 void GlGameStateDungeon::SaveObjects(const std::string &filename)
 { 
     if(!dungeon_objects.empty())
@@ -244,13 +245,11 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
         std::string extention = tmp_filename.replace(ext_pos,tmp_filename.length()- ext_pos,"sav");
         std::ofstream savefile;
         savefile.open (extention,std::ios::trunc);
-        
         for(auto object:dungeon_objects)
         {
             if(object->GetType() ==CharacterTypes::map_object)
                 savefile  << (*object);
         }
-
         savefile.close();
     }
     
