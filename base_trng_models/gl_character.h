@@ -17,7 +17,7 @@ public:
     void Draw(GLuint shader) const;
     void Draw(GLuint shader,const glm::mat4 &draw_matrix);
     int Process();
-    void AddModel(const std::string name);
+    void AddModel(const std::string & name);
     void AddSequence(const std::string & name, const AnimationSequence & in_sequence);
     void UseSequence(const std::string & name);
     void Damage(float damage);

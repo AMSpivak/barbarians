@@ -8,8 +8,8 @@ else
 	DELOPERATOR= rm
 	LDFLAGS=  -lGLEW -lSOIL -lGL `pkg-config --cflags glfw3` `pkg-config --static --libs glfw3`
 endif
-ENGINE_SOURCES= $(ENGINE)\glresourses.cpp $(ENGINE)\glscene.cpp $(ENGINE)\collision.cpp $(ENGINE)\engine_settings.cpp
-SOURCES= $(ENGINE_SOURCES) game_status.cpp main.cpp loader.cpp map_event_general.cpp map_event_valhalla.cpp map_event_hero_strikes.cpp  gl_resources_manager.cpp gl_render_target.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
+ENGINE_SOURCES= $(ENGINE)\glresourses.cpp $(ENGINE)\glscene.cpp $(ENGINE)\collision.cpp $(ENGINE)\engine_settings.cpp $(ENGINE)\loader.cpp
+SOURCES= $(ENGINE_SOURCES) animation_sequence.cpp game_status.cpp main.cpp map_event_general.cpp map_event_valhalla.cpp map_event_hero_strikes.cpp  gl_resources_manager.cpp gl_render_target.cpp gl_character.cpp gl_model.cpp gl_game_state_arena.cpp gl_game_state_dungeon.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=game
 

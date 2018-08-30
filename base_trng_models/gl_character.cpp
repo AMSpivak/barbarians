@@ -41,8 +41,9 @@ void GlCharacter::ToStream(std::ostream& os) const
 
     for(auto seq : sequence)
     {
-        os<<"sequence "<<seq.first<<" "<<seq.second.start_frame<<" "<<seq.second.end_frame<<"\n";
+        os<<"sequence "<<seq<<"\n";
     }
+
     glm::mat4 tmp_matrix = glm::rotate(model_matrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     os<<"matrix "<<tmp_matrix<<"\n"
     <<"mass_inv "<<mass_inv<<"\n"
@@ -87,73 +88,21 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
     if(lines.size()<=1) 
     return;
     
-    LoaderUtility::LinesProcessor processor;
+    LoaderUtility::LinesProcessor proc;
 
-    processor.AddProcessFunction("model",[this](std::stringstream &sstream)
-                                        {
-                                            std::string name;
-                                            sstream >> name;
-                                            AddModel(name);
-                                        });
-    processor.AddProcessFunction("sequence",[this](std::stringstream &sstream)
-                                        {
-                                            size_t start = 0;
-                                            size_t end =0;
-                                            std::string name;
-                                            sstream >> name >> start >> end; 
-                                            AnimationSequence sequence(start,end);
-                                            AddSequence(name,sequence);
-                                            UseSequence(name);
-                                        });
+    proc.Add("model",[this](std::stringstream &sstream){AddModel(LoaderUtility::GetFromStream<std::string>(sstream));});
+    proc.Add("run_sequence",[this](std::stringstream &sstream){UseSequence(LoaderUtility::GetFromStream<std::string>(sstream));});
+    proc.Add("ghost",[this](std::stringstream &sstream){ ghost = true;});
+    proc.Add("matrix",[this](std::stringstream &sstream){ sstream >> model_matrix;});
+    proc.Add("mass_inv",[this](std::stringstream &sstream){ sstream >> mass_inv;});
+    proc.Add("armor",[this](std::stringstream &sstream){SetArmorValue(LoaderUtility::GetFromStream<float>(sstream));});
+    proc.Add("life",[this](std::stringstream &sstream){SetLifeValue(LoaderUtility::GetFromStream<float>(sstream));});
+    proc.Add("name",[this](std::stringstream &sstream){SetName(LoaderUtility::GetFromStream<std::string>(sstream));});
+    proc.Add("radius",[this](std::stringstream &sstream){ sstream >> radius;});                                
+    proc.Add("edge",[this](std::stringstream &sstream){AddEdge(LoaderUtility::GetFromStream<std::pair<glm::vec3,glm::vec3>>(sstream));});
+    proc.Add("position",[this](std::stringstream &sstream){SetPosition(LoaderUtility::GetFromStream<glm::vec3>(sstream));}); 
 
-    processor.AddProcessFunction("run_sequence",[this](std::stringstream &sstream)
-                                        {
-                                            size_t start =0;
-                                            size_t end =0;
-                                            std::string name;
-                                            sstream >> name;
-                                            UseSequence(name);
-                                        });
-
-    processor.AddProcessFunction("ghost",[this](std::stringstream &sstream){ ghost = true;});
-
-    processor.AddProcessFunction("orientation",[this](std::stringstream &sstream)
-                                        {
-                                            float a_x = 0.0f;
-                                            float a_y = 0.0f;
-                                            float a_z = 0.0f;
-
-                                            sstream >> a_x >> a_y >> a_z; 
-                                            
-                                            model_matrix = glm::rotate(model_matrix, glm::radians(a_x), glm::vec3(1.0f, 0.0f, 0.0f));
-                                            model_matrix = glm::rotate(model_matrix, glm::radians(a_y), glm::vec3(0.0f, 1.0f, 0.0f));
-                                            model_matrix = glm::rotate(model_matrix, glm::radians(a_z), glm::vec3(0.0f, 0.0f, 1.0f));
-                                        });
-
-    processor.AddProcessFunction("matrix",[this](std::stringstream &sstream){ sstream >> model_matrix;});
-
-    processor.AddProcessFunction("mass_inv",[this](std::stringstream &sstream){ sstream >> mass_inv;});
-
-    processor.AddProcessFunction("armor",[this](std::stringstream &sstream)
-                                        {
-                                            float armor = 1.0f;
-                                            sstream >> armor;
-                                            SetArmorValue(armor);
-                                        });
-
-    processor.AddProcessFunction("life",[this](std::stringstream &sstream)
-                                        {
-                                            float life = 1.0f;
-                                            sstream >> life;
-                                            SetLifeValue(life);
-                                        });
-    processor.AddProcessFunction("name",[this](std::stringstream &sstream)
-                                        {   std::string name;
-                                            sstream >> name;
-                                            SetName(name);
-                                        });
-
-    processor.AddProcessFunction("light",[this](std::stringstream &sstream)
+    proc.Add("light",[this](std::stringstream &sstream)
                                         {
                                             float light_radius = 0.0f;
                                             glm::vec3 color;
@@ -161,33 +110,31 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             sstream >> color >> l_position >> light_radius; 
                                             SetLight(true,color,l_position,light_radius);
                                         });
+    proc.Add("orientation",[this](std::stringstream &sstream)
+                                    {
+                                        float a_x = 0.0f;
+                                        float a_y = 0.0f;
+                                        float a_z = 0.0f;
 
-    processor.AddProcessFunction("radius",[this](std::stringstream &sstream)
-                                        {
-                                            sstream >> radius;
-                                        });
+                                        sstream >> a_x >> a_y >> a_z; 
                                         
-    processor.AddProcessFunction("edge",[this](std::stringstream &sstream)
+                                        model_matrix = glm::rotate(model_matrix, glm::radians(a_x), glm::vec3(1.0f, 0.0f, 0.0f));
+                                        model_matrix = glm::rotate(model_matrix, glm::radians(a_y), glm::vec3(0.0f, 1.0f, 0.0f));
+                                        model_matrix = glm::rotate(model_matrix, glm::radians(a_z), glm::vec3(0.0f, 0.0f, 1.0f));
+                                    });
+    proc.Add("sequence",[this](std::stringstream &sstream)
                                         {
-                                            glm::vec3 start;
-                                            glm::vec3 stop;
-                                            sstream >> start>>stop;
-                                            AddEdge(std::make_pair(start,stop));
+                                            //size_t start = 0;
+                                            //size_t end =0;
+                                            std::string name;
+                                            sstream >> name ;//>> start >> end;
+                                             
+                                            //AnimationSequence sequence(start,end);
+                                            AddSequence(name,LoaderUtility::GetFromStream<AnimationSequence>(sstream));
+                                            UseSequence(name);
                                         });
 
-    processor.AddProcessFunction("position",[this](std::stringstream &sstream)
-                                        {
-                                            float a_x = 0.0f;
-                                            float a_y = 0.0f;
-                                            float a_z = 0.0f;
-
-                                            sstream >> a_x >> a_y >> a_z; 
-                                            SetPosition(glm::vec3(a_x,a_y,a_z));                                    
-                                        }); 
-
-    processor.Process(lines);
-
-    //model_matrix = glm::rotate(model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    proc.Process(lines);
 }
 
 void GlCharacter::AddEdge(const std::pair<glm::vec3, glm::vec3> edge)
@@ -218,14 +165,12 @@ void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)
     {
       
         for(auto model : Models) model->SetDrawMatrix(draw_matrix);
-        //RefreshMatrixes();
         Draw(shader);
         engine_frame = frame;
     }
     else
     {
         Draw(shader);
-        //std::cout<<"fast_draw\n";
     }
     
 }
@@ -242,7 +187,7 @@ void GlCharacter::RefreshMatrixes()
         Models[i]-> model = Models[Models[i]->parent_idx]->model *
             Models[Models[i]->parent_idx]->GetBoneMatrix(now_frame,Models[i]->parent_bone) *
            // Models[Models[i]->parent_idx]->animation->frames[now_frame].bones[Models[i]->parent_bone] *
-           bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
+            bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
     }
     else
     {
@@ -253,6 +198,7 @@ void GlCharacter::RefreshMatrixes()
 int GlCharacter::Process()
 {
     if(GetLifeValue() <=0.0f) return 1;
+    auto control = now_frame;
     if(current_animation == nullptr)
     {
         now_frame = 0;
@@ -262,11 +208,12 @@ int GlCharacter::Process()
         ++now_frame;
         ++now_frame;
 
-
-        if(now_frame > current_animation->end_frame || now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
+        if(now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
+        if(now_frame > current_animation->end_frame) now_frame = current_animation->m_loop ? current_animation->start_frame:current_animation->end_frame;
     }
 
-    RefreshMatrixes();
+    if(control != now_frame)
+        RefreshMatrixes();
     return 0;
 }
 
@@ -276,7 +223,7 @@ void GlCharacter::Damage(float damage)
     IGlModel::Damage(damage);
 }
 
-void GlCharacter::AddModel(const std::string name)
+void GlCharacter::AddModel(const std::string & name)
 {
     model_list.emplace_back(name);
     Models.emplace_back(std::make_shared<glModel>(name));

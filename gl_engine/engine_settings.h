@@ -11,8 +11,9 @@ class Settings
     unsigned short frame_number = 0;
     float m_quality_factor = 1.0;
     public:
+    Settings();
     ~Settings();
-    void LoadSettings(std::istream& os);
+    void LoadSettings(std::istream& is);
     void SaveSettings(std::ostream& os);
 
     void SetQualityFactor(float value);

@@ -16,6 +16,12 @@ std::ostream& operator << ( std::ostream& os, const std::pair<T1,T2> & value)
 
 	return os;
 }
+template <typename T1,typename T2>
+std::istream& operator>> ( std::istream& is, std::pair<T1,T2> & value)
+{
+	is>>value.first>>value.second;
+}
+
 struct Bone {
 	std::string name;
 	std::string parent;

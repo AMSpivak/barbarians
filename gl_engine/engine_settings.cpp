@@ -1,10 +1,21 @@
 #include <stdexcept>
-#include "engine_settings.h"
 #include <iostream>
 #include <fstream>
-
+#include <vector>
+#include <string>
+#include "engine_settings.h"
+#include "loader.h"
 namespace EngineSettings
 {
+    Settings::Settings()
+    {
+        std::ifstream loadfile;
+        loadfile.open ("engine.cfg");
+        if(loadfile.is_open())
+            LoadSettings(loadfile);
+        loadfile.close();
+    }
+
     Settings::~Settings()
     {
         std::ofstream savefile;
@@ -41,9 +52,21 @@ namespace EngineSettings
         os<<"pbr_light "<<pbr_light<<"\n"
         <<"quality_factor "<<m_quality_factor<<"\n";
     }
-    void Settings::LoadSettings(std::istream& os)
+    void Settings::LoadSettings(std::istream& is)
     {
-        
+        std::vector<std::string> lines;
+        std::string tempholder("");
+        while(!is.eof())
+        {
+            getline(is, tempholder);
+            lines.emplace_back(tempholder);
+        }
+
+        LoaderUtility::LinesProcessor proc;
+
+        proc.Add("pbr_light",[this](std::stringstream &sstream){SetPbr(LoaderUtility::GetFromStream<bool>(sstream));});
+        proc.Add("quality_factor",[this](std::stringstream &sstream){SetQualityFactor(LoaderUtility::GetFromStream<float>(sstream));});
+        proc.Process(lines);
     }
 
 

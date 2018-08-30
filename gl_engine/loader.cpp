@@ -4,6 +4,7 @@
 namespace LoaderUtility
 {
 
+    
     std::string FindPrefix(std::ifstream &file)
     {
         std::string tempholder("");
@@ -51,25 +52,29 @@ namespace LoaderUtility
         }
     }
 
-    void LinesProcessor::Process(std::vector<std::string> &lines)
+    void LinesProcessor::Process(std::vector<std::string> &lines) const
     {
         for(auto s : lines)
         {
-            std::stringstream ss(s);
-            std::string parameter;
-            ss >> parameter;
-            try
-            {
-                execute_funcs.at(parameter)(ss);               
-            }
-            catch(const std::out_of_range& exp)
-            {
-                std::cout<<"Unknown parameter: "<<s<<"\n";
-            } 
+            Process(s);
+        }
+    }
+    void LinesProcessor::Process(const std::string & value) const
+    {
+        std::stringstream ss(value);
+        std::string parameter;
+        ss >> parameter;
+        try
+        {
+            execute_funcs.at(parameter)(ss);               
+        }
+        catch(const std::out_of_range& exp)
+        {
+            std::cout<<"Unknown parameter: "<<value<<"\n";
         }
     }
 
-    void LinesProcessor::AddProcessFunction(std::string tag,const std::function<void(std::stringstream&)> function)
+    void LinesProcessor::Add(std::string tag,const std::function<void(std::stringstream&)> function)
     {
         execute_funcs.insert(std::make_pair(tag,function));
     }
