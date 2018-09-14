@@ -37,6 +37,48 @@ void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
     }
 }
 
+bool GlGameStateDungeon::AddObjectsFromFile(const std::string & object)
+{
+    std::ifstream objects_file;
+	objects_file.open(object);
+    if(objects_file.is_open())
+    {
+        std::vector<std::string> obj_lines;
+
+        while(!objects_file.eof())
+        {
+            LoaderUtility::LoadLineBlock(objects_file,LoaderUtility::FindPrefix(objects_file),obj_lines);
+            LoadObject(obj_lines);
+        }
+        objects_file.close();
+        return true;
+    }
+    else
+        return false;
+}
+
+bool GlGameStateDungeon::AddObjectFromFile(const std::string & object,const std::string & name,glm::vec3 position)
+{
+    std::ifstream objects_file;
+	objects_file.open(object);
+    if(objects_file.is_open())
+    {
+        std::vector<std::string> obj_lines;
+
+        if(!objects_file.eof())
+        {
+            LoaderUtility::LoadLineBlock(objects_file,LoaderUtility::FindPrefix(objects_file),obj_lines);
+            auto object = LoadObject(obj_lines);
+            object->SetPosition(position);
+            object->SetName(name);
+        }
+        objects_file.close();
+        return true;
+    }
+    else
+        return false;
+}
+
 GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
                                     std::map<std::string,std::shared_ptr<GlCharacter>> & models_map,
@@ -55,12 +97,28 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
 {
+
+    m_message_processor.Add("teleport",[this](std::stringstream &sstream)
+                                    {
+                                        std::string level;
+                                        std::string start;
+                                        sstream >> level >> start;
+                                        LoadMap(level,start);
+                                    });
+    m_message_processor.Add("spawn",[this](std::stringstream &sstream)
+                                    {
+                                        std::string object;
+                                        std::string name;
+                                        glm::vec3 position;
+                                        sstream >> object >> name >> position;
+                                        AddObjectFromFile(object,name,position);
+                                    });
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
-    //debug_texture = resources_manager.m_texture_atlas.Assign("fireball.png");
+
     time = glfwGetTime();
     LoadMap("levels/test.lvl","base");
 
@@ -69,14 +127,14 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix,const glm::vec3 &position,glRenderTargetDeffered &render_target)
 {
 
-    std::shared_ptr<IMapEventHeroStrike>e_ptr(new IMapEventHeroStrike(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),1.0f,1.4f));
-    IMapEventHeroStrike & event = *(e_ptr.get());
-    event.model_matrix = matrix;
-    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
-    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
-    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
-    event.AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
-    event.position = position;
+    auto e_ptr = std::make_shared<IMapEventHeroStrike>(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),1.0f,1.4f);
+    
+    e_ptr->model_matrix = matrix;
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
+    e_ptr->position = position;
     return e_ptr;
 }
 
@@ -136,12 +194,13 @@ void GlGameStateDungeon::LoadDungeonObjects(std::vector<std::string> &lines)
     }
 }
 
-void GlGameStateDungeon::LoadObject(std::vector<std::string> &lines)
+std::shared_ptr<GlCharacter> GlGameStateDungeon::LoadObject(std::vector<std::string> &lines)
 {
         auto object_ptr = std::make_shared<GlCharacter>(CharacterTypes::map_object);
         dungeon_objects.push_back(object_ptr);
         object_ptr->UpdateFromLines(lines);
         object_ptr->model_matrix = glm::rotate(object_ptr->model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        return object_ptr;
 }
 
 void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
@@ -161,18 +220,16 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
     if(lines.size()<=1) 
         return;
  
-
-    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
-    execute_funcs.insert(std::make_pair("light_pos",[this](std::stringstream &sstream)
-                                        {sstream >> light_position;}));
-    execute_funcs.insert(std::make_pair("skybox",[this](std::stringstream &sstream)
+    LoaderUtility::LinesProcessor proc;
+    proc.Add("light_pos",[this](std::stringstream &sstream){sstream >> light_position;});
+    proc.Add("skybox",[this](std::stringstream &sstream)
                                     {
                                         std::string sky;
                                         sstream >> sky;
                                         GLResourcesManager * resources_manager = GetResourceManager();
                                         skybox = resources_manager->m_texture_atlas.Assign(sky);
-                                    }));
-    execute_funcs.insert(std::make_pair("camera_lens",[this](std::stringstream &sstream)
+                                    });
+    proc.Add("camera_lens",[this](std::stringstream &sstream)
                                     {
                                         float f_near = 1.f;
                                         float f_far = 35.0f;
@@ -181,18 +238,10 @@ void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
                                         Light.SetCameraLens_Orto(-size, size,-size, size,f_near,f_far);                                         
                                         Light2.SetCameraLens_Orto(-size*2, size*2,-size*2, size*2,f_near,f_far);                                         
                                     
-                                    }));
+                                    });
 
-    execute_funcs.insert(std::make_pair("light_color",[this](std::stringstream &sstream)
-                                    { sstream >> light_color_vector;}));
-
-    std::string info = "";
-    for(auto line:lines)
-    {
-        std::stringstream ss(line);
-        ss >> info;
-        (execute_funcs[info])(ss);
-    }
+    proc.Add("light_color",[this](std::stringstream &sstream){ sstream >> light_color_vector;});
+    proc.Process(lines);
 
     light_dir_vector = glm::normalize(light_position);
     Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -211,28 +260,19 @@ void GlGameStateDungeon::LoadMapEvent(std::vector<std::string> &lines)
 
     float radius = 0;
     
-    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
-    execute_funcs.insert(std::make_pair("position",[e_ptr](std::stringstream &sstream)
-                                        {sstream >> e_ptr->position;}));
-    execute_funcs.insert(std::make_pair("message",[e_ptr](std::stringstream &sstream)
+    LoaderUtility::LinesProcessor proc;
+    proc.Add("position",[e_ptr](std::stringstream &sstream){sstream >> e_ptr->position;});
+    proc.Add("message",[e_ptr](std::stringstream &sstream)
                                     { 
                                         std::string tmp;
                                         //sstream >> tmp;
                                         std::getline(sstream,tmp);
                                         e_ptr->SetMessage(tmp);
                                         
-                                    }));
-    execute_funcs.insert(std::make_pair("radius",[e_ptr](std::stringstream &sstream)
-                                    { sstream >> e_ptr->radius;}));
-    std::string info = "";
-    for(auto line:lines)
-    {
-        std::stringstream ss(line);
-        ss >> info;
-        (execute_funcs[info])(ss);
-    }
+                                    });
+    proc.Add("radius",[e_ptr](std::stringstream &sstream){ sstream >> e_ptr->radius;});
+    proc.Process(lines);
     hero_events.push_back(e_ptr);
-
 }
 
 void GlGameStateDungeon::SaveObjects(const std::string &filename)
@@ -268,7 +308,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
 
     std::string tmp_filename(filename);
     size_t ext_pos = tmp_filename.find_last_of(".") +1;
-    std::string extention = tmp_filename.replace(ext_pos,tmp_filename.length()- ext_pos,"sav");
+    std::string extention = tmp_filename.replace(ext_pos,tmp_filename.length() - ext_pos,"sav");
     
     hero_position = glm::vec3(10.0f,0.0f,10.0f);  
     m_start_place = start_place;
@@ -299,22 +339,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     execute_funcs.insert(std::make_pair("hero_event",[this](std::vector<std::string> &lines){LoadMapEvent(lines);}));
     
 
-    std::ifstream objects_file;
-	objects_file.open(extention); 
-    
-
-    if(objects_file.is_open())
-    {
-        std::vector<std::string> obj_lines;
-
-        while(!objects_file.eof())
-        {
-            LoaderUtility::LoadLineBlock(objects_file,LoaderUtility::FindPrefix(objects_file),obj_lines);
-            LoadObject(obj_lines);
-        }
-        objects_file.close();
-    }
-    else 
+    if(!AddObjectsFromFile(extention))
     {
         execute_funcs.insert(std::make_pair("object",[this](std::vector<std::string> &lines){LoadObject(lines);}));
     }
@@ -919,29 +944,17 @@ void GlGameStateDungeon::MapObjectsEventsInteract()
     map_events.remove_if(IsKilled);
 }
 
-void GlGameStateDungeon::ProcessMessage(std::string event_string)
+void GlGameStateDungeon::PostMessage(const std::string & event_string)
 {
-    std::map<std::string,const std::function<void(std::stringstream&)>> execute_funcs;
+    m_messages.push_back(event_string);
+}
 
-    execute_funcs.insert(std::make_pair("teleport",[this](std::stringstream &sstream)
-                                    {
-                                        std::string level;
-                                        std::string start;
-                                        sstream >> level >> start;
-
-                                        LoadMap(level,start);
-                                    }));
-    std::string info;                               
-    std::stringstream ss(event_string);
-    ss >> info;
-
-    try
+void GlGameStateDungeon::ProcessMessages()
+{
+    while (!m_messages.empty())
     {
-        execute_funcs.at(info)(ss);
-    }
-    catch(const std::out_of_range& exp)
-    {
-        std::cout<<"Unknown prefix: "<<info<<"\n";
+        m_message_processor.Process(m_messages.front());
+        m_messages.pop_front();
     }
 }
 bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr)
@@ -952,7 +965,8 @@ bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr)
        if(ReactObjectToEvent(*hero_ptr,*event.get(),event_return_string) == InteractionResult::PostMessage)
        {
            std::cout<<"\n"<<event_return_string<<"\n"<< hero_ptr->GetPosition()<<"\n";
-           ProcessMessage(event_return_string);
+           
+           PostMessage(event_return_string);
            return true;
        }
     }
@@ -978,12 +992,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     {
         MapObjectsEventsInteract();
         hero.SetPosition(hero_position);
-        if(HeroEventsInteract(hero_ptr)) 
-        {
-           
-            hero.SetPosition(glm::vec3(0.0f,0.0f,0.0f));
-            return this;
-        }
+        HeroEventsInteract(hero_ptr);
         hero.SetPosition(glm::vec3(0.0f,0.0f,0.0f));
         
 
@@ -1000,8 +1009,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             {
                 moving = true;
             }
-            
-            
         }
 
         if(moving)
@@ -1062,9 +1069,17 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
             static const glm::mat4 hero_base_matrix = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             hero.model_matrix = rm * hero_base_matrix;
-            
         }
+
+        ProcessMessages();
+        
+
         bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
+
+        
+
+
+        
 
         int buttons_count;
         const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
@@ -1077,6 +1092,11 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             }
         }
 
+
+        static bool old_attack = false;
+        bool start_attack = attack && (!old_attack);
+        old_attack = attack;
+        
 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
         if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
@@ -1136,7 +1156,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             hero.UseSequence("stance");
         }
 
-        //hero.Process();
 
         for(auto object : dungeon_objects)
         {  

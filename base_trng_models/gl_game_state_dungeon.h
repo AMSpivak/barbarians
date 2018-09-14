@@ -9,6 +9,7 @@
 #include "gl_character.h"
 #include "gl_dungeon.h"
 #include "i_map_event.h"
+#include "loader.h"
 #include <list>
 
 class GlGameStateDungeon: public IGlGameState
@@ -40,6 +41,7 @@ private:
     std::list<std::shared_ptr<IMapEvent>> map_events;
     std::list<std::shared_ptr<IMapEvent>> hero_events;
     std::list<std::shared_ptr<IMapEvent>> mob_events;
+    std::list<std::string> m_messages;
     GlCharacter &hero;
     std::string m_level_file;
 
@@ -57,6 +59,8 @@ private:
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
     glm::vec3 light_color_vector;
+
+    LoaderUtility::LinesProcessor m_message_processor;
     
     void SaveObjects(const std::string &filename);
 
@@ -64,7 +68,10 @@ private:
     void SelectStart(std::vector<std::string> &lines);
     void LoadTiles(std::vector<std::string> &lines);
     void LoadDungeonObjects(std::vector<std::string> &lines);
-    void LoadObject(std::vector<std::string> &lines);
+    bool AddObjectsFromFile(const std::string & object);
+    bool AddObjectFromFile(const std::string & object,const std::string & name,glm::vec3 position);
+    
+    std::shared_ptr<GlCharacter> LoadObject(std::vector<std::string> &lines);
     void SetDungeonSize(std::vector<std::string> &lines);
     void LoadMapEvent(std::vector<std::string> &lines);
 
@@ -86,7 +93,8 @@ private:
     void MapObjectsEventsInteract();
     bool HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr);
     bool MobKilled(std::shared_ptr<IGlModel> obj);
-    void ProcessMessage(std::string event_string);
+    void PostMessage(const std::string & event_string);
+    void ProcessMessages();
     std::shared_ptr<IMapEvent> AddStrike(const glm::mat4 &matrix,const glm::vec3 &position,glRenderTargetDeffered &render_target);
     
     
