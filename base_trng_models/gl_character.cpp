@@ -251,3 +251,5 @@ std::pair<float, float> GlCharacter::ProjectOnAxe(const glm::vec3 &axe) const
         return Collision::ProjectEdgesOnAxe(model_matrix,m_edges,m_position,axe);
     }
 }
+
+

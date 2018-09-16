@@ -37,6 +37,7 @@ void ResetModels(std::vector <std::shared_ptr<glModel> > &Models)
     }
 }
 
+
 bool GlGameStateDungeon::AddObjectsFromFile(const std::string & object)
 {
     std::ifstream objects_file;
@@ -113,6 +114,16 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                         sstream >> object >> name >> position;
                                         AddObjectFromFile(object,name,position);
                                     });
+
+    m_message_processor.Add("rotate",[this](std::stringstream &sstream)
+                                    {
+                                        std::string name;
+                                        glm::vec3 rotation;
+                                        sstream >> name >> rotation;
+                                        auto object = 
+                                        AddObjectFromFile(object,name,position);
+                                    });
+
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
@@ -297,6 +308,8 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
 
 void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
 {  
+    m_messages.clear();                                        
+    
     std::ifstream level_file;
 	level_file.open(filename); 
     std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
@@ -923,13 +936,10 @@ bool GlGameStateDungeon::MobKilled(std::shared_ptr<IGlModel> obj)
 
     if (o_ptr->GetLifeValue() < 0.0f)
         {
-            std::shared_ptr<MapEventValhalla>e_ptr(new MapEventValhalla(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture.get()->m_texture),1.0f,1.4f));
-                        
-                        MapEventValhalla & event = *(e_ptr.get());
-                        
-                        event.position = o_ptr->GetPosition();
-                        event.position.y = 1.5f;
-                        map_events.push_back(e_ptr);
+            auto e_ptr = std::make_shared<MapEventValhalla>(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),1.0f,1.4f);
+            e_ptr->position = o_ptr->GetPosition();
+            e_ptr->position.y = 1.5f;
+            map_events.push_back(e_ptr);
 
             return true;
         }

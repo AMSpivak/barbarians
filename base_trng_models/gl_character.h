@@ -5,10 +5,11 @@
 #include <string>
 #include <vector>
 #include <map>
-
+#include <algorithm>
 #include "gl_model.h"
 
 enum class CharacterTypes {hero,tile,map_object};
+
 class GlCharacter: public IGlModel
 {
 public:
@@ -48,5 +49,11 @@ private:
 
 void UpdateCharacterFromFile(const std::string &filename,GlCharacter & character);
 std::ostream& operator << ( std::ostream& os, const GlCharacter & character);
+
+template<class InputIterator>
+std::shared_ptr<GlCharacter> FindSharedCollectionByName(InputIterator first, InputIterator end, const std::string & name)
+{
+    
+}
 
 #endif
