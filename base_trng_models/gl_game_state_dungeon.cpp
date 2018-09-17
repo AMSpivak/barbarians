@@ -118,10 +118,18 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
     m_message_processor.Add("rotate",[this](std::stringstream &sstream)
                                     {
                                         std::string name;
-                                        glm::vec3 rotation;
-                                        sstream >> name >> rotation;
-                                        auto object = 
-                                        AddObjectFromFile(object,name,position);
+                                        sstream >> name;
+                                        auto object = FindSharedCollectionByName(dungeon_objects.begin(), dungeon_objects.end(),name);
+                                        if(object != nullptr)
+                                        {
+                                            float angle =0.0f;
+                                            sstream >>angle;
+                                            //std::cout<<"rotate found\n";
+                                            object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
+                                            object->RefreshMatrixes();
+                                        }
+                                        //std::cout<<"rotate\n";
+                                        //AddObjectFromFile(object,name,position);
                                     });
 
     glEnable(GL_DEPTH_TEST);
@@ -1106,6 +1114,11 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         static bool old_attack = false;
         bool start_attack = attack && (!old_attack);
         old_attack = attack;
+
+        if(start_attack)
+        {
+            PostMessage("rotate candle 30.0 0.0 0.0 1.0");
+        }
         
 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;

@@ -53,7 +53,12 @@ std::ostream& operator << ( std::ostream& os, const GlCharacter & character);
 template<class InputIterator>
 std::shared_ptr<GlCharacter> FindSharedCollectionByName(InputIterator first, InputIterator end, const std::string & name)
 {
+    auto iter = std::find_if(first,end,[&name](std::shared_ptr<GlCharacter> obj){return obj->GetName()==name;});
     
+    return (iter != end)?*iter:nullptr;
+    
+    
+
 }
 
 #endif

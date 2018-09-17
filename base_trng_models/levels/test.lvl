@@ -59,6 +59,7 @@ sequence damage 2 3 0 0
 sequence base 0 1 0 0
 <!object>
 <object>
+name candle
 mass_inv 1.0
 radius 0.5
 armor 0.0
