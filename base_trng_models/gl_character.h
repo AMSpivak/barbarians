@@ -17,7 +17,7 @@ public:
     ~GlCharacter();
     void Draw(GLuint shader) const;
     void Draw(GLuint shader,const glm::mat4 &draw_matrix);
-    int Process();
+    int Process(std::list<std::string> &m_messages);
     void AddModel(const std::string & name);
     void AddSequence(const std::string & name, const AnimationSequence & in_sequence);
     void UseSequence(const std::string & name);
@@ -54,11 +54,7 @@ template<class InputIterator>
 std::shared_ptr<GlCharacter> FindSharedCollectionByName(InputIterator first, InputIterator end, const std::string & name)
 {
     auto iter = std::find_if(first,end,[&name](std::shared_ptr<GlCharacter> obj){return obj->GetName()==name;});
-    
     return (iter != end)?*iter:nullptr;
-    
-    
-
 }
 
 #endif

@@ -10,6 +10,8 @@ struct AnimationSequence
                                 start_frame(start)
                                 ,end_frame(stop)
                                 ,m_loop(true)
+                                ,m_start_message("")
+                                ,m_end_message("")
     {}
 
     size_t start_frame;
@@ -17,6 +19,8 @@ struct AnimationSequence
     bool m_loop;
     bool m_jump;
     std::string m_target_sequence;
+    std::string m_start_message;
+    std::string m_end_message;
 };
 
 std::istream& operator>> ( std::istream& is, AnimationSequence & value);

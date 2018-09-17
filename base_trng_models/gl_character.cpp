@@ -195,7 +195,7 @@ void GlCharacter::RefreshMatrixes()
     }
 }
 
-int GlCharacter::Process()
+int GlCharacter::Process(std::list<std::string> &m_messages)
 {
     if(GetLifeValue() <=0.0f) return 1;
     auto control = now_frame;
@@ -209,7 +209,15 @@ int GlCharacter::Process()
         ++now_frame;
 
         if(now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
-        if(now_frame > current_animation->end_frame) now_frame = current_animation->m_loop ? current_animation->start_frame:current_animation->end_frame;
+        if(now_frame > current_animation->end_frame) 
+        {
+            now_frame = current_animation->m_loop ? current_animation->start_frame:current_animation->end_frame;
+            if(current_animation->m_end_message !="")
+            {
+                m_messages.push_back(current_animation->m_end_message);
+                std::cout <<"message:"<<current_animation->m_end_message<<"!\n";
+            }
+        }
     }
 
     if(control != now_frame)

@@ -3,7 +3,13 @@
 
 namespace LoaderUtility
 {
-
+    std::string ReadQuoted(std::istream &source)
+    {
+        std::string skip; // dummy
+        std::string quoted;
+        std::getline(std::getline(source, skip, '"'), quoted, '"');
+        return quoted;
+    }
     
     std::string FindPrefix(std::ifstream &file)
     {

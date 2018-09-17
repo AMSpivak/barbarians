@@ -1115,10 +1115,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         bool start_attack = attack && (!old_attack);
         old_attack = attack;
 
-        if(start_attack)
-        {
-            PostMessage("rotate candle 30.0 0.0 0.0 1.0");
-        }
+        
         
 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
@@ -1182,7 +1179,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
         for(auto object : dungeon_objects)
         {  
-            object->Process();
+            object->Process(m_messages);
         }
 
         FitObjects(10,0.01f);

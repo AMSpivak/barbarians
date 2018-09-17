@@ -277,7 +277,7 @@ IGlGameState *  GlGameStateArena::Process(std::map <int, bool> &inputs, float jo
                     key_angle = 0;
                     now_frame++;
                     if(now_frame == Models[0]->animation->frames.size()) now_frame = 3;
-                    hero.Process();
+                    //hero.Process();
                 }
             return this;
 /**/

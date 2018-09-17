@@ -1,6 +1,6 @@
 mass_inv 1.0
 radius 0.5
 model material/barb/barb.mdl
-sequence strike 92 116
+sequence strike 92 116 1 0 "!!!" "rotate candle 30.0 0.0 0.0 1.0"
 sequence walk 53 83
 sequence stance 37 37

@@ -21,7 +21,7 @@ namespace LoaderUtility
         return value;
     }
 
-
+    std::string ReadQuoted(std::istream &source);
     std::string FindPrefix(std::ifstream &file);
     void LoadLineBlock(std::ifstream &file,const std::string &sufix,std::vector<std::string> &lines);
 
