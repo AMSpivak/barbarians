@@ -124,12 +124,9 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                         {
                                             float angle =0.0f;
                                             sstream >>angle;
-                                            //std::cout<<"rotate found\n";
                                             object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
                                             object->RefreshMatrixes();
                                         }
-                                        //std::cout<<"rotate\n";
-                                        //AddObjectFromFile(object,name,position);
                                     });
 
     glEnable(GL_DEPTH_TEST);
@@ -143,10 +140,10 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 
 }
 
-std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix,const glm::vec3 &position,glRenderTargetDeffered &render_target)
+std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/)
 {
 
-    auto e_ptr = std::make_shared<IMapEventHeroStrike>(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),1.0f,1.4f);
+    auto e_ptr = std::make_shared<IMapEventHeroStrike>(/*m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),*/1.0f,1.4f);
     
     e_ptr->model_matrix = matrix;
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
@@ -1169,7 +1166,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(attack)
         {
             hero.UseSequence("strike");
-            mob_events.push_back(AddStrike(hero.model_matrix,hero_position,render_target));
+            //mob_events.push_back(AddStrike(hero.model_matrix,hero.GetPosition()/*,render_target*/));
+            mob_events.push_back(AddStrike(hero.model_matrix,hero_position/*,render_target*/));
         }
         else
         {

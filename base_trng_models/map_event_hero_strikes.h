@@ -7,19 +7,19 @@ class IMapEventHeroStrike: public IMapEvent
 {
 private:
     std::vector<std::pair<glm::vec3, glm::vec3>> m_edges; 
-    GLuint m_current_shader;
-    GLuint m_depthmap;
-    const GLuint * m_texture;
+    //GLuint m_current_shader;
+    //GLuint m_depthmap;
+    //const GLuint * m_texture;
     float m_width; 
     float m_height;   
 public:
     float damage;
     int frames_lifetime;
-    IMapEventHeroStrike(GLuint current_shader, GLuint depthmap,const GLuint * texture,
+    IMapEventHeroStrike(//GLuint current_shader, GLuint depthmap,const GLuint * texture,
 						 float width, float height):IMapEvent()
-                            ,m_current_shader(current_shader)
-                            ,m_depthmap(depthmap)
-                            ,m_texture(texture)
+                            //,m_current_shader(current_shader)
+                            //,m_depthmap(depthmap)
+                            //,m_texture(texture)
                             ,m_width(width) 
                             ,m_height(height) 
     {

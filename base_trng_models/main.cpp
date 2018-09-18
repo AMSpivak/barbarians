@@ -174,6 +174,7 @@ int main(int argc, char const *argv[])
     auto hero = std::make_shared<GlCharacter>(CharacterTypes::hero);
     m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<GlCharacter>>("Hero",hero));
 	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",*hero);
+	hero->SetName("Hero");
 	hero->model_matrix = glm::rotate(hero->model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	
     GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);

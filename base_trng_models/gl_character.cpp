@@ -179,6 +179,7 @@ void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)
 
 void GlCharacter::RefreshMatrixes()
 {
+    bool first_base = false;
     int models_count = Models.size();
     for(int i = 0; i < models_count; i++)
     if(Models[i]->parent_idx != -1)
@@ -191,6 +192,11 @@ void GlCharacter::RefreshMatrixes()
     }
     else
     {
+        // if(first_base&&(now_frame!=0))
+        // {
+        //     glm::mat4 prev_matrix = glm::inverse(GetBoneMatrix(now_frame - 1,0))*GetBoneMatrix(now_frame,0) ;
+
+        // }
         Models[i]-> model = model_matrix;
     }
 }
