@@ -42,7 +42,7 @@ private:
     std::list<std::shared_ptr<IMapEvent>> hero_events;
     std::list<std::shared_ptr<IMapEvent>> mob_events;
     std::list<std::string> m_messages;
-    GlCharacter &hero;
+    std::shared_ptr<GlCharacter> hero;
     std::string m_level_file;
 
     
@@ -76,10 +76,10 @@ private:
     void LoadMapEvent(std::vector<std::string> &lines);
 
     void DrawGlobalCascade(const glRenderTargetDeffered &render_target);
-    void PrerenderLight(glLight &Light,GlCharacter &hero);
+    void PrerenderLight(glLight &Light,std::shared_ptr<GlCharacter>hero);
     void DrawGlobalLight(const GLuint light_loc, const glLight &Light);
 
-    void DrawDungeon(GLuint current_shader, const GlCharacter &hero);
+    void DrawDungeon(GLuint current_shader, std::shared_ptr<GlCharacter>hero);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,glRenderTargetDeffered &render_target );
     void Draw2D(GLuint depth_map);
     void MoveHero(const glm::vec3 & hero_move);

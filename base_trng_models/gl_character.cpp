@@ -212,7 +212,7 @@ int GlCharacter::Process(std::list<std::string> &m_messages)
     else
     {
         ++now_frame;
-        ++now_frame;
+        //++now_frame;
 
         if(now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
         if(now_frame > current_animation->end_frame) 
