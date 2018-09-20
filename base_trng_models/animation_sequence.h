@@ -3,15 +3,15 @@
 #include <iostream>
 #include <cstdio>
 
-
+enum class AnimationCommand {kNone,kMessage,kStrike};
 struct AnimationSequence
 {
     AnimationSequence(size_t start = 0,size_t stop = 0):
                                 start_frame(start)
                                 ,end_frame(stop)
                                 ,m_loop(true)
-                                ,m_start_message("")
-                                ,m_end_message("")
+                                ,m_start_message(AnimationCommand::kNone,"")
+                                ,m_end_message(AnimationCommand::kNone,"")
     {}
 
     size_t start_frame;
@@ -19,8 +19,8 @@ struct AnimationSequence
     bool m_loop;
     bool m_jump;
     std::string m_target_sequence;
-    std::string m_start_message;
-    std::string m_end_message;
+    std::pair<AnimationCommand,std::string> m_start_message;
+    std::pair<AnimationCommand,std::string> m_end_message;
 };
 
 std::istream& operator>> ( std::istream& is, AnimationSequence & value);

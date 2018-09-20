@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include "loader.h"
 #include "gl_model.h"
 
 enum class CharacterTypes {hero,tile,map_object};
@@ -35,6 +36,8 @@ private:
     CharacterTypes m_type;
     //glm::mat4 m_draw_matrix;
     size_t engine_frame;
+    // static LoaderUtility::LinesProcessor command_proc;
+    // static bool comand_proc_ready;
 
     size_t now_frame;
     std::vector <std::shared_ptr<glModel> > Models;
@@ -42,6 +45,7 @@ private:
     std::vector<std::pair<glm::vec3, glm::vec3>> m_edges; 
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;
+    void ExecuteCommand(const std::string & command,std::list<std::string> &m_messages);
 
     //void RefreshMatrixes();
 
