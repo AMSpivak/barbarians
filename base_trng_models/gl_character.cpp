@@ -206,9 +206,20 @@ void GlCharacter::RefreshMatrixes()
         Models[i]-> model = model_matrix;
     }
 }
-void GlCharacter::ExecuteCommand(const std::string & command,std::list<std::string> &m_messages)
+void GlCharacter::ExecuteCommand(const std::pair<AnimationCommand,std::string> &command,std::list<std::string> &m_messages)
 {
-    m_messages.push_back(current_animation->m_end_message);
+    switch(command.first)
+    {
+        case AnimationCommand::kMessage:
+            m_messages.push_back(command.second);
+        break;
+        case AnimationCommand::kStrike:
+
+        break;
+        default:
+        break;
+    }
+    //m_messages.push_back(current_animation->m_end_message);
 }
 
 int GlCharacter::Process(std::list<std::string> &m_messages)
@@ -228,10 +239,7 @@ int GlCharacter::Process(std::list<std::string> &m_messages)
         if(now_frame > current_animation->end_frame) 
         {
             now_frame = current_animation->m_loop ? current_animation->start_frame:current_animation->end_frame;
-            if(current_animation->m_end_message !="")
-            {
-                ExecuteCommand(current_animation->m_end_message);
-            }
+            ExecuteCommand(current_animation->m_end_message,m_messages);
         }
     }
 

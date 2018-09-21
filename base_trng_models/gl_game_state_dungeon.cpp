@@ -128,6 +128,11 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                             object->RefreshMatrixes();
                                         }
                                     });
+    m_message_processor.Add("hero_strike",[this](std::stringstream &sstream)
+    {                                
+        mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()));
+    });
+
 
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -913,26 +918,28 @@ void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
 bool IsKilled (std::shared_ptr<IMapEvent> value) { return value->Process() == EventProcessResult::Kill; }
 
 
-bool GlGameStateDungeon::MobKilled(std::shared_ptr<IGlModel> obj)
+bool GlGameStateDungeon::MobKilled(std::shared_ptr<GlCharacter> obj)
 {
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     
-    IGlModel * o_ptr = obj.get();
+    //IGlModel * o_ptr = obj.get();
     std::string event_return_string;
     for(auto event : map_events)
     {
-        ReactObjectToEvent(*o_ptr,*event.get(),event_return_string);
+        ReactObjectToEvent(*obj,*event.get(),event_return_string);
     }
-
-    for(auto event : mob_events)
+    if(obj->GetType() != CharacterTypes::hero)
     {
-        ReactObjectToEvent(*o_ptr,*event.get(),event_return_string);
+        for(auto event : mob_events)
+        {
+            ReactObjectToEvent(*obj,*event.get(),event_return_string);
+        }
     }
 
-    if (o_ptr->GetLifeValue() < 0.0f)
+    if (obj->GetLifeValue() < 0.0f)
         {
             auto e_ptr = std::make_shared<MapEventValhalla>(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),1.0f,1.4f);
-            e_ptr->position = o_ptr->GetPosition();
+            e_ptr->position = obj->GetPosition();
             e_ptr->position.y = 1.5f;
             map_events.push_back(e_ptr);
 
@@ -943,7 +950,7 @@ bool GlGameStateDungeon::MobKilled(std::shared_ptr<IGlModel> obj)
 
 void GlGameStateDungeon::MapObjectsEventsInteract()
 {
-    dungeon_objects.remove_if([this](std::shared_ptr<IGlModel> obj){return MobKilled(obj);});
+    dungeon_objects.remove_if([this](std::shared_ptr<GlCharacter> obj){return MobKilled(obj);});
 
     mob_events.remove_if(IsKilled);
     map_events.remove_if(IsKilled);
@@ -1157,8 +1164,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(attack)
         {
             hero->UseSequence("strike");
-            mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()/*,render_target*/));
-            //mob_events.push_back(AddStrike(hero.model_matrix,hero_position/*,render_target*/));
+            m_messages.push_back("hero_strike");
         }
         else
         {

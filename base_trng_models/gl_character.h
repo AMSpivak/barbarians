@@ -45,7 +45,7 @@ private:
     std::vector<std::pair<glm::vec3, glm::vec3>> m_edges; 
     std::map<std::string, AnimationSequence> sequence;
     AnimationSequence * current_animation;
-    void ExecuteCommand(const std::string & command,std::list<std::string> &m_messages);
+    void ExecuteCommand(const std::pair<AnimationCommand,std::string> &command,std::list<std::string> &m_messages);
 
     //void RefreshMatrixes();
 
