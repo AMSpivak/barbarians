@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdio>
 
-enum class AnimationCommand {kNone,kMessage,kStrike};
+enum class AnimationCommand {kNone,kMessage,kStrike,kMove,kRotate};
 struct AnimationSequence
 {
     AnimationSequence(size_t start = 0,size_t stop = 0):
@@ -12,6 +12,7 @@ struct AnimationSequence
                                 ,m_loop(true)
                                 ,m_start_message(AnimationCommand::kNone,"")
                                 ,m_end_message(AnimationCommand::kNone,"")
+                                ,m_frame_message(AnimationCommand::kNone,"")
     {}
 
     size_t start_frame;
@@ -21,6 +22,7 @@ struct AnimationSequence
     std::string m_target_sequence;
     std::pair<AnimationCommand,std::string> m_start_message;
     std::pair<AnimationCommand,std::string> m_end_message;
+    std::pair<AnimationCommand,std::string> m_frame_message;
 };
 
 std::istream& operator>> ( std::istream& is, AnimationSequence & value);

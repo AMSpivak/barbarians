@@ -193,16 +193,26 @@ void GlCharacter::RefreshMatrixes()
         IGlJubStruct * bone_ptr = Models[Models[i]->parent_idx]->jub_bones.get();
         Models[i]-> model = Models[Models[i]->parent_idx]->model *
             Models[Models[i]->parent_idx]->GetBoneMatrix(now_frame,Models[i]->parent_bone) *
-           // Models[Models[i]->parent_idx]->animation->frames[now_frame].bones[Models[i]->parent_bone] *
             bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
+            //bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
     }
     else
     {
-        // if(first_base&&(now_frame!=0))
-        // {
-        //     glm::mat4 prev_matrix = glm::inverse(GetBoneMatrix(now_frame - 1,0))*GetBoneMatrix(now_frame,0) ;
-
-        // }
+        if(first_base&&(now_frame!=0))
+        {
+            glm::mat4 change_matrix = glm::inverse(Models[i]-> GetBoneMatrix(now_frame - 1,0))*Models[i]-> GetBoneMatrix(now_frame,0) ;
+            glm::vec4 move_vec = change_matrix *glm::vec4(0.0f,0.0f,0.0f,1.0f);
+            change_matrix[0].w = 0;
+            change_matrix[1].w = 0;
+            change_matrix[2].w = 0;
+            change_matrix[3].x = 0;
+            change_matrix[3].y = 0;
+            change_matrix[3].z = 0;
+            change_matrix[3].w = 1;
+            model_matrix = change_matrix * model_matrix;
+            m_position += glm::vec3(move_vec.x,move_vec.y,move_vec.z);
+        }
+        
         Models[i]-> model = model_matrix;
     }
 }

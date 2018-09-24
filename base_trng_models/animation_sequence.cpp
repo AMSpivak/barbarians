@@ -17,6 +17,8 @@ std::pair<AnimationCommand,std::string> ParseCommand(const std::string &command)
     std::map<std::string,AnimationCommand> commands;
     commands.insert(std::make_pair("message", AnimationCommand::kMessage));
     commands.insert(std::make_pair("strike", AnimationCommand::kStrike));
+    commands.insert(std::make_pair("move", AnimationCommand::kMove));
+    commands.insert(std::make_pair("rotate", AnimationCommand::kRotate));
     std::stringstream command_stream(command);
     AnimationCommand cmd_id = commands[LoaderUtility::GetFromStream<std::string>(command_stream)];
     std::string params;
@@ -31,6 +33,8 @@ std::string CommandToStream(std::pair<AnimationCommand,std::string> value)
     commands.insert(std::make_pair(AnimationCommand::kNone,""));
     commands.insert(std::make_pair(AnimationCommand::kMessage,"message"));
     commands.insert(std::make_pair( AnimationCommand::kStrike,"strike"));
+    commands.insert(std::make_pair( AnimationCommand::kMove,"move"));
+    commands.insert(std::make_pair( AnimationCommand::kRotate,"rotate"));
 
     std::stringstream command_stream;
     command_stream << commands[value.first]<<" "<<value.second;

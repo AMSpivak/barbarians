@@ -92,6 +92,24 @@ sequence damage 2 3 0 0
 sequence base 0 1 0 0
 <!object>
 
+<object>
+name test_door
+mass_inv 0.0
+radius 0.01
+position 9.0 0.0 10.0
+orientation 0.0 0.0 0.0
+model material/door/door.mdl
+armor 0.0
+sequence damage 2 3 0 0
+sequence open 10 20 0 0
+sequence close 30 40 0 0
+sequence base 0 1 0 0
+edge -0.25 0.0 0.0 0.25 0.0 0.0
+edge 0.25 0.0 0.0 0.25 2.0 0.0
+edge 0.25 2.0 0.0 -0.25 2.0 0.0
+edge -0.25 2.0 0.0 -0.25 0.0 0.0
+<!object>
+
 <hero_event>
 radius 0.05
 position 9.0 0.0 17.5

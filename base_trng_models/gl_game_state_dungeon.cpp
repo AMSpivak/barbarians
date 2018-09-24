@@ -128,6 +128,22 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                             object->RefreshMatrixes();
                                         }
                                     });
+    
+    m_message_processor.Add("play_ani",[this](std::stringstream &sstream)
+                                {
+                                    std::string name;
+                                    sstream >> name;
+                                    auto object = FindSharedCollectionByName(dungeon_objects.begin(), dungeon_objects.end(),name);
+                                    if(object != nullptr)
+                                    {
+                                        object->UseSequence(LoaderUtility::GetFromStream<std::string>(sstream));
+                                        // float angle =0.0f;
+                                        // sstream >>angle;
+                                        // object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
+                                        // object->RefreshMatrixes();
+                                    }
+                                });
+
     m_message_processor.Add("hero_strike",[this](std::stringstream &sstream)
     {                                
         mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()));
@@ -921,8 +937,7 @@ bool IsKilled (std::shared_ptr<IMapEvent> value) { return value->Process() == Ev
 bool GlGameStateDungeon::MobKilled(std::shared_ptr<GlCharacter> obj)
 {
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
-    
-    //IGlModel * o_ptr = obj.get();
+
     std::string event_return_string;
     for(auto event : map_events)
     {
