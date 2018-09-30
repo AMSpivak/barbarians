@@ -199,7 +199,12 @@ void GlCharacter::RefreshMatrixes()
     {
         if(first_base&&(now_frame!=0))
         {
-            model_matrix = Models[i]->GetRotationMatrix(now_frame) * model_matrix;
+            glm::mat4 move_matrix = Models[i]->GetRotationMatrix(now_frame);
+            glm::vec4 move_position = model_matrix * glm::vec4(move_matrix[0].w,move_matrix[1].w,move_matrix[2].w,1.0f);
+            m_position += glm::vec3(move_position[0],move_position[1],move_position[2]);
+            move_matrix[0].w = move_matrix[1].w = move_matrix[2].w = 0.0f;
+            move_matrix[3] = glm::vec4(0.0f,0.0f,0.0f,1.0f);
+            model_matrix = move_matrix * model_matrix;
             first_base = false;
         }        
         Models[i]-> model = model_matrix;
