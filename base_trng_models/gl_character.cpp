@@ -185,7 +185,7 @@ void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)
 
 void GlCharacter::RefreshMatrixes()
 {
-    bool first_base = false;
+    bool first_base = true;
     int models_count = Models.size();
     for(int i = 0; i < models_count; i++)
     if(Models[i]->parent_idx != -1)
@@ -194,25 +194,14 @@ void GlCharacter::RefreshMatrixes()
         Models[i]-> model = Models[Models[i]->parent_idx]->model *
             Models[Models[i]->parent_idx]->GetBoneMatrix(now_frame,Models[i]->parent_bone) *
             bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
-            //bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
     }
     else
     {
         if(first_base&&(now_frame!=0))
         {
-            glm::mat4 change_matrix = glm::inverse(Models[i]-> GetBoneMatrix(now_frame - 1,0))*Models[i]-> GetBoneMatrix(now_frame,0) ;
-            glm::vec4 move_vec = change_matrix *glm::vec4(0.0f,0.0f,0.0f,1.0f);
-            change_matrix[0].w = 0;
-            change_matrix[1].w = 0;
-            change_matrix[2].w = 0;
-            change_matrix[3].x = 0;
-            change_matrix[3].y = 0;
-            change_matrix[3].z = 0;
-            change_matrix[3].w = 1;
-            model_matrix = change_matrix * model_matrix;
-            m_position += glm::vec3(move_vec.x,move_vec.y,move_vec.z);
-        }
-        
+            model_matrix = Models[i]->GetRotationMatrix(now_frame) * model_matrix;
+            first_base = false;
+        }        
         Models[i]-> model = model_matrix;
     }
 }

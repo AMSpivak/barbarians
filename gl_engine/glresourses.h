@@ -50,11 +50,14 @@ public:
 	Animation(const std::string &file_name);
 	GLfloat * GetDrawValues(size_t frame,const std::vector <Bone> &bones);
 	const glm::mat4 & GetBoneMatrix(size_t frame,size_t bone,const std::vector <Bone> &bones);
+	const glm::mat4 & GetRotationMatrix(size_t frame,const std::vector <Bone> &bones);
 	
 private:
 	bool m_precalculated;
 	size_t m_cache_frame;
 	AnimationFrame m_cashe_animation;
+	glm::mat4 rotation_matrix;
+
 };
 
 

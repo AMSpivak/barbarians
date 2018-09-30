@@ -742,14 +742,25 @@ void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 {
 	if(m_cache_frame == frame) 
 		return;
-	//std::cout <<"Caching " << frame <<" frame\n";
 	size_t bon_count = m_cashe_animation.bones.size();
-	for(int i = 0; i < bon_count; i++)
+	m_cashe_animation.bones[0] =glm::mat4(1.0f);
+	rotation_matrix = frame == 0 ? glm::mat4(1.0f) : glm::inverse(frames[frame - 1].bones[0] )*frames[frame].bones[0] ;
+	if(bon_count>1)
 	{
-		m_cashe_animation.bones[i] = frames[frame].bones[i] * glm::inverse(bones[i].matrix);
+		for(int i = 1; i < bon_count; i++)
+		{
+			m_cashe_animation.bones[i] = frames[frame].bones[i] * glm::inverse(bones[i].matrix);
+		}
 	}
 	m_cache_frame = frame;
 }
+
+const glm::mat4 & Animation::GetRotationMatrix(size_t frame,const std::vector <Bone> &bones)
+{
+	CalculateCache(bones, frame);
+	return rotation_matrix;
+}
+
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)
 {

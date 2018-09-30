@@ -78,6 +78,10 @@ const glm::mat4 &glModel::GetBoneMatrix(size_t frame, size_t bone)
 	animation->GetBoneMatrix(frame,bone,jub_bones.get()->bones);//frames[now_frame].bones[Models[i]->parent_bone];
 }
 
+const glm::mat4 &glModel::GetRotationMatrix(size_t frame)
+{
+	animation->GetRotationMatrix(frame,jub_bones.get()->bones);//frames[now_frame].bones[Models[i]->parent_bone];
+}
 
 void glModel::LoadAll(std::string FileName)
 {

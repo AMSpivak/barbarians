@@ -44,6 +44,7 @@ public:
 	}
 
 	const glm::mat4 &GetBoneMatrix(size_t frame, size_t bone);
+	const glm::mat4 &GetRotationMatrix(size_t frame);
 
 
 
