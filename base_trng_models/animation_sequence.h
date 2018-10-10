@@ -2,8 +2,9 @@
 #define ANIMATION_SEQUENCE
 #include <iostream>
 #include <cstdio>
+#include <map>
 
-enum class AnimationCommand {kNone,kMessage,kStrike,kMove,kRotate};
+enum class AnimationCommand {kNone,kMessage,kStrike,kMove,kRotate,kUse,kExecuted};
 struct AnimationSequence
 {
     AnimationSequence(size_t start = 0,size_t stop = 0):
@@ -23,6 +24,7 @@ struct AnimationSequence
     std::pair<AnimationCommand,std::string> m_start_message;
     std::pair<AnimationCommand,std::string> m_end_message;
     std::pair<AnimationCommand,std::string> m_frame_message;
+    std::map<AnimationCommand,std::string> jumps;
 };
 
 std::istream& operator>> ( std::istream& is, AnimationSequence & value);

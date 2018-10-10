@@ -87,6 +87,8 @@ int main(int argc, char const *argv[])
     inputs[GLFW_KEY_RIGHT_BRACKET] = false;
     inputs[GLFW_KEY_LEFT_BRACKET] = false;
     inputs[GLFW_KEY_F1] = false;
+    inputs[GLFW_KEY_LEFT_ALT] = false;
+
 
 	//Инициализация GLFW
 	glfwInit();
@@ -226,6 +228,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	/*if (action == GLFW_RELEASE)
 		return;*/
+	if (key == GLFW_KEY_LEFT_CONTROL)
+        inputs[GLFW_KEY_LEFT_CONTROL] = (action != GLFW_KEY_LEFT_CONTROL) ?  true : false;
 
 	if (key == GLFW_KEY_LEFT || key == GLFW_KEY_A )
         inputs[GLFW_KEY_LEFT] = (action != GLFW_RELEASE) ?  true : false;
@@ -241,6 +245,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (key == GLFW_KEY_SPACE )
     		inputs[GLFW_KEY_SPACE] = (action != GLFW_RELEASE) ?  true : false;
+
+	if (key == GLFW_KEY_LEFT_ALT )
+    		inputs[GLFW_KEY_LEFT_ALT] = (action != GLFW_RELEASE) ?  true : false;
 
     if (key == GLFW_KEY_LEFT_BRACKET )
         inputs[GLFW_KEY_LEFT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;

@@ -1119,7 +1119,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         bool start_attack = attack && (!old_attack);
         old_attack = attack;
 
-        
+        bool action_use = inputs[GLFW_KEY_LEFT_ALT];
         
 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
@@ -1174,6 +1174,12 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         {
             hero->UseSequence("strike");
             m_messages.push_back("hero_strike");
+        }
+        else
+        if(action_use)
+        {
+            hero->UseSequence("use");
+            //m_messages.push_back("hero_strike");
         }
         else
         {

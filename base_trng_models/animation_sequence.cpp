@@ -8,17 +8,32 @@
 
 #include "loader.h"
 
+std::map<std::string,AnimationCommand> commands = {
+                                                        {"message", AnimationCommand::kMessage},
+                                                        {"strike", AnimationCommand::kStrike},
+                                                        {"move", AnimationCommand::kMove},
+                                                        {"rotate", AnimationCommand::kRotate},
+                                                        {"use", AnimationCommand::kUse},
+                                                        {"executed", AnimationCommand::kExecuted}
+
+                                                    };
+
+std::map<AnimationCommand,std::string> command_names = {
+                                                        { AnimationCommand::kMessage,"message"},
+                                                        { AnimationCommand::kStrike,"strike"},
+                                                        { AnimationCommand::kMove,"move"},
+                                                        { AnimationCommand::kRotate,"rotate",},
+                                                        {AnimationCommand::kUse,"use" },
+                                                        { AnimationCommand::kExecuted,"executed"}
+
+                                                    };
+
 std::pair<AnimationCommand,std::string> ParseCommand(const std::string &command)
 {
     if(command =="")
     {
         return std::make_pair(AnimationCommand::kNone,"");
     }
-    std::map<std::string,AnimationCommand> commands;
-    commands.insert(std::make_pair("message", AnimationCommand::kMessage));
-    commands.insert(std::make_pair("strike", AnimationCommand::kStrike));
-    commands.insert(std::make_pair("move", AnimationCommand::kMove));
-    commands.insert(std::make_pair("rotate", AnimationCommand::kRotate));
     std::stringstream command_stream(command);
     AnimationCommand cmd_id = commands[LoaderUtility::GetFromStream<std::string>(command_stream)];
     std::string params;
@@ -27,30 +42,48 @@ std::pair<AnimationCommand,std::string> ParseCommand(const std::string &command)
     return std::make_pair(cmd_id,params);
 }
 
+
+
 std::string CommandToStream(std::pair<AnimationCommand,std::string> value)
 {
-    std::map<AnimationCommand,std::string> commands;
-    commands.insert(std::make_pair(AnimationCommand::kNone,""));
-    commands.insert(std::make_pair(AnimationCommand::kMessage,"message"));
-    commands.insert(std::make_pair( AnimationCommand::kStrike,"strike"));
-    commands.insert(std::make_pair( AnimationCommand::kMove,"move"));
-    commands.insert(std::make_pair( AnimationCommand::kRotate,"rotate"));
-
     std::stringstream command_stream;
-    command_stream << commands[value.first]<<" "<<value.second;
+    command_stream << command_names[value.first]<<" "<<value.second;
     return command_stream.str();
 }
 
 std::istream& operator>> ( std::istream& is, AnimationSequence & value)
 {
+    std::string skip; 
 	is>>value.start_frame>>value.end_frame>>value.m_loop>>value.m_jump;
     if(value.m_jump)
         is>>value.m_target_sequence;
     std::string tmp;
-    is >>std::quoted(tmp);
+    //is >>std::quoted(tmp);
+    std::getline(std::getline(is, skip, '"'), tmp, '"') ;
+
     value.m_start_message = ParseCommand(tmp);
-    is>>std::quoted(tmp);
+    std::cout << "<m_start_message------->"<<tmp<<"!\n";
+    //is>>std::quoted(tmp);
+    std::getline(std::getline(is, skip, '"'), tmp, '"') ;
+
+    value.m_frame_message = ParseCommand(tmp);
+    std::cout << "<m_frame_message------->"<<tmp<<"!\n";
+    //is>>std::quoted(tmp);
+    std::getline(std::getline(is, skip, '"'), tmp, '"') ;
     value.m_end_message = ParseCommand(tmp);
+    std::cout << "<m_end_message------->"<<tmp<<"!\n";
+    std::cout << "<commands-------> \n";
+    tmp = "";
+    while(!is.eof())
+    {
+        //is >>std::quoted(tmp);
+        std::getline(std::getline(is, skip, '"'), tmp, '"') ;
+
+        value.jumps.insert( ParseCommand(tmp));
+        std::cout << "<command><" << tmp <<"> \n";
+    }
+    std::cout << "<commands-------> \n";
+
     //std::cout<<"animation "<<value;
 }
 
@@ -59,6 +92,10 @@ std::ostream& operator << ( std::ostream& os, const AnimationSequence & value)
     os<<value.start_frame<<" "<<value.end_frame<<" "<<value.m_loop<<" "<<value.m_jump;
     if(value.m_jump) 
         os<<" "<<value.m_target_sequence;
-        os<<" "<<std::quoted(CommandToStream(value.m_start_message))<<" "<<std::quoted(CommandToStream(value.m_end_message))<<"\n";
+        os<<" "<<std::quoted(CommandToStream(value.m_start_message))<<" "
+        <<std::quoted(CommandToStream(value.m_frame_message))<<" "
+        <<std::quoted(CommandToStream(value.m_end_message));
+
+        os<<"\n";
 	return os;
 }
