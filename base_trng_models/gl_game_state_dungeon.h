@@ -86,12 +86,12 @@ private:
     void FitObjects(int steps, float accuracy);
     std::pair<float,const glm::vec3>  FitObjectToMap(IGlModel& object, const glm::vec3 & position);
     float FitObjectToObject(IGlModel& object1,IGlModel& object2);
-    InteractionResult ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value);
+    InteractionResult ReactObjectToEvent(GlCharacter& object,IMapEvent& event,std::string &return_value);
 
     void DrawFxSprite(GLuint &current_shader, GLuint texture);
     void SetMapLight(std::vector<std::string> &lines);
     void MapObjectsEventsInteract();
-    bool HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr);
+    bool HeroEventsInteract(std::shared_ptr<GlCharacter> hero_ptr);
     bool MobKilled(std::shared_ptr<GlCharacter> obj);
     void PostMessage(const std::string & event_string);
     void ProcessMessages();

@@ -37,7 +37,9 @@ std::pair<AnimationCommand,std::string> ParseCommand(const std::string &command)
     std::stringstream command_stream(command);
     AnimationCommand cmd_id = commands[LoaderUtility::GetFromStream<std::string>(command_stream)];
     std::string params;
-    std::getline(command_stream, params);
+    std::string dummy;
+    
+    std::getline(std::getline(command_stream,dummy,' '), params);
 
     return std::make_pair(cmd_id,params);
 }
@@ -83,7 +85,7 @@ std::istream& operator>> ( std::istream& is, AnimationSequence & value)
             value.jumps.insert( ParseCommand(tmp));
             std::cout << "<command><" << tmp <<"> \n";
         }
-        
+        tmp="";
     }
     std::cout << "<commands-------> \n";
 

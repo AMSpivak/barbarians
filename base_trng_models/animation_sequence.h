@@ -25,6 +25,7 @@ struct AnimationSequence
     std::pair<AnimationCommand,std::string> m_end_message;
     std::pair<AnimationCommand,std::string> m_frame_message;
     std::map<AnimationCommand,std::string> jumps;
+    
 };
 
 std::istream& operator>> ( std::istream& is, AnimationSequence & value);

@@ -1,12 +1,12 @@
-#include "map_event_hero_strikes.h"
+#include "map_event_hero_action.h"
 #include "collision.h"
 
-void IMapEventHeroStrike::AddEdge(const std::pair<glm::vec3, glm::vec3> edge)
+void IMapEventHeroAction::AddEdge(const std::pair<glm::vec3, glm::vec3> edge)
 {
     m_edges.push_back(edge);
 }
 
-void IMapEventHeroStrike::Show(const glm::vec3 & offset, glCamera & camera)
+void IMapEventHeroAction::Show(const glm::vec3 & offset, glCamera & camera)
 {
     /*renderBillBoardDepth(m_current_shader,m_depthmap,m_texture,   
         m_width,m_height,position,offset,camera);*/
@@ -25,29 +25,30 @@ void IMapEventHeroStrike::Show(const glm::vec3 & offset, glCamera & camera)
 }
 
 
-int IMapEventHeroStrike::AddAxes(std::vector<glm::vec3> &axes)
+int IMapEventHeroAction::AddAxes(std::vector<glm::vec3> &axes)
 {
     return Collision::AddAxes(axes,m_edges,model_matrix);
 }
 
 
 
-std::pair<float, float> IMapEventHeroStrike::ProjectOnAxe(const glm::vec3 & axe)
+std::pair<float, float> IMapEventHeroAction::ProjectOnAxe(const glm::vec3 & axe)
 {
     return Collision::ProjectEdgesOnAxe(model_matrix,m_edges,position,axe);
 }
 
-EventProcessResult IMapEventHeroStrike::Process()
+EventProcessResult IMapEventHeroAction::Process()
 {
     //std::cout<<"Stop event\n";
     return EventProcessResult::Kill;
 }
 
-InteractionResult IMapEventHeroStrike::Interact(GlCharacter &model,std::string &return_value)
+InteractionResult IMapEventHeroAction::Interact(GlCharacter &model,std::string &return_value)
 {
-    model.Damage(0.1f);
+    //model.Damage(0.1f);
     //std::cout<<"life "<<model.GetLifeValue()<<"\n";
-    if(model.GetLifeValue()< 0)
-        return InteractionResult::Kill;
-    return InteractionResult::Damage;
+    model.UseCommand(m_command);
+    //if(model.GetLifeValue()< 0)
+    //    return InteractionResult::Kill;
+    return InteractionResult::Use;
 }

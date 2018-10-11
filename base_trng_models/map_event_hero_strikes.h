@@ -27,7 +27,7 @@ public:
 
     ~IMapEventHeroStrike(){}
 
-    InteractionResult Interact(IGlModel &model,std::string &return_value);
+    InteractionResult Interact(GlCharacter &model,std::string &return_value);
     EventProcessResult Process();
     void Show(const glm::vec3 & offset, glCamera & camera);
     int AddAxes(std::vector<glm::vec3> &axes);

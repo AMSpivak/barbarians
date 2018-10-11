@@ -162,6 +162,22 @@ void GlCharacter::Draw(GLuint shader) const
 {
     for(auto model : Models) model->Draw(shader,now_frame);
 }
+void GlCharacter::UseCommand(AnimationCommand command)
+{
+    try
+    {
+        std::string jumper = current_animation->jumps.at(command);
+        std::cout<<"process command <"<<jumper<<">\n";
+        
+
+        current_animation = &sequence.at(jumper);              
+        // current_animation = &sequence.at(current_animation->jumps.at(command));              
+    }
+    catch(const std::out_of_range& exp)
+    {
+        std::cout<<"Unknown command\n";
+    }   
+}
 
 
 void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)

@@ -19,6 +19,8 @@
 #include "gl_physics.h"
 #include "gl_game_state_dungeon.h"
 #include "map_event_hero_strikes.h"
+#include "map_event_hero_action.h"
+
 #include "map_event_valhalla.h"
 #include "map_event_general.h"
 #include "collision.h"
@@ -151,7 +153,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 
     m_message_processor.Add("hero_use",[this](std::stringstream &sstream)
     {                                
-        mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()));
+        mob_events.push_back(AddUse(hero->model_matrix,hero->GetPosition()));
     });
 
     glEnable(GL_DEPTH_TEST);
@@ -182,7 +184,7 @@ std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix
 std::shared_ptr<IMapEvent> GlGameStateDungeon::AddUse(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/)
 {
 
-    auto e_ptr = std::make_shared<IMapEventHeroStrike>(/*m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),*/1.0f,1.4f);
+    auto e_ptr = std::make_shared<IMapEventHeroAction>(1.0f,1.4f,AnimationCommand::kUse);
     
     e_ptr->model_matrix = matrix;
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
@@ -901,7 +903,7 @@ float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)
     
 }
 
-InteractionResult GlGameStateDungeon::ReactObjectToEvent(IGlModel& object,IMapEvent& event,std::string &return_value)
+InteractionResult GlGameStateDungeon::ReactObjectToEvent(GlCharacter& object,IMapEvent& event,std::string &return_value)
 {
     auto intersection = Physics::Intersection(object,event);
     return intersection.first < std::numeric_limits<float>::min() ? InteractionResult::Nothing : event.Interact(object,return_value);
@@ -1002,7 +1004,7 @@ void GlGameStateDungeon::ProcessMessages()
         m_messages.pop_front();
     }
 }
-bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<IGlModel> hero_ptr)
+bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<GlCharacter> hero_ptr)
 {
     std::string event_return_string;
     for(auto event : hero_events)

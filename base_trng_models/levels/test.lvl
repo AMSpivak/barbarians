@@ -103,7 +103,7 @@ armor 0.0
 sequence damage 2 3 0 0 "" "" ""
 sequence open 10 20 0 0 "" "" ""
 sequence close 30 40 0 0 "" "" ""
-sequence base 0 1 0 0 "" "" ""
+sequence base 0 1 0 0 "" "" "" "use open"
 edge -0.25 0.0 0.0 0.25 0.0 0.0
 edge 0.25 0.0 0.0 0.25 2.0 0.0
 edge 0.25 2.0 0.0 -0.25 2.0 0.0
