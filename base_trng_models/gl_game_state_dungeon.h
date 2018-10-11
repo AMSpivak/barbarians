@@ -96,6 +96,7 @@ private:
     void PostMessage(const std::string & event_string);
     void ProcessMessages();
     std::shared_ptr<IMapEvent> AddStrike(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/);
+    std::shared_ptr<IMapEvent> AddUse(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/);
     
     
     

@@ -8,8 +8,8 @@
 
 #include <vector>
 
-enum class InteractionResult { Nothing, PostMessage, Damage, Kill };
-enum class EventProcessResult { Nothing, Kill };
+enum class InteractionResult { Nothing, PostMessage, Damage, Kill, Use };
+enum class EventProcessResult { Nothing, Kill, Used };
 
 class IMapEvent
 {

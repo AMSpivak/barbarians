@@ -149,6 +149,10 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
         mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()));
     });
 
+    m_message_processor.Add("hero_use",[this](std::stringstream &sstream)
+    {                                
+        mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()));
+    });
 
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -162,6 +166,20 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 }
 
 std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/)
+{
+
+    auto e_ptr = std::make_shared<IMapEventHeroStrike>(/*m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),*/1.0f,1.4f);
+    
+    e_ptr->model_matrix = matrix;
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
+    e_ptr->position = position;
+    return e_ptr;
+}
+
+std::shared_ptr<IMapEvent> GlGameStateDungeon::AddUse(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/)
 {
 
     auto e_ptr = std::make_shared<IMapEventHeroStrike>(/*m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),*/1.0f,1.4f);
@@ -1179,7 +1197,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(action_use)
         {
             hero->UseSequence("use");
-            //m_messages.push_back("hero_strike");
+            m_messages.push_back("hero_use");
         }
         else
         {

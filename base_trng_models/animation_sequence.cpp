@@ -78,9 +78,12 @@ std::istream& operator>> ( std::istream& is, AnimationSequence & value)
     {
         //is >>std::quoted(tmp);
         std::getline(std::getline(is, skip, '"'), tmp, '"') ;
-
-        value.jumps.insert( ParseCommand(tmp));
-        std::cout << "<command><" << tmp <<"> \n";
+        if(tmp!="")
+        {
+            value.jumps.insert( ParseCommand(tmp));
+            std::cout << "<command><" << tmp <<"> \n";
+        }
+        
     }
     std::cout << "<commands-------> \n";
 

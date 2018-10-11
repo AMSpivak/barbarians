@@ -43,8 +43,8 @@ mass_inv 1.0
 radius 0.5
 position 13.0 0.0 12.0
 model material/barrel/barrel.mdl
-sequence damage 2 3 0 0
-sequence base 0 1 0 0
+sequence damage 2 3 0 0  "" "" ""
+sequence base 0 1 0 0  "" "" ""
 edge 1.0 1.0 0.0 -1.0 1.0 0.0
 edge -1.0 1.0 0.0 -1.0 -1.0 0.0
 edge -1.0 -1.0 0.0 1.0 -1.0 0.0
@@ -55,8 +55,8 @@ mass_inv 1.0
 radius 0.5
 position 10.0 0.0 12.0
 model material/barrel/barrel.mdl
-sequence damage 2 3 0 0
-sequence base 0 1 0 0
+sequence damage 2 3 0 0  "" "" ""
+sequence base 0 1 0 0  "" "" ""
 <!object>
 <object>
 name candle
@@ -66,8 +66,8 @@ armor 0.0
 position 12.0 0.0 12.0
 model material/candle/candle.mdl
 light 3.0 2.0 1.0 0.0 0.0 1.5 4.0
-sequence damage 2 3 0 0
-sequence base 0 1 0 0
+sequence damage 2 3 0 0  "" "" ""
+sequence base 0 1 0 0  "" "" ""
 <!object>
 
 <object>
@@ -77,8 +77,8 @@ position 9.0 0.0 17.5
 orientation 0.0 270.0 0.0
 model material/sign/sign.mdl
 armor 0.0
-sequence damage 2 3 0 0
-sequence base 0 1 0 0
+sequence damage 2 3 0 0  "" "" ""
+sequence base 0 1 0 0  "" "" ""
 <!object>
 
 <object>
@@ -88,8 +88,8 @@ position 4.0 0.0 16.0
 orientation 0.0 -90.0 0.0
 model material/dungeon/carpet/carpet.mdl
 armor 0.0
-sequence damage 2 3 0 0
-sequence base 0 1 0 0
+sequence damage 2 3 0 0  "" "" ""
+sequence base 0 1 0 0  "" "" ""
 <!object>
 
 <object>
@@ -100,10 +100,10 @@ position 9.0 0.0 10.0
 orientation 0.0 0.0 0.0
 model material/door/door.mdl
 armor 0.0
-sequence damage 2 3 0 0
-sequence open 10 20 0 0
-sequence close 30 40 0 0
-sequence base 0 1 0 0
+sequence damage 2 3 0 0 "" "" ""
+sequence open 10 20 0 0 "" "" ""
+sequence close 30 40 0 0 "" "" ""
+sequence base 0 1 0 0 "" "" ""
 edge -0.25 0.0 0.0 0.25 0.0 0.0
 edge 0.25 0.0 0.0 0.25 2.0 0.0
 edge 0.25 2.0 0.0 -0.25 2.0 0.0
