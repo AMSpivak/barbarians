@@ -20,6 +20,7 @@ std::map<std::string,AnimationCommand> commands = {
 
 std::map<AnimationCommand,std::string> command_names = {
                                                         { AnimationCommand::kMessage,"message"},
+                                                        { AnimationCommand::kNone,""},
                                                         { AnimationCommand::kStrike,"strike"},
                                                         { AnimationCommand::kMove,"move"},
                                                         { AnimationCommand::kRotate,"rotate",},
@@ -48,8 +49,11 @@ std::pair<AnimationCommand,std::string> ParseCommand(const std::string &command)
 
 std::string CommandToStream(std::pair<AnimationCommand,std::string> value)
 {
+    
     std::stringstream command_stream;
-    command_stream << command_names[value.first]<<" "<<value.second;
+    command_stream << command_names[value.first];
+
+    if(value.second != "") command_stream<<" "<<value.second;
     return command_stream.str();
 }
 
