@@ -50,8 +50,12 @@ bool GlGameStateDungeon::AddObjectsFromFile(const std::string & object)
 
         while(!objects_file.eof())
         {
-            LoaderUtility::LoadLineBlock(objects_file,LoaderUtility::FindPrefix(objects_file),obj_lines);
-            LoadObject(obj_lines);
+            std::string prefix = LoaderUtility::FindPrefix(objects_file);
+            if(prefix == "object")
+            {
+                LoaderUtility::LoadLineBlock(objects_file,prefix,obj_lines);
+                LoadObject(obj_lines);
+            }
         }
         objects_file.close();
         return true;
@@ -341,13 +345,20 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
         size_t ext_pos = tmp_filename.find_last_of(".") +1;
         std::string extention = tmp_filename.replace(ext_pos,tmp_filename.length()- ext_pos,"sav");
         std::ofstream savefile;
-        savefile.open (extention,std::ios::trunc);
+        savefile.open (extention,std::ofstream::out | std::ofstream::trunc);
         for(auto object:dungeon_objects)
         {
-            if(object->GetType() ==CharacterTypes::map_object)
+            if(object->GetType() == CharacterTypes::map_object)
+            {
+                std::cout<<"Saving\n";
                 savefile  << (*object);
+                #ifdef DBG
+                std::cout<<(*object);
+                #endif
+            }
         }
         savefile.close();
+        std::cout<<"sav closed\n";
     }
     
 }
@@ -363,6 +374,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
 
 
     SaveObjects(m_level_file);
+    std::cout<<"Level: old saves to"<< m_level_file<<"\n";
     m_level_file = filename;
 
     std::string tmp_filename(filename);
@@ -378,7 +390,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     map_events.clear();
     
     dungeon_objects.clear();
-    dungeon_objects.push_back(m_models_map["Hero"]);
+    //dungeon_objects.push_back(m_models_map["Hero"]);
 
 
     
@@ -428,7 +440,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
         }
     }
 
-    dungeon_objects.push_back(std::shared_ptr<GlCharacter>(hero));
+    dungeon_objects.push_back(hero);
     hero->UseSequence("stance");
 
     
@@ -1141,6 +1153,13 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
         bool action_use = inputs[GLFW_KEY_LEFT_ALT];
         
+        if(buttons!= nullptr)
+        {
+            if(buttons_count>6)
+            {
+                action_use = buttons[6] == GLFW_PRESS;
+            }
+        }
 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
         if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;

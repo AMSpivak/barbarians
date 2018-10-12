@@ -39,6 +39,7 @@ CharacterTypes GlCharacter::GetType() const
 
 void GlCharacter::ToStream(std::ostream& os) const
 {
+    os<<"name " << GetName()<<"\n";
     
     for(auto model_name : model_list)
     {
@@ -59,7 +60,6 @@ void GlCharacter::ToStream(std::ostream& os) const
     <<"mass_inv "<<mass_inv<<"\n"
     <<"armor "<<GetArmorValue()<<"\n"
     <<"life " << GetLifeValue()<<"\n"
-    <<"name " << GetName()<<"\n"
     <<"radius "<<radius<<"\n"
     <<"position "<<GetPosition()<<"\n";
 

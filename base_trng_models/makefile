@@ -1,6 +1,6 @@
 CC=g++
 ENGINE=..\gl_engine
-CFLAGS=-c  -I".\includes" -I".\glm" -I"$(ENGINE)" -O2  -std=gnu++14
+CFLAGS=-c  -I".\includes" -I".\glm" -I"$(ENGINE)" -D DBG -O2  -std=gnu++14
 ifeq ($(OS),Windows_NT)
 	DELOPERATOR= del /q
 	LDFLAGS=  -lglew32 -lSOIL -lglfw3 -lopengl32 -static-libgcc -static-libstdc++  -l:libgdi32.a -L".\gl"

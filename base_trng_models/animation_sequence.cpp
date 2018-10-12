@@ -51,10 +51,17 @@ std::string CommandToStream(std::pair<AnimationCommand,std::string> value)
 {
     
     std::stringstream command_stream;
-    command_stream << command_names[value.first];
-
-    if(value.second != "") command_stream<<" "<<value.second;
-    return command_stream.str();
+    try
+    {
+        command_stream << command_names.at(value.first);
+        if(value.second != "") command_stream<<" "<<value.second;
+        return command_stream.str();
+    }
+    catch(const std::out_of_range& exp)
+    {
+        std::cout << "<error------->!\n";
+        return "";
+    }
 }
 
 std::istream& operator>> ( std::istream& is, AnimationSequence & value)
