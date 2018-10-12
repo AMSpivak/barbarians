@@ -50,6 +50,10 @@ void GlCharacter::ToStream(std::ostream& os) const
         os<<"sequence "<<seq<<"\n";
     }
 
+    //auto it = std::find_if(sequence.begin(), sequence.end(), [this](std::pair<std::string, AnimationSequence> anim){return *current_animation == anim.second;});
+    
+    os<<"run_sequence "<<current_animation->m_name<<"\n";
+
     glm::mat4 tmp_matrix = glm::rotate(model_matrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     os<<"matrix "<<tmp_matrix<<"\n"
     <<"mass_inv "<<mass_inv<<"\n"
@@ -135,8 +139,9 @@ void GlCharacter::UpdateFromLines(std::vector<std::string> &lines)
                                             std::string name;
                                             sstream >> name ;//>> start >> end;
                                              
-                                            //AnimationSequence sequence(start,end);
-                                            AddSequence(name,LoaderUtility::GetFromStream<AnimationSequence>(sstream));
+                                            AnimationSequence seq(name);
+                                            sstream >> seq;
+                                            AddSequence(name,seq);
                                             UseSequence(name);
                                         });
 
@@ -260,6 +265,11 @@ int GlCharacter::Process(std::list<std::string> &m_messages)
         {
             now_frame = current_animation->m_loop ? current_animation->start_frame:current_animation->end_frame;
             ExecuteCommand(current_animation->m_end_message,m_messages);
+            if(current_animation->m_jump)
+            {
+                current_animation = &sequence[current_animation->m_target_sequence];
+                now_frame = current_animation->start_frame;
+            }
         }
     }
 

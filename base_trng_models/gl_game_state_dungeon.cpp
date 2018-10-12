@@ -144,7 +144,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                         // object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
                                         // object->RefreshMatrixes();
                                     }
-                                });
+                                });                         
 
     m_message_processor.Add("hero_strike",[this](std::stringstream &sstream)
     {                                

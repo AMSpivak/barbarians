@@ -14,13 +14,24 @@ struct AnimationSequence
                                 ,m_start_message(AnimationCommand::kNone,"")
                                 ,m_end_message(AnimationCommand::kNone,"")
                                 ,m_frame_message(AnimationCommand::kNone,"")
+                                ,m_name("")
     {}
 
+    AnimationSequence(const  std::string &name,size_t start = 0,size_t stop = 0):
+                                start_frame(start)
+                                ,end_frame(stop)
+                                ,m_loop(true)
+                                ,m_start_message(AnimationCommand::kNone,"")
+                                ,m_end_message(AnimationCommand::kNone,"")
+                                ,m_frame_message(AnimationCommand::kNone,"")
+                                ,m_name(name)
+    {}
     size_t start_frame;
     size_t end_frame;
     bool m_loop;
     bool m_jump;
     std::string m_target_sequence;
+    std::string m_name;
     std::pair<AnimationCommand,std::string> m_start_message;
     std::pair<AnimationCommand,std::string> m_end_message;
     std::pair<AnimationCommand,std::string> m_frame_message;

@@ -101,9 +101,10 @@ orientation 0.0 0.0 0.0
 model material/door/door.mdl
 armor 0.0
 sequence damage 2 3 0 0 "" "" ""
-sequence open 10 20 0 0 "" "" ""
-sequence close 30 40 0 0 "" "" ""
-sequence base 0 1 0 0 "" "" "" "use open"
+sequence open 10 20 0 1 opened "" "" ""
+sequence close 30 40 0 1 base "" "" ""
+sequence opened 1 8 0 0 "" "" "" "use close"
+sequence base 1 8 0 0 "" "" "" "use open"
 edge -0.25 0.0 0.0 0.25 0.0 0.0
 edge 0.25 0.0 0.0 0.25 2.0 0.0
 edge 0.25 2.0 0.0 -0.25 2.0 0.0

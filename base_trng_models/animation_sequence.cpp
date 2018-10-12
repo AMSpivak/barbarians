@@ -80,15 +80,20 @@ std::istream& operator>> ( std::istream& is, AnimationSequence & value)
     {
         //is >>std::quoted(tmp);
         std::getline(std::getline(is, skip, '"'), tmp, '"') ;
+        std::cout << "<skip><" << skip <<"> \n";
+        if(skip == "" && tmp == "") return is;
+
         if(tmp!="")
         {
             value.jumps.insert( ParseCommand(tmp));
             std::cout << "<command><" << tmp <<"> \n";
         }
         tmp="";
+
     }
     std::cout << "<commands-------> \n";
 
+    return is;
     //std::cout<<"animation "<<value;
 }
 
@@ -100,7 +105,11 @@ std::ostream& operator << ( std::ostream& os, const AnimationSequence & value)
         os<<" "<<std::quoted(CommandToStream(value.m_start_message))<<" "
         <<std::quoted(CommandToStream(value.m_frame_message))<<" "
         <<std::quoted(CommandToStream(value.m_end_message));
+        for(auto jump : value.jumps)
+        {
+            os<<" "<<std::quoted(CommandToStream(jump));
+        }
 
-        os<<"\n";
+        //os<<"\n";
 	return os;
 }
