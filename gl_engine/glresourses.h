@@ -91,8 +91,10 @@ void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,f
 void renderSprite(GLuint current_shader,
 	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
 	const glm::vec4 & corrector_v,
-	const GLuint * texture 
-);
+	const GLuint * texture,
+	float t_sprite_w = 1.0f,float t_sprite_h = 1.0f,
+	float t_sprite_offset_x = 0.0f,
+	float t_sprite_offset_y = 0.0f);
 
 void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_depth,
 	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,

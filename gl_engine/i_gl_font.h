@@ -3,11 +3,14 @@
 #include <GL/glew.h>
 #include <string>
 #include "glresourses.h"
+#include "gl_atlas.h"
+#include "i_gl_texture_struct.h"
 class IGlText
 {
     protected:
     float m_width;
     float m_height;
+	std::shared_ptr<IGlTextureStruct> texture;    
     public:
     IGlText(const std::string & filename, GLAtlas<IGlTextureStruct> &m_texture_atlas,float width, float height)
     {

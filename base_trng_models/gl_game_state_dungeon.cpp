@@ -104,6 +104,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
 {
+    m_gl_text = std::make_shared<GlText16x16>("font2.png",GetResourceManager()->m_texture_atlas,0.1f,0.1f);
 
     m_message_processor.Add("teleport",[this](std::stringstream &sstream)
                                     {
@@ -143,10 +144,6 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                     if(object != nullptr)
                                     {
                                         object->UseSequence(LoaderUtility::GetFromStream<std::string>(sstream));
-                                        // float angle =0.0f;
-                                        // sstream >>angle;
-                                        // object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
-                                        // object->RefreshMatrixes();
                                     }
                                 });                         
 
@@ -587,10 +584,13 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 
 void GlGameStateDungeon::Draw2D(GLuint depth_map)
 {
-      for(std::shared_ptr<IMapEvent> event :map_events) 
-      {
-          event.get()->Show(hero_position,Camera);
-      }
+    for(std::shared_ptr<IMapEvent> event :map_events) 
+    {
+        event.get()->Show(hero_position,Camera);
+    }
+    glClear( GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+    m_gl_text->SetTextSize(1.0f,1.0f); 
+    m_gl_text->DrawString("453",0,0, m_shader_map["sprite2dsimple"]);
 }
 void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharacter>hero)
 {
@@ -799,6 +799,7 @@ void GlGameStateDungeon::Draw()
         renderQuad();/**/
 
         Draw2D(render_target.depthMap);
+
 
 }
 

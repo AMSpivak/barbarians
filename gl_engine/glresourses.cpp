@@ -32,6 +32,32 @@ void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,f
 
 }
 
+void Fit_Tile_Matrix(glm::mat4 &matrix,float x,float y,float width,float height)
+{
+	float mScale_Matrix[16] = {0};
+
+	//Matrix.setIdentityM(mScale_Matrix,0);
+	mScale_Matrix[0]=width;
+	mScale_Matrix[1]=0.0f;
+	mScale_Matrix[2]=0.0f;
+	mScale_Matrix[3]=1.0f;
+	mScale_Matrix[4]=0.0f;
+	mScale_Matrix[5]=height;
+	mScale_Matrix[6]=0.0f;
+	mScale_Matrix[7]=1.0f;
+	mScale_Matrix[8]=0.0f;
+	mScale_Matrix[9]=0.0f;
+	mScale_Matrix[10]=0.0f;
+	mScale_Matrix[11]=1.0f;
+	mScale_Matrix[12]=x;
+	mScale_Matrix[13]=y;
+	mScale_Matrix[14]=0.0f;
+	mScale_Matrix[15]=1.0f;
+
+	matrix = glm::make_mat4(mScale_Matrix);
+
+}
+
 /*std::istream& operator>> ( std::istream& is, glm::vec3 & fill_vector)
 {
 	is>>fill_vector[0] >>fill_vector[1]>>fill_vector[2];
@@ -42,8 +68,11 @@ void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,f
 void renderSprite(GLuint current_shader,
 	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
 	const glm::vec4 & corrector_v,
-	const GLuint * texture 
-)
+	const GLuint * texture,
+	float t_sprite_w,float t_sprite_h,
+	float t_sprite_offset_x,
+	float t_sprite_offset_y
+	)
 {
 
 
@@ -90,6 +119,7 @@ void renderSprite(GLuint current_shader,
 	Fit_Matrix(position_m,
 		x0,y0,x1,y1,x2,y2,x3,y3
 	);
+	Fit_Tile_Matrix(texture_m,t_sprite_offset_x,t_sprite_offset_y,t_sprite_w,t_sprite_h);
 	GLuint position_u  = glGetUniformLocation(current_shader, "DrawMatrix");
 	glUniformMatrix4fv(position_u, 1, GL_FALSE, glm::value_ptr(position_m));
 

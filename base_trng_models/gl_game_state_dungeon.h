@@ -10,6 +10,7 @@
 #include "gl_dungeon.h"
 #include "i_map_event.h"
 #include "loader.h"
+#include "gl_font16x16.h"
 #include <list>
 
 class GlGameStateDungeon: public IGlGameState
@@ -31,6 +32,8 @@ public:
     void SwitchIn(){}
     void SwitchOut(){}
 private:
+    std::shared_ptr<IGlText> m_gl_text;
+
 
     std::vector <std::shared_ptr<glModel> > Models;
     std::map<std::string,std::shared_ptr<glRenderTarget>> &m_render_target_map;
