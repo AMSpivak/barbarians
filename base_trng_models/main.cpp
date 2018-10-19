@@ -203,7 +203,7 @@ int main(int argc, char const *argv[])
 		if(counter++ == 0) time_r = glfwGetTime();
 		if(counter > 30)
 		{
-			std::cout<<(1.0f*counter/(glfwGetTime() - time_r))<<"\n";
+			EngineSettings::GetEngineSettings() ->SetFPS((1.0f*counter/(glfwGetTime() - time_r)));
 			counter = 0;
 		}
 		

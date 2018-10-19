@@ -21,6 +21,7 @@ protected:
     
     size_t m_screen_width;
     size_t m_screen_height;
+    float m_aspect_ratio;
 public:
     IGlGameState(std::map<const std::string,GLuint> &shader_map,GLResourcesManager &resources_manager,
 
@@ -30,6 +31,9 @@ public:
     {        
         m_screen_width = screen_width;
         m_screen_height = screen_height;
+        m_aspect_ratio = m_screen_height;
+        m_aspect_ratio /= m_screen_width;
+
     }
     virtual ~IGlGameState(){}
     virtual void Draw() = 0;

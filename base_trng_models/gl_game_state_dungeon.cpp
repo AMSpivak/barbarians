@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <functional>
@@ -588,9 +589,17 @@ void GlGameStateDungeon::Draw2D(GLuint depth_map)
     {
         event.get()->Show(hero_position,Camera);
     }
+
+    
     glClear( GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
-    m_gl_text->SetTextSize(1.0f,1.0f); 
-    m_gl_text->DrawString("453",0,0, m_shader_map["sprite2dsimple"]);
+    const float text_size_y = 0.060f;
+    const float text_size_x = m_aspect_ratio * text_size_y;
+
+    m_gl_text->SetTextSize(text_size_x,text_size_y); 
+    auto shader = m_shader_map["sprite2dsimple"];
+    std::stringstream ss;
+    ss<< std::fixed<<std::setprecision(1)<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS";
+    m_gl_text->DrawString(ss.str(),-1.0f,1.0f - text_size_y*1.2f, shader);
 }
 void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharacter>hero)
 {

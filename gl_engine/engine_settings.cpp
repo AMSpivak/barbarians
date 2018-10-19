@@ -69,6 +69,15 @@ namespace EngineSettings
         proc.Process(lines);
     }
 
+    float Settings::GetFPS()
+    {
+        return m_fps;
+    }
+
+    void Settings::SetFPS(float value)
+    {
+        m_fps = value;
+    }
 
     unsigned short Settings::GetFrame(){return frame_number;}
 
