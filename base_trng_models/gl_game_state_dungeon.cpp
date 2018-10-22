@@ -179,6 +179,12 @@ std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
+
+    //e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,0.5f),glm::vec3(0.5f,0.0f,2.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,2.5f),glm::vec3(-0.5f,0.0f,2.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,2.5f),glm::vec3(-0.3f,0.0f,0.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,0.5f),glm::vec3(0.3f,0.0f,0.5f)));
+
     e_ptr->position = position;
     return e_ptr;
 }
@@ -193,7 +199,12 @@ std::shared_ptr<IMapEvent> GlGameStateDungeon::AddUse(const glm::mat4 &matrix,co
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
     e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
-    e_ptr->position = position;
+
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,0.5f),glm::vec3(0.5f,0.0f,2.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,2.5f),glm::vec3(-0.5f,0.0f,2.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,2.5f),glm::vec3(-0.3f,0.0f,0.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,0.5f),glm::vec3(0.3f,0.0f,0.5f)));
+    // e_ptr->position = position;
     return e_ptr;
 }
 
@@ -970,7 +981,7 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 
 void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
 {
-    hero->SetPosition(hero->GetPosition() + hero_move);
+    //hero->SetPosition(hero->GetPosition() + hero_move);
 }
 
 bool IsKilled (std::shared_ptr<IMapEvent> value) { return value->Process() == EventProcessResult::Kill; }

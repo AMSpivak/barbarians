@@ -791,11 +791,13 @@ void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 	size_t bon_count = m_cashe_animation.bones.size();
 	m_cashe_animation.bones[0] =glm::mat4(1.0f);
 	rotation_matrix = frame == 0 ? glm::mat4(1.0f) : glm::inverse(frames[frame - 1].bones[0] )*frames[frame].bones[0] ;
+	glm::mat4 base = glm::inverse(frames[frame].bones[0] );
+	//glm::mat4 rot = glm::rotate(glm::mat4(), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	if(bon_count>1)
 	{
 		for(int i = 1; i < bon_count; i++)
 		{
-			m_cashe_animation.bones[i] = frames[frame].bones[i] * glm::inverse(bones[i].matrix);
+			m_cashe_animation.bones[i] = base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix);
 		}
 	}
 	m_cache_frame = frame;
