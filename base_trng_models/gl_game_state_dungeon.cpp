@@ -175,15 +175,10 @@ std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix
     auto e_ptr = std::make_shared<IMapEventHeroStrike>(/*m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),*/1.0f,1.4f);
     
     e_ptr->model_matrix = matrix;
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
-
-    //e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,0.5f),glm::vec3(0.5f,0.0f,2.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,2.5f),glm::vec3(-0.5f,0.0f,2.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,2.5f),glm::vec3(-0.3f,0.0f,0.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,0.5f),glm::vec3(0.3f,0.0f,0.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,0.3f),glm::vec3(-0.5f,0.0f,-0.3f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-0.3f),glm::vec3(-2.5f,0.0f,-0.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,-0.5f),glm::vec3(-2.5f,0.0f,0.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,0.5f),glm::vec3(-0.5f,0.0f,0.3f)));
 
     e_ptr->position = position;
     return e_ptr;
@@ -628,18 +623,14 @@ void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharact
     glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
     DrawDungeon(current_shader,hero);
-    //hero.Draw(current_shader);
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
 
 void GlGameStateDungeon::DrawGlobalLight(const GLuint light_loc, const glLight &Light)
 {
-        //glUniform1i(glGetUniformLocation(current_shader, "shadowMap"), 3);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, Light.depthMap);
-
-		//GLuint LightLoc  = glGetUniformLocation(current_shader, "lightSpaceMatrix");
 		glUniformMatrix4fv(light_loc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
 		renderQuad();
@@ -970,11 +961,9 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
         }
         if(summ < accuracy)
         {
-            //std::cout<<"!\n";
             break; 
         }
     }
-    //std::cout<<summ<<"!\n";
 }
 
 
@@ -1062,7 +1051,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     static float old_joy_x = 0.0f;
     std::shared_ptr<GlCharacter> hero_ptr = m_models_map["Hero"];
    
-    // GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(hero_ptr.get()));
     GLuint current_shader;
 
     int models_count = Models.size();
@@ -1071,11 +1059,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     if((time_now - time)>(1.0/30.0))
     {
         MapObjectsEventsInteract();
-        //hero->SetPosition(hero_position);
         hero_position = hero->GetPosition();
         HeroEventsInteract(hero_ptr);
-        //hero.SetPosition(glm::vec3(0.0f,0.0f,0.0f));
-        
+
 
         // m_antialiase_enabled = !inputs[GLFW_KEY_F1];
         static float distance = 12.f;
@@ -1148,8 +1134,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
                 glm::vec4(0.0,0.0,0.0,1.0f)
                 );
 
-            static const glm::mat4 hero_base_matrix = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            hero->model_matrix = rm * hero_base_matrix;
+            //static const glm::mat4 hero_base_matrix = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            hero->model_matrix = rm;// * hero_base_matrix;
         }
         
         ProcessMessages();

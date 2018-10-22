@@ -797,7 +797,7 @@ void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 	{
 		for(int i = 1; i < bon_count; i++)
 		{
-			m_cashe_animation.bones[i] = base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix);
+			m_cashe_animation.bones[i] =  base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix);
 		}
 	}
 	m_cache_frame = frame;

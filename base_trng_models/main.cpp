@@ -18,7 +18,6 @@
 #include "gl_render_target.h"
 #include "gl_model.h"
 #include "gl_character.h"
-#include "gl_game_state_arena.h"
 #include "gl_game_state_dungeon.h"
 #include "animation_sequence.h"
 #include "engine_settings.h"
