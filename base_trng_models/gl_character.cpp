@@ -280,7 +280,7 @@ int GlCharacter::Process(std::list<std::string> &m_messages)
 
 void GlCharacter::Damage(float damage)
 {
-    UseSequence("damage");
+    UseCommand(AnimationCommand::kDamaged);
     IGlModel::Damage(damage);
 }
 

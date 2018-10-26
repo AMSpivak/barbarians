@@ -14,7 +14,8 @@ std::map<std::string,AnimationCommand> commands = {
                                                         {"move", AnimationCommand::kMove},
                                                         {"rotate", AnimationCommand::kRotate},
                                                         {"use", AnimationCommand::kUse},
-                                                        {"executed", AnimationCommand::kExecuted}
+                                                        {"executed", AnimationCommand::kExecuted},
+                                                        {"damage", AnimationCommand::kDamaged},
 
                                                     };
 
@@ -24,8 +25,9 @@ std::map<AnimationCommand,std::string> command_names = {
                                                         { AnimationCommand::kStrike,"strike"},
                                                         { AnimationCommand::kMove,"move"},
                                                         { AnimationCommand::kRotate,"rotate",},
-                                                        {AnimationCommand::kUse,"use" },
-                                                        { AnimationCommand::kExecuted,"executed"}
+                                                        { AnimationCommand::kUse,"use" },
+                                                        { AnimationCommand::kExecuted,"executed"},
+                                                        { AnimationCommand::kDamaged,"damage"}
 
                                                     };
 

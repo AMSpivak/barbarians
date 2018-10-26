@@ -175,10 +175,15 @@ std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix
     auto e_ptr = std::make_shared<IMapEventHeroStrike>(/*m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),*/1.0f,1.4f);
     
     e_ptr->model_matrix = matrix;
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,0.3f),glm::vec3(-0.5f,0.0f,-0.3f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-0.3f),glm::vec3(-2.5f,0.0f,-0.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,-0.5f),glm::vec3(-2.5f,0.0f,0.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,0.5f),glm::vec3(-0.5f,0.0f,0.3f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,0.3f),glm::vec3(-0.5f,0.0f,-0.3f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-0.3f),glm::vec3(-2.5f,0.0f,-0.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,-0.5f),glm::vec3(-2.5f,0.0f,0.5f)));
+    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,0.5f),glm::vec3(-0.5f,0.0f,0.3f)));
+
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,-0.5f),glm::vec3(0.5f,0.0f,-2.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,-2.5f),glm::vec3(-0.5f,0.0f,-2.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-2.5f),glm::vec3(-0.3f,0.0f,-0.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,-0.5f),glm::vec3(0.3f,0.0f,-0.5f)));
 
     e_ptr->position = position;
     return e_ptr;
@@ -190,16 +195,12 @@ std::shared_ptr<IMapEvent> GlGameStateDungeon::AddUse(const glm::mat4 &matrix,co
     auto e_ptr = std::make_shared<IMapEventHeroAction>(1.0f,1.4f,AnimationCommand::kUse);
     
     e_ptr->model_matrix = matrix;
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.5f,0.0f),glm::vec3(0.5f,2.5f,0.0f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,2.5f,0.0f),glm::vec3(-0.5f,2.5f,0.0f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,2.5f,0.0f),glm::vec3(-0.3f,0.5f,0.0f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.5f,0.0f),glm::vec3(0.3f,0.5f,0.0f)));
 
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,0.5f),glm::vec3(0.5f,0.0f,2.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,2.5f),glm::vec3(-0.5f,0.0f,2.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,2.5f),glm::vec3(-0.3f,0.0f,0.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,0.5f),glm::vec3(0.3f,0.0f,0.5f)));
-    // e_ptr->position = position;
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,-0.5f),glm::vec3(0.5f,0.0f,-2.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,-2.5f),glm::vec3(-0.5f,0.0f,-2.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-2.5f),glm::vec3(-0.3f,0.0f,-0.5f)));
+    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,-0.5f),glm::vec3(0.3f,0.0f,-0.5f)));
+    e_ptr->position = position;
     return e_ptr;
 }
 
