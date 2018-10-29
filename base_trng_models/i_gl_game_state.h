@@ -22,12 +22,14 @@ protected:
     size_t m_screen_width;
     size_t m_screen_height;
     float m_aspect_ratio;
+    bool processed;
 public:
     IGlGameState(std::map<const std::string,GLuint> &shader_map,GLResourcesManager &resources_manager,
 
                     size_t screen_width, size_t screen_height):
                     m_shader_map(shader_map)
                     ,m_resources_manager(resources_manager)
+                    ,processed(true)
     {        
         m_screen_width = screen_width;
         m_screen_height = screen_height;

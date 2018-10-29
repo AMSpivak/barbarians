@@ -644,10 +644,15 @@ void GlGameStateDungeon::Draw()
 
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
     glRenderTarget &final_render_target = *(m_render_target_map["final"].get());
+    glRenderTarget &postprocess_render_target = *(m_render_target_map["postprocess"].get());
 
     size_t width = IGlGameState::m_screen_width;
     size_t height = IGlGameState::m_screen_height;
-    int models_count = Models.size();
+
+    if(processed)
+    {
+        processed = false;
+        int models_count = Models.size();
 
 		glDisable(GL_MULTISAMPLE);
 		glDisable(GL_CULL_FACE);
@@ -753,15 +758,16 @@ void GlGameStateDungeon::Draw()
         
 
     /**/
+		postprocess_render_target.set();
 
 
         glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	   //glEnable(GL_MULTISAMPLE);
+	// 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//    //glEnable(GL_MULTISAMPLE);
 
-		glViewport(0, 0, width, height);
+	// 	glViewport(0, 0, width, height);
 
 		glClearColor(1.0f, 0.4f, 0.4f, 1.0f);
 
@@ -810,7 +816,29 @@ void GlGameStateDungeon::Draw()
 
         renderQuad();/**/
 
-        Draw2D(render_target.depthMap);
+		
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+    }
+
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DEPTH_TEST);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, width, height);
+    GLuint current_shader = m_shader_map["fullscreen"];
+
+    glUseProgram(current_shader);
+
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, postprocess_render_target.AlbedoMap);
+    renderQuad();/**/
+
+    Draw2D(render_target.depthMap);
+
+    glEnable(GL_DEPTH_TEST);
 
 
 }
@@ -1059,6 +1087,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     //std::cout<<(time_now - time)<<'\n';
     if((time_now - time)>(1.0/30.0))
     {
+        processed = true;
         MapObjectsEventsInteract();
         hero_position = hero->GetPosition();
         HeroEventsInteract(hero_ptr);
@@ -1137,6 +1166,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
             //static const glm::mat4 hero_base_matrix = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             hero->model_matrix = rm;// * hero_base_matrix;
+            
         }
         
         ProcessMessages();
@@ -1171,7 +1201,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
         if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
-
+    
         distance = glm::clamp(distance,3.0f,14.0f);
 
 
@@ -1210,10 +1240,11 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
 
         time = time_now;
+        bool fast_move = inputs[GLFW_KEY_LEFT_SHIFT];
 
         if(moving&&!attack)
         {
-            hero->UseSequence("walk");
+            hero->UseSequence(fast_move? "run":"walk");
             glm::vec4 move_h = hero->model_matrix * glm::vec4(0.0f,0.142f,0.0f,1.0f);
             MoveHero(glm::vec3(move_h));
         }else

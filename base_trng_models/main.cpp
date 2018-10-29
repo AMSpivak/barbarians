@@ -61,6 +61,7 @@ void FillShaders(std::map<const std::string,GLuint> &shader_map, const std::stri
     shader_map.insert ( std::pair<const std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("fullscreen", LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("sprite2dsimple", LoadshaderProgram("shaders/sprite2dsimple.vs","shaders/sprite2dsimple.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
@@ -248,6 +249,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (key == GLFW_KEY_LEFT_ALT )
     		inputs[GLFW_KEY_LEFT_ALT] = (action != GLFW_RELEASE) ?  true : false;
+
+	if (key == GLFW_KEY_LEFT_SHIFT )
+		inputs[GLFW_KEY_LEFT_SHIFT] = (action != GLFW_RELEASE) ?  true : false;
 
     if (key == GLFW_KEY_LEFT_BRACKET )
         inputs[GLFW_KEY_LEFT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;

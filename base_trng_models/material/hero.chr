@@ -2,6 +2,7 @@ mass_inv 1.0
 radius 0.5
 model material/barb/barb.mdl
 sequence strike 92 116 1 0 "" "" ""
-sequence use 92 116 1 0 "" "" ""
+sequence use 145 155 1 0 "" "" ""
 sequence walk 54 82 1 0 "" "" ""
+sequence run 127 143 1 0 "" "" ""
 sequence stance 12 41 1 0 "" "" ""
