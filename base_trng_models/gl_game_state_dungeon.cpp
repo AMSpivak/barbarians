@@ -27,6 +27,7 @@
 #include "collision.h"
 #include "loader.h"
 #include "engine_settings.h"
+#include "game_event_fabric.h"
 
 
 
@@ -150,12 +151,12 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 
     m_message_processor.Add("hero_strike",[this](std::stringstream &sstream)
     {                                
-        mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()));
+        mob_events.push_back(GameEvents::CreateGameEvent(GameEvents::EventTypes::HeroStrike,&(*hero)));
     });
 
     m_message_processor.Add("hero_use",[this](std::stringstream &sstream)
     {                                
-        mob_events.push_back(AddUse(hero->model_matrix,hero->GetPosition()));
+        mob_events.push_back(GameEvents::CreateGameEvent(GameEvents::EventTypes::HeroUse,&(*hero)));
     });
 
     glEnable(GL_DEPTH_TEST);
@@ -169,40 +170,6 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 
 }
 
-std::shared_ptr<IMapEvent> GlGameStateDungeon::AddStrike(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/)
-{
-
-    auto e_ptr = std::make_shared<IMapEventHeroStrike>(/*m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),*/1.0f,1.4f);
-    
-    e_ptr->model_matrix = matrix;
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,0.3f),glm::vec3(-0.5f,0.0f,-0.3f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-0.3f),glm::vec3(-2.5f,0.0f,-0.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,-0.5f),glm::vec3(-2.5f,0.0f,0.5f)));
-    // e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-2.5f,0.0f,0.5f),glm::vec3(-0.5f,0.0f,0.3f)));
-
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,-0.5f),glm::vec3(0.5f,0.0f,-2.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,-2.5f),glm::vec3(-0.5f,0.0f,-2.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-2.5f),glm::vec3(-0.3f,0.0f,-0.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,-0.5f),glm::vec3(0.3f,0.0f,-0.5f)));
-
-    e_ptr->position = position;
-    return e_ptr;
-}
-
-std::shared_ptr<IMapEvent> GlGameStateDungeon::AddUse(const glm::mat4 &matrix,const glm::vec3 &position/*,glRenderTargetDeffered &render_target*/)
-{
-
-    auto e_ptr = std::make_shared<IMapEventHeroAction>(1.0f,1.4f,AnimationCommand::kUse);
-    
-    e_ptr->model_matrix = matrix;
-
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.3f,0.0f,-0.5f),glm::vec3(0.5f,0.0f,-2.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(0.5f,0.0f,-2.5f),glm::vec3(-0.5f,0.0f,-2.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-2.5f),glm::vec3(-0.3f,0.0f,-0.5f)));
-    e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,-0.5f),glm::vec3(0.3f,0.0f,-0.5f)));
-    e_ptr->position = position;
-    return e_ptr;
-}
 
 void GlGameStateDungeon::SelectStart(std::vector<std::string> &lines)
 {
