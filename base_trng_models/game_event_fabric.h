@@ -4,7 +4,17 @@
 #include <memory>
 namespace GameEvents
 {
-    enum class EventTypes {HeroStrike,HeroUse};
+    enum class EventTypes {HeroStrike,HeroUse,BarrelValhalla};
+    struct BarrelValhallaStruct
+    {
+        GlCharacter * object;
+        GLuint current_shader;
+        GLuint depthmap;
+        const GLuint * texture;
+        // float width;
+        // float height;
+    };
+    
     std::shared_ptr<IMapEvent> CreateGameEvent(EventTypes event_type, const void * parameters);
 }
 #endif

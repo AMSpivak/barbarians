@@ -1,9 +1,12 @@
 #include "game_event_fabric.h"
 #include "map_event_hero_strikes.h"
 #include "map_event_hero_action.h"
+#include "map_event_valhalla.h"
 #include "gl_character.h"
 namespace GameEvents
 {
+    
+
     std::shared_ptr<IMapEvent> CreateGameEvent(EventTypes event_type, const void * parameters)
     {
         std::shared_ptr<IMapEvent> retval;
@@ -33,6 +36,16 @@ namespace GameEvents
                 e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-2.5f),glm::vec3(-0.3f,0.0f,-0.5f)));
                 e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,-0.5f),glm::vec3(0.3f,0.0f,-0.5f)));
                 e_ptr->position = ptr->GetPosition();
+                return e_ptr;
+            }
+            break;
+
+            case EventTypes::BarrelValhalla:
+            {
+                auto ptr = static_cast<const BarrelValhallaStruct *>(parameters);                
+                auto e_ptr = std::make_shared<MapEventValhalla>(ptr->current_shader,ptr->depthmap,ptr->texture,1.0f,1.4f);
+                e_ptr->position = ptr->object->GetPosition();
+                e_ptr->position.y = 1.5f;
                 return e_ptr;
             }
             break;    

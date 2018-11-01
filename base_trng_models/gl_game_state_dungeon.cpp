@@ -16,13 +16,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/rotate_vector.hpp"
-#include "glscene.h"
 #include "gl_physics.h"
 #include "gl_game_state_dungeon.h"
-#include "map_event_hero_strikes.h"
-#include "map_event_hero_action.h"
 
-#include "map_event_valhalla.h"
+
 #include "map_event_general.h"
 #include "collision.h"
 #include "loader.h"
@@ -298,10 +295,8 @@ void GlGameStateDungeon::LoadMapEvent(std::vector<std::string> &lines)
     proc.Add("message",[e_ptr](std::stringstream &sstream)
                                     { 
                                         std::string tmp;
-                                        //sstream >> tmp;
                                         std::getline(sstream,tmp);
                                         e_ptr->SetMessage(tmp);
-                                        
                                     });
     proc.Add("radius",[e_ptr](std::stringstream &sstream){ sstream >> e_ptr->radius;});
     proc.Process(lines);
@@ -991,11 +986,8 @@ bool GlGameStateDungeon::MobKilled(std::shared_ptr<GlCharacter> obj)
 
     if (obj->GetLifeValue() < 0.0f)
         {
-            auto e_ptr = std::make_shared<MapEventValhalla>(m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture),1.0f,1.4f);
-            e_ptr->position = obj->GetPosition();
-            e_ptr->position.y = 1.5f;
-            map_events.push_back(e_ptr);
-
+            GameEvents::GeneralEventStruct info = {&(*obj),m_shader_map["sprite2d"],render_target.depthMap,&(fx_texture->m_texture)};
+            map_events.push_back(CreateGameEvent( GameEvents::EventTypes::BarrelValhalla,&info));
             return true;
         }
     return false;
