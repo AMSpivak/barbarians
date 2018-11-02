@@ -17,11 +17,13 @@ all: build
 
 build:	$(SOURCES) $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC)  $(OBJECTS) -o $@ $(LDFLAGS)
+$(EXECUTABLE): $(OBJECTS) game.res
+	$(CC)  $(OBJECTS) -o $@ $(LDFLAGS) game.res
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
+game.res:
+	windres game.rc -O coff -o game.res
 
 rebuild: clean build
 

@@ -5,7 +5,7 @@
 namespace GameEvents
 {
     enum class EventTypes {HeroStrike,HeroUse,BarrelValhalla};
-    struct BarrelValhallaStruct
+    struct GeneralEventStruct
     {
         GlCharacter * object;
         GLuint current_shader;
