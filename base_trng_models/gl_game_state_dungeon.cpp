@@ -178,6 +178,7 @@ void GlGameStateDungeon::SelectStart(std::vector<std::string> &lines)
         size_t tile = 0;
         std::stringstream ss(line);
         ss >> start_name >> hero_position;
+        hero->SetPosition(hero_position);
         if(!start_name.compare(m_start_place)) 
             return;
     }
@@ -976,6 +977,7 @@ bool GlGameStateDungeon::MobKilled(std::shared_ptr<GlCharacter> obj)
     {
         ReactObjectToEvent(*obj,*event.get(),event_return_string);
     }
+    
     if(obj->GetType() != CharacterTypes::hero)
     {
         for(auto event : mob_events)

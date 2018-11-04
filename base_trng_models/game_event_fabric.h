@@ -14,7 +14,7 @@ namespace GameEvents
         // float width;
         // float height;
     };
-    
+
     std::shared_ptr<IMapEvent> CreateGameEvent(EventTypes event_type, const void * parameters);
 }
 #endif
