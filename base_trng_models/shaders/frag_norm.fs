@@ -21,6 +21,7 @@ void main()
     vec3 utility = texture(UtilityTexture, TexCoord).xyz;
     vec4 pos = vec4(v_Position,utility.x);
     gPosition = pos;
+    // vec3 normal = vec3(0.0,0.0,1.0);//texture(NormalTexture, TexCoord).xyz;
     vec3 normal = texture(NormalTexture, TexCoord).xyz;
     normal = normalize(normal * 2.0 - 1.0); 
     normal = normalize(TBN * normal); 
@@ -31,6 +32,7 @@ void main()
     //gNormal = vec4(normal.xyz, utility.y);
     float val = length(normal);
 
+	// gAlbedoSpec = vec4(normal.xyz, 0.06 + utility.z*0.94);//texColor;
 	gAlbedoSpec = vec4(texColor.xyz, 0.06 + utility.z*0.94);//texColor;
 	//gAlbedoSpec = vec4(normal, 0.06 + utility.z*0.94);//texColor;
 	

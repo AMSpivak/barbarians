@@ -13,13 +13,11 @@
 
 void glModel::Draw()
 {
-
-	IGlJalStruct * mesh_ptr = jal_mesh.get();
 	
-	if(mesh_ptr->vertexcount > 2)
+	if(jal_mesh->vertexcount > 2)
 	{
-	    glBindVertexArray(mesh_ptr->VAO);
-	    glDrawArrays(GL_TRIANGLES, 0, mesh_ptr->vertexcount);
+	    glBindVertexArray(jal_mesh->VAO);
+	    glDrawArrays(GL_TRIANGLES, 0, jal_mesh->vertexcount);
 	    glBindVertexArray(0);
 	}
 }

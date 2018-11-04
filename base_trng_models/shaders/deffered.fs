@@ -24,43 +24,46 @@ uniform vec3 viewPos;
 
 float ShadowCalculation(vec4 PosLight, vec3 tNormal)
 {
-	vec4 fragPosLightSpace = lightSpaceMatrix * PosLight;
-
-
-	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    
+    vec4 fragPosLightSpace = lightSpaceMatrix * PosLight;
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
     if(fragPosLightSpace.x<-1.0||fragPosLightSpace.x>1.0||fragPosLightSpace.y<-1.0||fragPosLightSpace.y>1.0)
         discard;
-    //    return 0.0;
-	projCoords = projCoords * 0.5 + 0.5;
-    float currentDepth = projCoords.z;
 
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-	//float bias = max(0.01 * smoothstep(0.65,0.85,(1.0 - max(dot(tNormal,LightDir),0.0))), 0.005);
-	float bias = max(0.01 * (1.0 - max(dot(tNormal,LightDir),0.0)), 0.005);
-    //float bias = 0.0005*tan(acos(max(dot(tNormal,LightDir),0.0))); // cosTheta is dot( n,l ), clamped between 0 and 1
-    //float bias = max(0.05 * (1.0 - dot(tNormal,LightDir)), 0.005);
-    currentDepth -= 0.1*bias;
-    vec2 shift = texelSize*vec2(0.0,1.0);
-    //float res = (textureProj(shadowMap,vec4(projCoords,1.0)));
-    float res = texture(shadowMap,vec3(projCoords.xy,currentDepth));
-//    float res = texture(shadowMap,vec3(projCoords.xy,currentDepth - bias));
-    //float depth = texture(shadowMap,projCoords.xy).r;
-    //float res = smoothstep(-0.1,0.1,depth - currentDepth);
+    float light_fall = dot(tNormal,LightDir);
 
-  //  res = smoothstep(0.0,1.0, (texture(shadowMap,projCoords.xy) - currentDepth + bias));
+        //    return 0.0;
+        projCoords = projCoords * 0.5 + 0.5;
+        float currentDepth = projCoords.z;
 
-    // res *=0.4;
-    // res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
-    // shift =texelSize*vec2(0.0,-1.0);
-    // res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
-    // shift =texelSize*vec2(1.0, 0.0);
-    // res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
-    // shift = texelSize*vec2(-1.0, 0.0);
-    // res += 0.15*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+        //float bias = max(0.01 * smoothstep(0.65,0.85,(1.0 - max(dot(tNormal,LightDir),0.0))), 0.005);
+        float bias = max(0.01 * (1.0 - max(light_fall,0.0)), 0.005);
+        //float bias = 0.0005*tan(acos(max(dot(tNormal,LightDir),0.0))); // cosTheta is dot( n,l ), clamped between 0 and 1
+        //float bias = max(0.05 * (1.0 - dot(tNormal,LightDir)), 0.005);
+        currentDepth -= 0.1*bias;
+        vec2 shift = texelSize*vec2(0.0,1.0);
+        //float res = (textureProj(shadowMap,vec4(projCoords,1.0)));
+        float res = texture(shadowMap,vec3(projCoords.xy,currentDepth));
+    //    float res = texture(shadowMap,vec3(projCoords.xy,currentDepth - bias));
+        //float depth = texture(shadowMap,projCoords.xy).r;
+        //float res = smoothstep(-0.1,0.1,depth - currentDepth);
 
-    //res*=0.2;/**/
-    return res;
+    //  res = smoothstep(0.0,1.0, (texture(shadowMap,projCoords.xy) - currentDepth + bias));
+
+        res *=0.6;
+        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        shift =texelSize*vec2(0.0,-1.0);
+        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        shift =texelSize*vec2(1.0, 0.0);
+        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        shift = texelSize*vec2(-1.0, 0.0);
+        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+
+        //res*=0.2;/**/
+        return res;
+
 }
 
 float GGX_PartialGeometry(float cosThetaN, float alpha) {
@@ -133,41 +136,53 @@ void main()
 	vec3 texNormal= normal_map.xyz;
 
 	vec3 FragPos= texture(PositionMap, TexCoords).xyz;
-	float norm_l = max(dot(texNormal,LightDir),0.01);
+	float norm_l = dot(texNormal,LightDir);
+    
+     
+    if(norm_l > 0.01)
+    {
+	    norm_l = max(norm_l,0.01);
+        
+        vec3 viewDir = normalize(viewPos - FragPos);
 
-    vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 halfwayDir = normalize(LightDir + viewDir); 
+        float dotHV = max(dot(viewDir, halfwayDir), 0.0);
+        float dotNH = max(dot(texNormal, halfwayDir), 0.0);
+        float dotNV = max(dot(texNormal, viewDir), 0.10);
 
-    vec3 halfwayDir = normalize(LightDir + viewDir); 
-    float dotHV = max(dot(viewDir, halfwayDir), 0.0);
-    float dotNH = max(dot(texNormal, halfwayDir), 0.0);
-    float dotNV = max(dot(texNormal, viewDir), 0.10);
+        vec3 F0 = vec3(0.04);
+        F0      = mix(F0, texColor.rgb, texColor.a);
 
-    vec3 F0 = vec3(0.04);
-    F0      = mix(F0, texColor.rgb, texColor.a);
+        vec3 shlick =fresnelSchlick(dotNV,F0);
 
-    vec3 shlick =fresnelSchlick(dotNV,F0);
+        float roug_sqr = (normal_map.w)*(normal_map.w);
+    
 
-    float roug_sqr = (normal_map.w)*(normal_map.w);
-  
-
-    float D =  DistributionGGX(texNormal, halfwayDir, roug_sqr);       
-    float G   = GeometrySmith(texNormal, viewDir, LightDir, roug_sqr); 
+        float D =  DistributionGGX(texNormal, halfwayDir, roug_sqr);       
+        float G   = GeometrySmith(texNormal, viewDir, LightDir, roug_sqr); 
 
 
 
-	float shadow_res = (ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
-    //float shadow_norm =1.0 -  smoothstep(0.6,1.0,1.0-norm_l);//norm_l;//smoothstep(shadow_res,1.0,norm_l);
-    shadow_res = 1.0 - (1.0 - shadow_res) ;//* norm_l;
+        float shadow_res = (ShadowCalculation(vec4(FragPos.xyz,1.0),texNormal));
+        //float shadow_norm =1.0 -  smoothstep(0.6,1.0,1.0-norm_l);//norm_l;//smoothstep(shadow_res,1.0,norm_l);
+        //shadow_res = 1.0 - (1.0 - shadow_res) ;//* norm_l;
 
-    vec3 numerator    = D * G * shlick;
-    float denominator = 4.0 * max(dotNV, 0.0);
-    vec3 specular     = numerator / max(denominator, 0.001);
-    vec3 kS = shlick;
-    vec3 kD = vec3(1.0) - kS;
+        vec3 numerator    = D * G * shlick;
+        float denominator = 4.0 * max(dotNV, 0.0);
+        vec3 specular     = numerator / max(denominator, 0.001);
+        vec3 kS = shlick;
+        vec3 kD = vec3(1.0) - kS;
 
-    vec3 diffuse =kD/M_PI;
-    vec3 ShadowLightColor = shadow_res* LightColor;
-    gAlbedoSpec =vec4(ShadowLightColor *norm_l* diffuse,1.0);
-    gNormal =vec4(ShadowLightColor * specular,1.0);
+        vec3 diffuse =kD/M_PI;
+        vec3 ShadowLightColor = shadow_res* LightColor;
+        gAlbedoSpec =vec4(ShadowLightColor *norm_l* diffuse,1.0);
+        gNormal =vec4(ShadowLightColor * specular,1.0);
+
+    }
+    else
+    {
+        gAlbedoSpec =vec4(0.0,0.0,0.0,1.0);
+        gNormal =vec4(0.0,0.0,0.0,1.0);
+    }
     //gNormal =vec4(0.0);
 }
