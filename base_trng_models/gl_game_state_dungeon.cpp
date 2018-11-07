@@ -26,6 +26,7 @@
 #include "engine_settings.h"
 #include "game_status.h"
 #include "game_event_fabric.h"
+#include "gl2d_progressbar.h"
 
 
 
@@ -104,6 +105,18 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
 {
+    float a_ratio = screen_width;
+    a_ratio /= screen_height;
+
+
+    auto object_ptr = std::make_shared<Gl2D::GlProgressbar>(-1.0,0.9,0.8,0.1,a_ratio,
+                                GetResourceManager()->m_texture_atlas.Assign("halfbar_border.png"),
+                                GetResourceManager()->m_texture_atlas.Assign("halfbar.png"),
+                                m_shader_map["sprite2dsimple"]);
+    object_ptr->SetItemAligment(Gl2D::ItemAligment::Left);
+    object_ptr->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);                    
+    Interface2D.push_back(object_ptr);
+
     m_gl_text = std::make_shared<GlText16x16>("font2.png",GetResourceManager()->m_texture_atlas,0.1f,0.1f);
 
     m_message_processor.Add("teleport",[this](std::stringstream &sstream)
@@ -556,13 +569,27 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 
 void GlGameStateDungeon::Draw2D(GLuint depth_map)
 {
-    for(std::shared_ptr<IMapEvent> event :map_events) 
+    for(/*std::shared_ptr<IMapEvent>*/auto event :map_events) 
     {
-        event.get()->Show(hero_position,Camera);
+        event->Show(hero_position,Camera);
     }
 
     
     glClear( GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_BLEND);	
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_CULL_FACE);
+    
+    for(auto item :Interface2D) 
+    {
+        item->Draw();
+    }
+    glEnable(GL_CULL_FACE);
+	glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+
     const float text_size_y = 0.060f;
     const float text_size_x = m_aspect_ratio * text_size_y;
 

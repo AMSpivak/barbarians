@@ -11,6 +11,7 @@
 #include "i_map_event.h"
 #include "loader.h"
 #include "gl_font16x16.h"
+#include "gl2d_item.h"
 #include <list>
 
 class GlGameStateDungeon: public IGlGameState
@@ -33,6 +34,8 @@ public:
     void SwitchOut(){}
 private:
     std::shared_ptr<IGlText> m_gl_text;
+
+    std::list<std::shared_ptr<Gl2D::Gl2dItem>> Interface2D;
 
 
     std::vector <std::shared_ptr<glModel> > Models;

@@ -49,6 +49,11 @@ namespace Gl2D
                 real_x = - real_width *0.5f;
                 real_y = - real_height *0.5f;
             }
+            
+            if(m_aligment == ItemAligment::Left)
+            {
+                real_x = -1.0f;
+            }
         }
         public:
         // Gl2dItem(){}
