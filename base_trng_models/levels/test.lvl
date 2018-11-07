@@ -5,7 +5,7 @@ light_color 4.0 4.0 4.0
 camera_lens 29.0 1.0 45.0
 <!sky>
 <models>
-material/tiles/tile.mdl
+material/tiles/tile_sand.mdl
 material/dungeon/walls/wall/wall.mdl
 material/dungeon/walls/wallcross/wallcross.mdl
 <!models>

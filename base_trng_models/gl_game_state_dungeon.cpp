@@ -24,6 +24,7 @@
 #include "collision.h"
 #include "loader.h"
 #include "engine_settings.h"
+#include "game_status.h"
 #include "game_event_fabric.h"
 
 
@@ -568,8 +569,8 @@ void GlGameStateDungeon::Draw2D(GLuint depth_map)
     m_gl_text->SetTextSize(text_size_x,text_size_y); 
     auto shader = m_shader_map["sprite2dsimple"];
     std::stringstream ss;
-    ss<< std::fixed<<std::setprecision(1)<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS";
-    m_gl_text->DrawString(ss.str(),-1.0f,1.0f - text_size_y*1.2f, shader);
+    ss<< std::fixed<<std::setprecision(1)<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS; life: "<<std::setprecision(2)<<GameSettings::GetHeroStatus()->GetLife();
+    m_gl_text->DrawString(ss.str(),0.3f,1.0f - text_size_y*1.2f, shader);
 }
 void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharacter>hero)
 {

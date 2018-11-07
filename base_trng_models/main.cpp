@@ -21,6 +21,8 @@
 #include "gl_game_state_dungeon.h"
 #include "animation_sequence.h"
 #include "engine_settings.h"
+#include "game_status.h"
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
@@ -77,6 +79,8 @@ std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
 
 int main(int argc, char const *argv[])
 {
+
+
     bool is_fullscreen = true;
 
     if(argc > 1) is_fullscreen = false;
@@ -156,11 +160,16 @@ int main(int argc, char const *argv[])
 	
 
 	GLResourcesManager resources_atlas("material/textures/","material/meshes/","material/animations/","");
+	SetResourceManager(&resources_atlas);
 
 	EngineSettings::Settings main_settings;
 	EngineSettings::SetEngineSettings(&main_settings);
 
-	SetResourceManager(&resources_atlas);
+	
+
+	GameSettings::HeroStatus hero_status;
+	GameSettings::SetHeroStatus(&hero_status);
+
 
     std::map<const std::string,GLuint> m_shader_map;
 
