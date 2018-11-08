@@ -104,6 +104,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,now_frame(91)
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
+                                                        ,m_show_intro(false)
 {
     float a_ratio = screen_width;
     a_ratio /= screen_height;
@@ -113,6 +114,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                 GetResourceManager()->m_texture_atlas.Assign("halfbar_border.png"),
                                 GetResourceManager()->m_texture_atlas.Assign("halfbar.png"),
                                 m_shader_map["sprite2dsimple"]);
+                                
     object_ptr->SetItemAligment(Gl2D::ItemAligment::Left);
     object_ptr->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);                    
     Interface2D.push_back(object_ptr);
@@ -332,7 +334,7 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
         {
             if(object->GetType() == CharacterTypes::map_object)
             {
-                std::cout<<"Saving\n";
+                // std::cout<<"Saving\n";
                 savefile  << (*object);
                 #ifdef DBG
                 std::cout<<(*object);
@@ -340,7 +342,7 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
             }
         }
         savefile.close();
-        std::cout<<"sav closed\n";
+        // std::cout<<"sav closed\n";
     }
     
 }
@@ -351,12 +353,12 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     
     std::ifstream level_file;
 	level_file.open(filename); 
-    std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
+    // std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     if(!level_file.is_open()) return;
 
 
     SaveObjects(m_level_file);
-    std::cout<<"Level: old saves to"<< m_level_file<<"\n";
+    // std::cout<<"Level: old saves to"<< m_level_file<<"\n";
     m_level_file = filename;
 
     std::string tmp_filename(filename);
@@ -418,7 +420,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
         }
         catch(const std::out_of_range& exp)
         {
-            std::cout<<"Unknown prefix: "<<sufix<<"\n";
+            // std::cout<<"Unknown prefix: "<<sufix<<"\n";
         }
     }
 
@@ -988,10 +990,6 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 
 
 
-void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
-{
-    //hero->SetPosition(hero->GetPosition() + hero_move);
-}
 
 bool IsKilled (std::shared_ptr<IMapEvent> value) { return value->Process() == EventProcessResult::Kill; }
 
@@ -1051,7 +1049,7 @@ bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<GlCharacter> hero_pt
     {
        if(ReactObjectToEvent(*hero_ptr,*event.get(),event_return_string) == InteractionResult::PostMessage)
        {
-           std::cout<<"\n"<<event_return_string<<"\n"<< hero_ptr->GetPosition()<<"\n";
+           //std::cout<<"\n"<<event_return_string<<"\n"<< hero_ptr->GetPosition()<<"\n";
            
            PostMessage(event_return_string);
            return true;
@@ -1234,8 +1232,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         if(moving&&!attack)
         {
             hero->UseSequence(fast_move? "run":"walk");
-            glm::vec4 move_h = hero->model_matrix * glm::vec4(0.0f,0.142f,0.0f,1.0f);
-            MoveHero(glm::vec3(move_h));
         }else
         if(attack)
         {

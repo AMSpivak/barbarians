@@ -33,6 +33,7 @@ public:
     void SwitchIn(){}
     void SwitchOut(){}
 private:
+    bool m_show_intro;
     std::shared_ptr<IGlText> m_gl_text;
 
     std::list<std::shared_ptr<Gl2D::Gl2dItem>> Interface2D;
@@ -88,7 +89,7 @@ private:
     void DrawDungeon(GLuint current_shader, std::shared_ptr<GlCharacter>hero);
     void DrawLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,glRenderTargetDeffered &render_target );
     void Draw2D(GLuint depth_map);
-    void MoveHero(const glm::vec3 & hero_move);
+
     void FitObjects(int steps, float accuracy);
     std::pair<float,const glm::vec3>  FitObjectToMap(IGlModel& object, const glm::vec3 & position);
     float FitObjectToObject(IGlModel& object1,IGlModel& object2);
