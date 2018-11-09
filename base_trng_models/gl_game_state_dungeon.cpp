@@ -113,7 +113,9 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
     auto object_ptr = std::make_shared<Gl2D::GlProgressbar>(-1.0,0.9,0.8,0.1,a_ratio,
                                 GetResourceManager()->m_texture_atlas.Assign("halfbar_border.png"),
                                 GetResourceManager()->m_texture_atlas.Assign("halfbar.png"),
-                                m_shader_map["sprite2dsimple"]);
+                                m_shader_map["sprite2dsimple"],
+                                []() { return GameSettings::GetHeroStatus()->GetLife(); }
+                                );
                                 
     object_ptr->SetItemAligment(Gl2D::ItemAligment::Left);
     object_ptr->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);                    
