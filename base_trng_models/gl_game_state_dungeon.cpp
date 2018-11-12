@@ -121,6 +121,11 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
     object_ptr->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);                    
     Interface2D.push_back(object_ptr);
 
+    m_intro = std::make_shared<Gl2D::GlImage>(-1.0f,-1.0f,2.0f,2.0f,a_ratio,
+                                GetResourceManager()->m_texture_atlas.Assign("back.png"),m_shader_map["sprite2dsimple"]);
+    m_intro->SetItemAligment(Gl2D::ItemAligment::Center);
+    m_intro->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);     
+
     m_gl_text = std::make_shared<GlText16x16>("font2.png",GetResourceManager()->m_texture_atlas,0.1f,0.1f);
 
     m_message_processor.Add("teleport",[this](std::stringstream &sstream)
@@ -182,6 +187,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 
     time = glfwGetTime();
     LoadMap("levels/test.lvl","base");
+    m_mode = GameStateMode::Intro;
 
 }
 
@@ -643,6 +649,30 @@ void GlGameStateDungeon::Draw()
 
     size_t width = IGlGameState::m_screen_width;
     size_t height = IGlGameState::m_screen_height;
+    
+    if(m_mode == GameStateMode::Intro)
+    {
+        glDisable(GL_STENCIL_TEST);
+        glDisable(GL_DEPTH_TEST);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
+        GLuint current_shader = m_shader_map["fullscreen"];
+
+        glUseProgram(current_shader);
+
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, postprocess_render_target.AlbedoMap);
+        renderQuad();/**/
+
+        m_intro->Draw();
+
+        //Draw2D(render_target.depthMap);
+
+        glEnable(GL_DEPTH_TEST);
+        return;
+    }
 
     if(processed)
     {
@@ -752,17 +782,12 @@ void GlGameStateDungeon::Draw()
         DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),render_target);
         
 
-    /**/
+
 		postprocess_render_target.set();
 
 
         glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-
-	// 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//    //glEnable(GL_MULTISAMPLE);
-
-	// 	glViewport(0, 0, width, height);
 
 		glClearColor(1.0f, 0.4f, 0.4f, 1.0f);
 
@@ -1073,20 +1098,25 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
     int models_count = Models.size();
     double time_now = glfwGetTime();
-    //std::cout<<(time_now - time)<<'\n';
+
+    if(m_mode == GameStateMode::Intro)
+    {
+        if(inputs[GLFW_KEY_SPACE])
+        {
+            m_mode = GameStateMode::General;
+        }
+        return this;
+    }
+    else
     if((time_now - time)>(1.0/30.0))
     {
         processed = true;
         MapObjectsEventsInteract();
         hero_position = hero->GetPosition();
         HeroEventsInteract(hero_ptr);
-
-
-        // m_antialiase_enabled = !inputs[GLFW_KEY_F1];
         static float distance = 12.f;
         bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
 
-        //key_angle = 0.0f;
         int joy_axes_count;
         const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);       
         if(joy_axes!=nullptr)
@@ -1259,5 +1289,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
         FitObjects(10,0.01f);
     }
+
     return this;
 }

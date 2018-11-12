@@ -10,6 +10,8 @@
 #include <map>
 #include "glscene.h"
 #include "gl_resources_manager.h"
+enum class GameStateMode {General,Intro,Menu};
+
 class IGlGameState
 {
 private:
@@ -23,6 +25,7 @@ protected:
     size_t m_screen_height;
     float m_aspect_ratio;
     bool processed;
+    GameStateMode m_mode;
 public:
     IGlGameState(std::map<const std::string,GLuint> &shader_map,GLResourcesManager &resources_manager,
 
@@ -30,6 +33,7 @@ public:
                     m_shader_map(shader_map)
                     ,m_resources_manager(resources_manager)
                     ,processed(true)
+                    ,m_mode(GameStateMode::General)
     {        
         m_screen_width = screen_width;
         m_screen_height = screen_height;

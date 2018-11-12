@@ -12,6 +12,7 @@
 #include "loader.h"
 #include "gl_font16x16.h"
 #include "gl2d_item.h"
+#include "gl2d_image.h"
 #include <list>
 
 class GlGameStateDungeon: public IGlGameState
@@ -51,7 +52,7 @@ private:
     std::list<std::string> m_messages;
     std::shared_ptr<GlCharacter> hero;
     std::string m_level_file;
-
+    std::shared_ptr<Gl2D::GlImage> m_intro;
     
     bool m_antialiase_enabled;
     std::string m_start_place;
