@@ -106,6 +106,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,m_dungeon(10,10,1)
                                                         ,m_show_intro(false)
 {
+    glClearColor(0.0f,0.0f,0.0f,1.0f);
+
     float a_ratio = screen_width;
     a_ratio /= screen_height;
 
@@ -121,10 +123,10 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
     object_ptr->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);                    
     Interface2D.push_back(object_ptr);
 
-    m_intro = std::make_shared<Gl2D::GlImage>(-1.0f,-1.0f,2.0f,2.0f,a_ratio,
+    m_intro = std::make_shared<Gl2D::GlImage>(-1.0f,-0.56f,2.0f,1.12f,a_ratio,
                                 GetResourceManager()->m_texture_atlas.Assign("back.png"),m_shader_map["sprite2dsimple"]);
     m_intro->SetItemAligment(Gl2D::ItemAligment::Center);
-    m_intro->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);     
+    m_intro->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Maximal);     
 
     m_gl_text = std::make_shared<GlText16x16>("font2.png",GetResourceManager()->m_texture_atlas,0.1f,0.1f);
 
@@ -135,6 +137,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                         sstream >> level >> start;
                                         LoadMap(level,start);
                                     });
+
     m_message_processor.Add("spawn",[this](std::stringstream &sstream)
                                     {
                                         std::string object;
@@ -179,16 +182,23 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
         mob_events.push_back(GameEvents::CreateGameEvent(GameEvents::EventTypes::HeroUse,&(*hero)));
     });
 
-    glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+    m_message_processor.Add("show_intro",[this](std::stringstream &sstream)
+    {  
+        std::string image;
+        sstream >> image;
+        m_intro->SetImage(GetResourceManager()->m_texture_atlas.Assign(image)); 
+        m_mode = GameStateMode::Intro;
+        
+    });
 
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
 
     time = glfwGetTime();
     LoadMap("levels/test.lvl","base");
-    m_mode = GameStateMode::Intro;
 
+    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 }
 
 
@@ -267,7 +277,15 @@ void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
 
     ss >> width>> height>>floors;
     m_dungeon = GlDungeon(width,height,floors);
+}
 
+void GlGameStateDungeon::LoadScript(std::vector<std::string> &lines)
+{
+    std::vector<std::string> clean_lines()
+    m_scripts.Insert(std::make_pair(lines[0],lines));
+
+    ss >> width>> height>>floors;
+    m_dungeon = GlDungeon(width,height,floors);
 }
 
 void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
@@ -380,6 +398,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     hero_events.clear();
     mob_events.clear();
     map_events.clear();
+    m_scripts.clear();
     
     dungeon_objects.clear();
     //dungeon_objects.push_back(m_models_map["Hero"]);
@@ -401,6 +420,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     execute_funcs.insert(std::make_pair("dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadDungeonObjects(lines);}));
     execute_funcs.insert(std::make_pair("hero_event",[this](std::vector<std::string> &lines){LoadMapEvent(lines);}));
+    execute_funcs.insert(std::make_pair("script",[this](std::vector<std::string> &lines){LoadScript(lines);}));
     
 
     if(!AddObjectsFromFile(extention))
@@ -652,6 +672,8 @@ void GlGameStateDungeon::Draw()
     
     if(m_mode == GameStateMode::Intro)
     {
+
+        
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_DEPTH_TEST);
 
@@ -659,12 +681,14 @@ void GlGameStateDungeon::Draw()
         glViewport(0, 0, width, height);
         GLuint current_shader = m_shader_map["fullscreen"];
 
-        glUseProgram(current_shader);
+        glClearColor(0.0f,0.0f,0.0f,1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glUseProgram(current_shader);
 
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, postprocess_render_target.AlbedoMap);
-        renderQuad();/**/
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, postprocess_render_target.AlbedoMap);
+        // renderQuad();/**/
 
         m_intro->Draw();
 

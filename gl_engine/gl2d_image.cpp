@@ -17,8 +17,8 @@ namespace Gl2D
 			real_x + real_width, real_y + real_height,
 			real_x, real_y + real_height,
 			glm::vec4(1.0f,1.0f,1.0f,1.0f),&(m_texture->m_texture),
-			0.0f, 0.0f,
-			1.0f,1.0f
+			1.0f, 1.0f,
+			0.0f,0.0f
 			);
     }
     

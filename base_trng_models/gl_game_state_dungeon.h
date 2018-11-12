@@ -50,6 +50,9 @@ private:
     std::list<std::shared_ptr<IMapEvent>> hero_events;
     std::list<std::shared_ptr<IMapEvent>> mob_events;
     std::list<std::string> m_messages;
+
+    std::map<std::string,std::vector<std::string>> m_scripts;
+    
     std::shared_ptr<GlCharacter> hero;
     std::string m_level_file;
     std::shared_ptr<Gl2D::GlImage> m_intro;
@@ -76,6 +79,8 @@ private:
     void SelectStart(std::vector<std::string> &lines);
     void LoadTiles(std::vector<std::string> &lines);
     void LoadDungeonObjects(std::vector<std::string> &lines);
+    void LoadScript(std::vector<std::string> &lines)
+    
     bool AddObjectsFromFile(const std::string & object);
     bool AddObjectFromFile(const std::string & object,const std::string & name,glm::vec3 position);
     
