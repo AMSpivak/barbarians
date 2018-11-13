@@ -281,11 +281,8 @@ void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
 
 void GlGameStateDungeon::LoadScript(std::vector<std::string> &lines)
 {
-    std::vector<std::string> clean_lines()
-    m_scripts.Insert(std::make_pair(lines[0],lines));
-
-    ss >> width>> height>>floors;
-    m_dungeon = GlDungeon(width,height,floors);
+    std::vector<std::string> clean_lines(lines.begin()+1,lines.end());
+    m_scripts.insert(std::make_pair(lines[0],clean_lines));
 }
 
 void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
