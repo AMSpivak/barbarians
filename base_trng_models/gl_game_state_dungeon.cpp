@@ -105,6 +105,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
                                                         ,m_show_intro(false)
+                                                        ,m_info_message("")
 {
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 
@@ -138,6 +139,13 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                         LoadMap(level,start);
                                     });
 
+    m_message_processor.Add("show_message",[this](std::stringstream &sstream)
+                                    {
+                                        std::getline(sstream,m_info_message);
+                                        //m_info_message = sstream.str();
+                                        std::cout<<m_info_message<<"\n";
+                                    });
+
     m_message_processor.Add("spawn",[this](std::stringstream &sstream)
                                     {
                                         std::string object;
@@ -158,6 +166,18 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                             sstream >>angle;
                                             object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
                                             object->RefreshMatrixes();
+                                        }
+                                    });
+
+    m_message_processor.Add("run_script",[this](std::stringstream &sstream)
+                                    {
+                                        std::string name;
+                                        sstream >> name;
+                                        auto script = m_scripts.at(name);
+                                        for(auto message:script)
+                                        {
+                                            PostMessage(message);
+                                            //std::cout<<message<<"\n";
                                         }
                                     });
     
@@ -624,7 +644,13 @@ void GlGameStateDungeon::Draw2D(GLuint depth_map)
     auto shader = m_shader_map["sprite2dsimple"];
     std::stringstream ss;
     ss<< std::fixed<<std::setprecision(1)<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS; life: "<<std::setprecision(2)<<GameSettings::GetHeroStatus()->GetLife();
-    m_gl_text->DrawString(ss.str(),1.0f - text_size_x * 0.7f* ss.str().length(),1.0f - text_size_y*1.2f, shader);
+    m_gl_text->DrawString(ss.str(),1.0f - m_gl_text->GetStringLength(ss.str()),1.0f - text_size_y*1.2f, shader);
+
+    if(m_info_message.length()!=0) 
+    {
+        m_gl_text->DrawString(m_info_message, - 0.5f * m_gl_text->GetStringLength(m_info_message),-1.0f + text_size_y*2.2f, shader);
+    }
+
 }
 void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharacter>hero)
 {
