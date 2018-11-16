@@ -26,7 +26,7 @@ class GlGameStateDungeon: public IGlGameState
         {
             return (time - start_time) < duration;
         }
-    }
+    };
 
 
 public:
@@ -80,6 +80,9 @@ private:
     int now_frame;
     double time;
     float key_angle;
+    float camera_rotation_angle;
+    float old_joy_x;
+    
     glm::vec3 hero_position;
     glm::vec3 light_position;
     glm::vec3 light_dir_vector;
@@ -123,8 +126,9 @@ private:
     bool MobKilled(std::shared_ptr<GlCharacter> obj);
     void PostMessage(const std::string & event_string);
     void ProcessMessages();
-    void ProcessInputs();
-    std::pair<float,float> ProcessInputsMoveControl();
+    AnimationCommand ProcessInputs(std::map <int, bool> &inputs);
+    void ProcessInputsCamera(std::map <int, bool> &inputs,float joy_x, float joy_y);
+    std::pair<float,float> ProcessInputsMoveControl(std::map <int, bool> &inputs);
     
 };
 

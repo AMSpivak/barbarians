@@ -138,4 +138,5 @@ start_right 16.0 0.0 9.0
 got_sword
 show_message Thank you for test! Press Esc to exit
 show_intro sword_intro.png
+pause_interface 5.0
 <!script>     

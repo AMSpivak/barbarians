@@ -104,6 +104,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,camera_distance(12.f)
                                                         ,now_frame(91)
                                                         ,key_angle(0.0f)
+                                                        ,camera_rotation_angle(0.0f)
+                                                        ,old_joy_x(0.0f)
                                                         ,m_dungeon(10,10,1)
                                                         ,m_show_intro(false)
                                                         ,m_info_message("")
@@ -1125,7 +1127,8 @@ void GlGameStateDungeon::PostMessage(const std::string & event_string)
 
 void GlGameStateDungeon::ProcessMessages()
 {
-    while (!m_messages.empty())
+    double l_time = glfwGetTime();
+    while (!m_messages.empty()&&!pause_interface.IsPaused(l_time))
     {
         m_message_processor.Process(m_messages.front());
         m_messages.pop_front();
@@ -1150,10 +1153,6 @@ bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<GlCharacter> hero_pt
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
 {
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
-    
-    static float camera_rotation_angle = 0.0f;
-    static float hero_rotation_angle = 0.0f;
-    static float old_joy_x = 0.0f;
     std::shared_ptr<GlCharacter> hero_ptr = m_models_map["Hero"];
    
     GLuint current_shader;
@@ -1163,7 +1162,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
     if(m_mode == GameStateMode::Intro)
     {
-        if(inputs[GLFW_KEY_SPACE])
+        
+        if((!pause_interface.IsPaused(time_now)) &&inputs[GLFW_KEY_SPACE])
         {
             m_mode = GameStateMode::General;
         }
@@ -1172,114 +1172,140 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
     else
     if((time_now - time)>(1.0/30.0))
     {
+        time = time_now;        
         processed = true;
         MapObjectsEventsInteract();
         hero_position = hero->GetPosition();
         HeroEventsInteract(hero_ptr);
 
-        bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
-
-        int joy_axes_count;
-        const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);       
-        if(joy_axes!=nullptr)
-        {
-            if(std::abs(joy_axes[0])+std::abs(joy_axes[1])>0.6f)
-            {
-                moving = true;
-            }
-        }
-
-        if(moving)
-        {
-            glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
-            glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
-
-            if(joy_axes!=nullptr)
-            {
-                x_basis[0]= -joy_axes[0];
-                x_basis[2]= -joy_axes[1];
-            }
-            else
-            {
-                if(inputs[GLFW_KEY_UP])
-                {
-                    x_basis[2]=1.0f;
-                }
-                else
-                if(inputs[GLFW_KEY_DOWN])
-                {
-                    x_basis[2]=-1.0f;                            
-                }
-
-                if(inputs[GLFW_KEY_LEFT])
-                {
-                    x_basis[0]=1.0f;
-                }
-                else
-                if(inputs[GLFW_KEY_RIGHT])
-                {
-                    x_basis[0]=-1.0f;                          
-                }
-            }
-
-            x_basis = glm::normalize(x_basis);
-            
-            glm::mat4 m = glm::rotate(glm::radians(camera_rotation_angle), glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::vec4 x_basis4 = m *glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f);
-            x_basis = glm::vec3(x_basis4[0],x_basis4[1],x_basis4[2]);
-            x_basis = glm::normalize(x_basis);
-            
-            glm::vec4 move_h = hero->model_matrix * glm::vec4(1.0f,0.0f,0.0f,1.0f);
-            glm::vec3 old_dir = glm::vec3(move_h);
-
-            float l = 0.2f * glm::length(old_dir - x_basis);
-            x_basis =(1.0f - l) * old_dir + l * x_basis;
-            x_basis = glm::normalize(x_basis);
-
-            glm::vec3 z_basis = glm::cross(x_basis, y_basis);
-
-            glm::mat4 rm(
-                glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f),
-                glm::vec4(y_basis[0],y_basis[1],y_basis[2],0.0f),
-                glm::vec4(z_basis[0],z_basis[1],z_basis[2],0.0f),
-                glm::vec4(0.0,0.0,0.0,1.0f)
-                );
-
-            //static const glm::mat4 hero_base_matrix = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            hero->model_matrix = rm;// * hero_base_matrix;
-            
-        }
-        
         ProcessMessages();
-
-        bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
-
-        int buttons_count;
-        const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
         
-        if(buttons!= nullptr)
+
+       
+         
+        ProcessInputsCamera(inputs,joy_x, joy_y);
+              
+        auto action = ProcessInputs(inputs);
+        switch(action)
         {
-            if(buttons_count>7)
-            {
-                attack = buttons[7] == GLFW_PRESS;
-            }
+            case AnimationCommand::kStrike:
+                hero->UseSequence("strike");
+                m_messages.push_back("hero_strike");
+            break;
+            case AnimationCommand::kUse:
+                hero->UseSequence("use");
+                m_messages.push_back("hero_use");
+            break;
+            case AnimationCommand::kMove:
+                hero->UseSequence("walk");
+            break;
+            case AnimationCommand::kFastMove:
+                hero->UseSequence("run");
+            break;
+            default:
+                hero->UseSequence("stance");
+            break;
         }
 
 
-        static bool old_attack = false;
-        bool start_attack = attack && (!old_attack);
-        old_attack = attack;
-
-        bool action_use = inputs[GLFW_KEY_LEFT_ALT];
-        
-        if(buttons!= nullptr)
-        {
-            if(buttons_count>6)
-            {
-                action_use = buttons[6] == GLFW_PRESS;
-            }
+        for(auto object : dungeon_objects)
+        {  
+            object->Process(m_messages);
         }
 
+        FitObjects(10,0.01f);
+    }
+
+    return this;
+}
+
+AnimationCommand GlGameStateDungeon::ProcessInputs(std::map <int, bool> &inputs)
+{
+    auto move_inputs = ProcessInputsMoveControl(inputs);
+    bool moving = (std::abs(move_inputs.first)+std::abs(move_inputs.second)>0.6f);
+
+    if(moving)
+    {
+        glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
+        glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
+        
+
+        x_basis[0]= move_inputs.first;
+        x_basis[2]= move_inputs.second;
+
+        x_basis = glm::normalize(x_basis);
+        
+        glm::mat4 m = glm::rotate(glm::radians(camera_rotation_angle), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec4 x_basis4 = m *glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f);
+        x_basis = glm::vec3(x_basis4[0],x_basis4[1],x_basis4[2]);
+        x_basis = glm::normalize(x_basis);
+        
+        glm::vec4 move_h = hero->model_matrix * glm::vec4(1.0f,0.0f,0.0f,1.0f);
+        glm::vec3 old_dir = glm::vec3(move_h);
+
+        float l = 0.2f * glm::length(old_dir - x_basis);
+        x_basis =(1.0f - l) * old_dir + l * x_basis;
+        x_basis = glm::normalize(x_basis);
+
+        glm::vec3 z_basis = glm::cross(x_basis, y_basis);
+
+        glm::mat4 rm(
+            glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f),
+            glm::vec4(y_basis[0],y_basis[1],y_basis[2],0.0f),
+            glm::vec4(z_basis[0],z_basis[1],z_basis[2],0.0f),
+            glm::vec4(0.0,0.0,0.0,1.0f)
+            );
+
+        hero->model_matrix = rm;
+        
+    }
+
+
+    int buttons_count;
+    const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
+    
+    const auto joy_buttons = std::make_pair(buttons_count,buttons);
+
+    bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
+
+    if(joy_buttons.second!= nullptr)
+    {
+        if(joy_buttons.first>7)
+        {
+            attack = joy_buttons.second[7] == GLFW_PRESS;
+        }
+    }
+
+
+    static bool old_attack = false;
+    bool start_attack = attack && (!old_attack);
+    old_attack = attack;
+
+    if(attack) 
+        return AnimationCommand::kStrike;
+
+    bool action_use = inputs[GLFW_KEY_LEFT_ALT];
+    
+    if(joy_buttons.second!= nullptr)
+    {
+        if(joy_buttons.first>6)
+        {
+            action_use = joy_buttons.second[6] == GLFW_PRESS;
+        }
+    }
+
+    if(action_use) 
+        return AnimationCommand::kUse;
+
+    bool fast_move = inputs[GLFW_KEY_LEFT_SHIFT];
+
+    if(moving)
+        return fast_move ? AnimationCommand::kFastMove:AnimationCommand::kMove;
+}
+
+void GlGameStateDungeon::ProcessInputsCamera(std::map <int, bool> &inputs,float joy_x, float joy_y)
+{
+    
         if(inputs[GLFW_KEY_RIGHT_BRACKET]) camera_distance +=0.1f;
         if(inputs[GLFW_KEY_LEFT_BRACKET]) camera_distance -=0.1f;
     
@@ -1292,7 +1318,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         {
             joy_diff = 0.0f;
         }
-
+        
+        int joy_axes_count;
+        const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);
         if(joy_axes_count>2&&joy_axes!=nullptr)
         {
             joy_diff = joy_axes[2];
@@ -1310,8 +1338,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         {
             camera_rotation_angle +=  360.0f;
         }
-        
-        
+
         glm::vec3 camera_position = glm::vec3(-camera_distance * glm::cos(glm::radians(camera_rotation_angle)), camera_distance,  camera_distance * glm::sin(glm::radians(camera_rotation_angle)));
         Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         
@@ -1319,52 +1346,43 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
         Light2.SetCameraLocation(light_position+light_orientation*10.0f,light_orientation*10.0f, light_orientation);
 
-
-        bool fast_move = inputs[GLFW_KEY_LEFT_SHIFT];
-
-        if(moving&&!attack)
-        {
-            hero->UseSequence(fast_move? "run":"walk");
-        }else
-        if(attack)
-        {
-            hero->UseSequence("strike");
-            m_messages.push_back("hero_strike");
-        }
-        else
-        if(action_use)
-        {
-            hero->UseSequence("use");
-            m_messages.push_back("hero_use");
-        }
-        else
-        {
-            hero->UseSequence("stance");
-        }
-
-        time = time_now;
-
-        for(auto object : dungeon_objects)
-        {  
-            object->Process(m_messages);
-        }
-
-        FitObjects(10,0.01f);
-    }
-
-    return this;
+        
 }
 
-void GlGameStateDungeon::ProcessInputs()
-{
 
-}
-
-std::pair<float,float> GlGameStateDungeon::ProcessInputsMoveControl()
+std::pair<float,float> GlGameStateDungeon::ProcessInputsMoveControl(std::map <int, bool> &inputs)
 {
     int joy_axes_count;
     const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);  
+    float x = 0;
+    float z = 0;
+    if(joy_axes!=nullptr)
+    {
+        x = -joy_axes[0];
+        z= -joy_axes[1];
+    }
+    else
+    {
+        if(inputs[GLFW_KEY_UP])
+        {
+            z=1.0f;
+        }
+        else
+        if(inputs[GLFW_KEY_DOWN])
+        {
+            z=-1.0f;                            
+        }
 
-    
+        if(inputs[GLFW_KEY_LEFT])
+        {
+            x=1.0f;
+        }
+        else
+        if(inputs[GLFW_KEY_RIGHT])
+        {
+            x=-1.0f;                          
+        }
+    }
+    return std::make_pair(x,z); 
 }
 
