@@ -17,6 +17,18 @@
 
 class GlGameStateDungeon: public IGlGameState
 {
+    struct PauseStruct
+    {
+        double duration;
+        double start_time;
+        PauseStruct():duration(0.0),start_time(0.0){}
+        bool IsPaused(double time)
+        {
+            return (time - start_time) < duration;
+        }
+    }
+
+
 public:
     GlGameStateDungeon(std::map<const std::string,GLuint> &shader_map,
         std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
@@ -35,6 +47,7 @@ public:
     void SwitchOut(){}
 private:
     bool m_show_intro;
+    PauseStruct pause_interface;
     std::shared_ptr<IGlText> m_gl_text;
 
     std::list<std::shared_ptr<Gl2D::Gl2dItem>> Interface2D;
@@ -62,6 +75,7 @@ private:
     glLight Light,Light2;
     float light_angle;
     float light_radius;
+    float camera_distance;
     glCamera Camera;
     int now_frame;
     double time;
@@ -109,6 +123,8 @@ private:
     bool MobKilled(std::shared_ptr<GlCharacter> obj);
     void PostMessage(const std::string & event_string);
     void ProcessMessages();
+    void ProcessInputs();
+    std::pair<float,float> ProcessInputsMoveControl();
     
 };
 
