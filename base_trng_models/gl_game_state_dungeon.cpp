@@ -101,6 +101,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,m_start_place("")
                                                         ,light_angle (90.0f)
                                                         ,light_radius (20.0f)
+                                                        ,camera_distance(12.f)
                                                         ,now_frame(91)
                                                         ,key_angle(0.0f)
                                                         ,m_dungeon(10,10,1)
@@ -144,6 +145,12 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                         std::getline(sstream,m_info_message);
                                         //m_info_message = sstream.str();
                                         std::cout<<m_info_message<<"\n";
+                                    });
+    
+    m_message_processor.Add("pause_interface",[this](std::stringstream &sstream)
+                                    {
+                                        pause_interface.duration = LoaderUtility::GetFromStream<double>(sstream);
+                                        pause_interface.start_time = glfwGetTime();
                                     });
 
     m_message_processor.Add("spawn",[this](std::stringstream &sstream)
@@ -1161,7 +1168,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         MapObjectsEventsInteract();
         hero_position = hero->GetPosition();
         HeroEventsInteract(hero_ptr);
-        static float distance = 12.f;
+
         bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
 
         int joy_axes_count;
@@ -1265,10 +1272,10 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             }
         }
 
-        if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
-        if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
+        if(inputs[GLFW_KEY_RIGHT_BRACKET]) camera_distance +=0.1f;
+        if(inputs[GLFW_KEY_LEFT_BRACKET]) camera_distance -=0.1f;
     
-        distance = glm::clamp(distance,3.0f,14.0f);
+        camera_distance = glm::clamp(camera_distance,6.0f,14.0f);
 
 
 
@@ -1297,7 +1304,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         }
         
         
-        glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
+        glm::vec3 camera_position = glm::vec3(-camera_distance * glm::cos(glm::radians(camera_rotation_angle)), camera_distance,  camera_distance * glm::sin(glm::radians(camera_rotation_angle)));
         Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         
         glm::vec3 light_orientation = glm::normalize(glm::vec3(-camera_position.x,0.0f,-camera_position.z));
@@ -1305,7 +1312,6 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         Light2.SetCameraLocation(light_position+light_orientation*10.0f,light_orientation*10.0f, light_orientation);
 
 
-        time = time_now;
         bool fast_move = inputs[GLFW_KEY_LEFT_SHIFT];
 
         if(moving&&!attack)
@@ -1328,6 +1334,7 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             hero->UseSequence("stance");
         }
 
+        time = time_now;
 
         for(auto object : dungeon_objects)
         {  
@@ -1339,3 +1346,17 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
     return this;
 }
+
+void GlGameStateDungeon::ProcessInputs()
+{
+
+}
+
+std::pair<float,float> GlGameStateDungeon::ProcessInputsMoveControl()
+{
+    int joy_axes_count;
+    const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);  
+
+    
+}
+
