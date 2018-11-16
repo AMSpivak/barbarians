@@ -714,7 +714,15 @@ void GlGameStateDungeon::Draw()
         // renderQuad();/**/
 
         m_intro->Draw();
+        if(m_info_message.length()!=0) 
+        {
+            const float text_size_y = 0.050f;
+            const float text_size_x = m_aspect_ratio * text_size_y;
 
+            m_gl_text->SetTextSize(text_size_x,text_size_y); 
+            auto shader = m_shader_map["sprite2dsimple"];
+            m_gl_text->DrawString(m_info_message, - 0.5f * m_gl_text->GetStringLength(m_info_message),-1.0f + text_size_y*2.2f, shader);
+        }
         //Draw2D(render_target.depthMap);
 
         glEnable(GL_DEPTH_TEST);
