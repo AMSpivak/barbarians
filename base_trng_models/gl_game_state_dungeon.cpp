@@ -771,6 +771,12 @@ void GlGameStateDungeon::Draw()
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
         DrawDungeon(current_shader,hero);
+
+        current_shader = m_shader_map["deff_1st_pass_height"];
+		glUseProgram(current_shader);
+		cameraLoc  = glGetUniformLocation(current_shader, "camera");
+		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
+        RenderHeightMap();
      
 		final_render_target.set();
         glEnable(GL_BLEND);
