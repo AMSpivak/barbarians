@@ -14,27 +14,27 @@ layout (location = 2) out vec4 gPosition;
 void main()
 {
 
-	vec4 texColor = vec4(0.8,0.5,0.5,1.0);//texture(ourTexture, TexCoord);
-    if(texColor.a < 0.1)
-        discard;
+	vec4 texColor = vec4(0.8,0.1,0.1,1.0);//texture(ourTexture, TexCoord);
+    //if(texColor.a < 0.1)
+    //    discard;
 
-    vec3 utility = vec3(1.0,1.0,1.0);//texture(UtilityTexture, TexCoord).xyz;
+    vec3 utility = vec3(0.5,0.5,0.5);//texture(UtilityTexture, TexCoord).xyz;
     vec4 pos = vec4(v_Position,utility.x);
     gPosition = pos;
     vec3 normal = vec3(0.0,1.0,0.0);
     //vec3 normal = texture(NormalTexture, TexCoord).xyz;
     //normal = normalize(normal * 2.0 - 1.0); 
-    normal = normalize(TBN * normal); 
+    //normal = normalize(TBN * normal); 
     //normal = normal * 0.5 + 0.5; 
     
-    gNormal = vec4(normal, 1.0);//utility.y);
+    gNormal = vec4(normal, utility.y);
     //gNormal = vec4(normal, utility.y);
     //gNormal = vec4(ourColor.xyz, utility.y);
     //gNormal = vec4(normal.xyz, utility.y);
     float val = length(normal);
 
 	// gAlbedoSpec = vec4(normal.xyz, 0.06 + utility.z*0.94);//texColor;
-	gAlbedoSpec = vec4(texColor.xyz, 1.0);//0.06 + utility.z*0.94);//texColor;
+	gAlbedoSpec = vec4(texColor.xyz, 0.06 + utility.z*0.94);//texColor;
 	//gAlbedoSpec = vec4(normal, 0.06 + utility.z*0.94);//texColor;
 	
 	//gAlbedoSpec = gNormal;

@@ -770,13 +770,30 @@ void GlGameStateDungeon::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
-        DrawDungeon(current_shader,hero);
+        //DrawDungeon(current_shader,hero);
 
-        current_shader = m_shader_map["deff_1st_pass_height"];
-		glUseProgram(current_shader);
-		cameraLoc  = glGetUniformLocation(current_shader, "camera");
-		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
-        RenderHeightMap();
+        {
+            current_shader = m_shader_map["deff_1st_pass_heght"];
+            glUseProgram(current_shader);
+
+            glm::mat4 pos_matrix_tmp = glm::mat4();
+            
+            //pos_matrix_tmp = glm::translate(pos_matrix_tmp, glm::vec3(0.0f, 1.0f, 0.0f) - hero_position);
+
+            cameraLoc  = glGetUniformLocation(current_shader, "camera");
+            glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
+
+            cameraLoc  = glGetUniformLocation(current_shader, "draw");
+            glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(pos_matrix_tmp));
+
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		    glDisable(GL_CULL_FACE);
+
+            RenderHeightMap();
+		    glEnable(GL_CULL_FACE);
+
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
      
 		final_render_target.set();
         glEnable(GL_BLEND);
