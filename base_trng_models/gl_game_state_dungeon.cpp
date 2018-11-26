@@ -8,6 +8,7 @@
 #include <functional>
 #include <utility>
 #include <algorithm>
+#include <math.h>  
 //#define GLM_SWIZZLE_XYZW
 
 #include "glm/glm.hpp"
@@ -770,21 +771,22 @@ void GlGameStateDungeon::Draw()
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
-        //DrawDungeon(current_shader,hero);
+        DrawDungeon(current_shader,hero);
 
         {
             current_shader = m_shader_map["deff_1st_pass_heght"];
             glUseProgram(current_shader);
 
-            glm::mat4 pos_matrix_tmp = glm::mat4();
+            float offset_x = (0.15f * round((hero_position[0]-trunc(hero_position[0]))*6.6666666f)); 
+            float offset_z = (0.15f * round((hero_position[2]-trunc(hero_position[2]))*6.6666666f)); 
+            std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
+            glm::vec3 offset_position_vector = glm::vec3(offset_x,0.5f,offset_z);
             
-            //pos_matrix_tmp = glm::translate(pos_matrix_tmp, glm::vec3(0.0f, 1.0f, 0.0f) - hero_position);
-
             cameraLoc  = glGetUniformLocation(current_shader, "camera");
             glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
-            cameraLoc  = glGetUniformLocation(current_shader, "draw");
-            glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(pos_matrix_tmp));
+            GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
+		    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		    glDisable(GL_CULL_FACE);

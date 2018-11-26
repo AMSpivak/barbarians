@@ -9,7 +9,7 @@ out vec2 TexCoord;
 out mat3 TBN;
 
 
-uniform mat4 draw;
+uniform vec3 offset_position;
 uniform mat4 camera;
 //uniform mat4 projection;
 uniform mat4    u_BoneMatrices[128];
@@ -20,19 +20,19 @@ void main()
 	vec2 texCoord = vec2(0.0,0.0);
 	vec3 a_Tangent = vec3(0.0,1.0,0.0);
  	
-	vec4 tv_Position = vec4(a_Position.xyz, 1.0);
-	tv_Position = draw*(vec4(tv_Position.xyz, 1.0));
+	vec4 tv_Position = vec4(a_Position.xyz+ offset_position, 1.0);
+	tv_Position = (vec4(tv_Position.xyz, 1.0));
     v_Position = tv_Position.xyz;
 
 
 
 
-        ourColor = vec3(draw* vec4(a_Normal, 0.0));
+        ourColor = vec3( vec4(a_Normal, 0.0));
         
 
 
 	
-        vec3 tangent = vec3(draw* vec4(a_Tangent.xyz, 0.0));
+        vec3 tangent = vec3(vec4(a_Tangent.xyz, 0.0));
 		tangent = normalize(tangent - dot(tangent, ourColor) * ourColor);
 		vec3 B = cross(ourColor, tangent);
 

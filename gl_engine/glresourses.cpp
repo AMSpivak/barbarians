@@ -324,24 +324,63 @@ void RenderHeightMap()
 {
 	static unsigned int quadVAO = 0;
     static unsigned int quadVBO;
+    static unsigned int quadIBO;
+	static GLsizei vert_count = 0;
 
     if (quadVAO == 0)
     {
-        float quadVertices[] = {
-            // positions        // texture Coords
-            -0.5f,  0.5f, 0.0f, 
-            -0.5f, -0.5f, 0.0f, 
-             0.5f,  0.5f, 0.0f, 
-             0.5f, -0.5f, 0.0f, 
-        };
+        // float quadVertices[] = {
+        //     // positions        // texture Coords
+        //      1.0f,  0.0f, -1.0f, 
+        //     -1.0f,  0.0f, 1.0f, 
+        //      1.0f,  0.0f, 1.0f, 
+        //      0.5f, -0.5f, 0.0f, 
+        // };
+		std::vector<float> quadVertices;
 
+		size_t map_vertex_size = 500;
+		size_t map_size = map_vertex_size - 1;
+		const float tile_size = 0.15f;
+		float offset = 0.5f * tile_size * map_size;
+
+		for(size_t i_z = 0; i_z < map_vertex_size; i_z++)
+		{
+			for(size_t i_x = 0; i_x < map_vertex_size;i_x++)
+			{
+				quadVertices.push_back(-offset + tile_size * i_x);
+				quadVertices.push_back(0.0f);
+				quadVertices.push_back(offset - tile_size * i_z);
+			}
+		}
+
+	 	std::vector<unsigned int> indices;
 		
+		for(size_t i_z = 0; i_z < map_size; i_z++)
+		{
+			for(size_t i_x = 0; i_x < map_size;i_x++)
+			{
+				size_t current = i_z * map_vertex_size + i_x;
+				indices.push_back(current + map_vertex_size);
+				indices.push_back(current + 1);
+				indices.push_back(current);
+
+				indices.push_back(current + 1);
+				indices.push_back(current + map_vertex_size);
+				indices.push_back(current + map_vertex_size + 1);
+
+			}
+		}
+		vert_count =  indices.size();
         // setup plane VAO
         glGenVertexArrays(1, &quadVAO);
         glGenBuffers(1, &quadVBO);
+		glGenBuffers(1, &quadIBO);
         glBindVertexArray(quadVAO);
         glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*quadVertices.size(), quadVertices.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIBO);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+		
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         // glEnableVertexAttribArray(1);
@@ -349,7 +388,13 @@ void RenderHeightMap()
     }
 	
     glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    //glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+	glDrawElements(
+     GL_TRIANGLES,      // mode
+     vert_count,    // count
+     GL_UNSIGNED_INT,   // type
+     0           // element array buffer offset
+ 	);
     glBindVertexArray(0);
 	// static unsigned int quadVAO = 0;
     // static unsigned int quadVBO;
