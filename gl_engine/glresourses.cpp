@@ -361,12 +361,12 @@ void RenderHeightMap()
 			{
 				size_t current = i_z * map_vertex_size + i_x;
 				indices.push_back(current + map_vertex_size);
-				indices.push_back(current + 1);
 				indices.push_back(current);
+				indices.push_back(current + 1);
 
 				indices.push_back(current + 1);
-				indices.push_back(current + map_vertex_size);
 				indices.push_back(current + map_vertex_size + 1);
+				indices.push_back(current + map_vertex_size);
 
 			}
 		}

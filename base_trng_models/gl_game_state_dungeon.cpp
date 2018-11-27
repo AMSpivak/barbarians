@@ -113,6 +113,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
 {
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 
+
     float a_ratio = screen_width;
     a_ratio /= screen_height;
 
@@ -402,6 +403,8 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
 
 void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
 {  
+    heightmap_texture = GetResourceManager()->m_texture_atlas.Assign("desert_map.png");
+
     m_messages.clear();                                        
     
     std::ifstream level_file;
@@ -678,6 +681,39 @@ void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharact
     glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
     DrawDungeon(current_shader,hero);
+    {
+            current_shader = m_shader_map["deff_1st_pass_heght"];
+            glUseProgram(current_shader);
+            float x = hero_position[0]-trunc(hero_position[0]);
+            float z = hero_position[2]-trunc(hero_position[2]);
+
+            float offset_x = x - (0.15f * round(x*6.6666666f)); 
+            float offset_z = z - (0.15f * round(z*6.6666666f)); 
+
+            std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
+            glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
+            glm::vec4 map_position_vector = glm::vec4((0.15f * round(hero_position[0]*6.6666666f)),(0.15f * round(hero_position[2]*6.6666666f)),0.008f,2.0f);
+            
+            cameraLoc  = glGetUniformLocation(current_shader, "camera");
+            glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
+
+            GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
+		    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
+
+            GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
+		    glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, heightmap_texture->m_texture);
+
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		    //glDisable(GL_CULL_FACE);
+
+            RenderHeightMap();
+		    //glEnable(GL_CULL_FACE);
+
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
@@ -776,11 +812,15 @@ void GlGameStateDungeon::Draw()
         {
             current_shader = m_shader_map["deff_1st_pass_heght"];
             glUseProgram(current_shader);
+            float x = hero_position[0]-trunc(hero_position[0]);
+            float z = hero_position[2]-trunc(hero_position[2]);
 
-            float offset_x = (0.15f * round((hero_position[0]-trunc(hero_position[0]))*6.6666666f)); 
-            float offset_z = (0.15f * round((hero_position[2]-trunc(hero_position[2]))*6.6666666f)); 
+            float offset_x = x - (0.15f * round(x*6.6666666f)); 
+            float offset_z = z - (0.15f * round(z*6.6666666f)); 
+
             std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
-            glm::vec3 offset_position_vector = glm::vec3(offset_x,0.5f,offset_z);
+            glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
+            glm::vec4 map_position_vector = glm::vec4((0.15f * round(hero_position[0]*6.6666666f)),(0.15f * round(hero_position[2]*6.6666666f)),0.008f,2.0f);
             
             cameraLoc  = glGetUniformLocation(current_shader, "camera");
             glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
@@ -788,13 +828,19 @@ void GlGameStateDungeon::Draw()
             GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
 		    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		    glDisable(GL_CULL_FACE);
+            GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
+		    glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, heightmap_texture->m_texture);
+
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		    //glDisable(GL_CULL_FACE);
 
             RenderHeightMap();
-		    glEnable(GL_CULL_FACE);
+		    //glEnable(GL_CULL_FACE);
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
      
 		final_render_target.set();

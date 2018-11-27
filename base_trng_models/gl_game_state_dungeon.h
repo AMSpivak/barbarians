@@ -46,7 +46,11 @@ public:
     void SwitchIn(){}
     void SwitchOut(){}
 private:
+
+    std::shared_ptr<IGlTextureStruct> heightmap_texture;
+
     bool m_show_intro;
+
     PauseStruct pause_interface;
     std::shared_ptr<IGlText> m_gl_text;
 
