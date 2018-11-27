@@ -25,7 +25,7 @@ void main()
 
 
 
-	vec2 texCoord = vec2(map_position.x + a_Position.x,map_position.y + a_Position.z) * map_position.z + vec2(0.5,0.5);
+	vec2 texCoord = vec2(map_position.x + position.x,map_position.y + position.z) * map_position.z + vec2(0.5,0.5);
 	vec4 texColor = texture(HeightMap, texCoord);
 	float multiplier = map_position.z * 0.15f;
 	vec4 texColor_x1 = texture(HeightMap , texCoord + vec2(1.0,0.0)* multiplier);

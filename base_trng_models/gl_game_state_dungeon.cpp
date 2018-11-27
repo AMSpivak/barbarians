@@ -535,11 +535,14 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,std::shared_ptr<GlCha
             pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
         }
     }
+
                 
     for(auto object : dungeon_objects)
     {  
         object->Draw(current_shader,glm::translate(glm::mat4(), object->GetPosition() - hero_position));
     }
+
+    
 }
 
 void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,const glm::vec3 &camera_position,GLuint current_shader,glRenderTargetDeffered &render_target)
@@ -681,39 +684,8 @@ void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharact
     glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
     DrawDungeon(current_shader,hero);
-    {
-            current_shader = m_shader_map["deff_1st_pass_heght"];
-            glUseProgram(current_shader);
-            float x = hero_position[0]-trunc(hero_position[0]);
-            float z = hero_position[2]-trunc(hero_position[2]);
-
-            float offset_x = x - (0.15f * round(x*6.6666666f)); 
-            float offset_z = z - (0.15f * round(z*6.6666666f)); 
-
-            std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
-            glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
-            glm::vec4 map_position_vector = glm::vec4((0.15f * round(hero_position[0]*6.6666666f)),(0.15f * round(hero_position[2]*6.6666666f)),0.008f,2.0f);
-            
-            cameraLoc  = glGetUniformLocation(current_shader, "camera");
-            glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
-
-            GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
-		    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
-
-            GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
-		    glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, heightmap_texture->m_texture);
-
-            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		    //glDisable(GL_CULL_FACE);
-
-            RenderHeightMap();
-		    //glEnable(GL_CULL_FACE);
-
-            //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
+    DrawHeightMap(m_shader_map["deff_1st_pass_heght"],hero,Light.CameraMatrix());
+    
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
@@ -726,6 +698,44 @@ void GlGameStateDungeon::DrawGlobalLight(const GLuint light_loc, const glLight &
 
 		renderQuad();
 }
+
+void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<GlCharacter>hero,const glm::mat4 camera)
+{
+    //current_shader = m_shader_map["deff_1st_pass_heght"];
+    glUseProgram(current_shader);
+    const float tile_size = 0.15f;
+    float inv = 1/tile_size;
+    float x = hero_position[0]-trunc(hero_position[0]);
+    float z = hero_position[2]-trunc(hero_position[2]);
+
+    float offset_x = x - (tile_size * round(x*inv)); 
+    float offset_z = z - (tile_size * round(z*inv)); 
+
+    //std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
+    glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
+    glm::vec4 map_position_vector = glm::vec4(hero_position[0],hero_position[2],0.006f,2.0f);
+    
+    GLuint cameraLoc  = glGetUniformLocation(current_shader, "camera");
+    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
+
+    GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
+    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
+
+    GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
+    glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, heightmap_texture->m_texture);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glDisable(GL_CULL_FACE);
+
+    RenderHeightMap();
+    //glEnable(GL_CULL_FACE);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
 
 void GlGameStateDungeon::Draw()
 {
@@ -809,39 +819,8 @@ void GlGameStateDungeon::Draw()
 
         DrawDungeon(current_shader,hero);
 
-        {
-            current_shader = m_shader_map["deff_1st_pass_heght"];
-            glUseProgram(current_shader);
-            float x = hero_position[0]-trunc(hero_position[0]);
-            float z = hero_position[2]-trunc(hero_position[2]);
-
-            float offset_x = x - (0.15f * round(x*6.6666666f)); 
-            float offset_z = z - (0.15f * round(z*6.6666666f)); 
-
-            std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
-            glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
-            glm::vec4 map_position_vector = glm::vec4((0.15f * round(hero_position[0]*6.6666666f)),(0.15f * round(hero_position[2]*6.6666666f)),0.008f,2.0f);
-            
-            cameraLoc  = glGetUniformLocation(current_shader, "camera");
-            glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
-
-            GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
-		    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
-
-            GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
-		    glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, heightmap_texture->m_texture);
-
-            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		    //glDisable(GL_CULL_FACE);
-
-            RenderHeightMap();
-		    //glEnable(GL_CULL_FACE);
-
-            //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
+        DrawHeightMap(m_shader_map["deff_1st_pass_heght"],hero,Camera.CameraMatrix());
+        
      
 		final_render_target.set();
         glEnable(GL_BLEND);
