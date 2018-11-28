@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <map>
+
 #include "glm/glm.hpp"
 #include "glm/trigonometric.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -17,21 +18,70 @@
 #include "gl_render_target.h"
 #include "gl_model.h"
 #include "gl_character.h"
-#include "gl_game_state_arena.h"
 #include "gl_game_state_dungeon.h"
 #include "animation_sequence.h"
+#include "engine_settings.h"
+#include "game_status.h"
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
 
 float key_angle = 0.0f;
 
+// float clamp(float value, float min, float max)
+// {
+// 	return 
+// }
 
 std::map <int, bool> inputs;
 
+void SetRenderTargets(
+					std::map<std::string,std::shared_ptr<glRenderTarget>> &render_target_map,
+					float width,
+					float height)
+{
+	render_target_map.clear();
+	EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+	float quality = settings->GetQualityFactor();
+
+	std::cout << "Set RT quality "<<quality<<"\n";
+	auto base = std::make_pair("base_deffered",std::make_shared<glRenderTargetDeffered>());
+	render_target_map.insert( base);
+	base.second->InitBuffer(width, height,quality);
+	auto fin = std::make_pair("final",std::make_shared<glRenderTarget>());
+	render_target_map.insert( fin);
+	fin.second->InitBuffer(width, height,quality);
+	auto post = std::make_pair("postprocess",std::make_shared<glRenderTarget>());
+	render_target_map.insert( post);
+	post.second->InitBuffer(width, height,quality);
+}
+
+void FillShaders(std::map<const std::string,GLuint> &shader_map, const std::string filename)
+{
+    //shader_map.insert ( std::pair<const std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("fullscreen", LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("sprite2dsimple", LoadshaderProgram("shaders/sprite2dsimple.vs","shaders/sprite2dsimple.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("deffered_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deffered_cheap.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple_cheap.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deff_1st_pass_heght",LoadshaderProgram("shaders/vert_norm_height.vs","shaders/frag_norm_height.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
+}
+
+std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
 
 int main(int argc, char const *argv[])
 {
+
+
     bool is_fullscreen = true;
 
     if(argc > 1) is_fullscreen = false;
@@ -43,6 +93,8 @@ int main(int argc, char const *argv[])
     inputs[GLFW_KEY_RIGHT_BRACKET] = false;
     inputs[GLFW_KEY_LEFT_BRACKET] = false;
     inputs[GLFW_KEY_F1] = false;
+    inputs[GLFW_KEY_LEFT_ALT] = false;
+
 
 	//Инициализация GLFW
 	glfwInit();
@@ -52,6 +104,10 @@ int main(int argc, char const *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	//Минорная
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+/*
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	//Минорная
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);*/
 	//Установка профайла для которого создается контекст
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//Выключение возможности изменения размера окна
@@ -105,60 +161,38 @@ int main(int argc, char const *argv[])
 	
 
 	GLResourcesManager resources_atlas("material/textures/","material/meshes/","material/animations/","");
-
 	SetResourceManager(&resources_atlas);
 
-    std::map<std::string,GLuint> m_shader_map;
+	EngineSettings::Settings main_settings;
+	EngineSettings::SetEngineSettings(&main_settings);
 
-    std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
+	
 
-    m_render_target_map.insert( std::make_pair("base_deffered",std::make_shared<glRenderTargetDeffered>()));
-    m_render_target_map.insert( std::make_pair("final",std::make_shared<glRenderTarget>()));
-
-  
-
-	for(auto prt : m_render_target_map)
-	{
-		prt.second.get()->InitBuffer(width, height);
-	}
-
-    // Build and compile our shader program
+	GameSettings::HeroStatus hero_status;
+	GameSettings::SetHeroStatus(&hero_status);
 
 
-    m_shader_map.insert ( std::pair<std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
-    m_shader_map.insert ( std::pair<std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("sprite2d", LoadshaderProgram("shaders/sprite2d.vs","shaders/sprite2d.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("skybox", LoadshaderProgram("shaders/skybox.vs","shaders/skybox.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("deffered",LoadshaderProgram("shaders/dbg.vs","shaders/deffered.fs")) );
-    m_shader_map.insert ( std::pair<std::string,GLuint>("deffered_simple",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple.fs")) );
-    m_shader_map.insert ( std::pair<std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
-	m_shader_map.insert ( std::pair<std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
+    std::map<const std::string,GLuint> m_shader_map;
+
+    
 
 
+	SetRenderTargets(m_render_target_map,width,height);
+	 
+	FillShaders(m_shader_map,"shaders/list.shd");
 
-	std::vector <std::shared_ptr<glModel> > Models;
+    std::map<std::string,std::shared_ptr<GlCharacter>> m_glmodels_map;
 
-	//Models.emplace_back(std::make_shared<glModel>("material/scene03/scene.mdl"));
 
-    std::map<std::string,std::shared_ptr<IGlModel>> m_glmodels_map;
-
-    {
-        std::shared_ptr<IGlModel> r_model(new GlCharacter());
-        m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<IGlModel>>("Hero",r_model));
-    }
-
-	GlCharacter &hero =  *(dynamic_cast<GlCharacter*>(m_glmodels_map["Hero"].get()));
-
-	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",hero);
-
+    auto hero = std::make_shared<GlCharacter>(CharacterTypes::hero);
+    m_glmodels_map.insert( std::pair<std::string,std::shared_ptr<GlCharacter>>("Hero",hero));
+	UpdateCharacterFromFile(argc > 2 ?  argv[2]:"material/hero.chr",*hero);
+	hero->SetName("Hero");
+	//hero->model_matrix = glm::rotate(hero->model_matrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	
     GlGameStateDungeon game_state_dungeon(m_shader_map,m_render_target_map,m_glmodels_map,resources_atlas,width,height);
-    IGlGameState * game_state = nullptr;//&game_state_arena;
+    IGlGameState * game_state = nullptr;
     game_state = &game_state_dungeon;
-
-
-	//glfwSwapInterval(1);
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -179,11 +213,12 @@ int main(int argc, char const *argv[])
 		if(counter++ == 0) time_r = glfwGetTime();
 		if(counter > 30)
 		{
-			std::cout<<(1.0f*counter/(glfwGetTime() - time_r))<<"\n";
+			EngineSettings::GetEngineSettings() ->SetFPS((1.0f*counter/(glfwGetTime() - time_r)));
 			counter = 0;
 		}
 		
 		game_state->Process(inputs, xpos, ypos);
+		EngineSettings::GetEngineSettings()->BeginNewFrame();
         game_state->Draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -204,11 +239,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	/*if (action == GLFW_RELEASE)
 		return;*/
+	if (key == GLFW_KEY_LEFT_CONTROL)
+        inputs[GLFW_KEY_LEFT_CONTROL] = (action != GLFW_KEY_LEFT_CONTROL) ?  true : false;
 
 	if (key == GLFW_KEY_LEFT || key == GLFW_KEY_A )
         inputs[GLFW_KEY_LEFT] = (action != GLFW_RELEASE) ?  true : false;
-
-
 
 	if (key == GLFW_KEY_RIGHT || key == GLFW_KEY_D )
 		inputs[GLFW_KEY_RIGHT] = (action != GLFW_RELEASE) ?  true : false;
@@ -222,6 +257,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_SPACE )
     		inputs[GLFW_KEY_SPACE] = (action != GLFW_RELEASE) ?  true : false;
 
+	if (key == GLFW_KEY_LEFT_ALT )
+    		inputs[GLFW_KEY_LEFT_ALT] = (action != GLFW_RELEASE) ?  true : false;
+
+	if (key == GLFW_KEY_LEFT_SHIFT )
+		inputs[GLFW_KEY_LEFT_SHIFT] = (action != GLFW_RELEASE) ?  true : false;
+
     if (key == GLFW_KEY_LEFT_BRACKET )
         inputs[GLFW_KEY_LEFT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;
 
@@ -229,5 +270,53 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         inputs[GLFW_KEY_RIGHT_BRACKET] = (action != GLFW_RELEASE) ?  true : false;
     
 	if (key == GLFW_KEY_F1 )
+	{
         inputs[GLFW_KEY_F1] = (action != GLFW_RELEASE) ?  true : false;
+		if(action == GLFW_RELEASE)
+		{
+			EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+			settings->SetPbr(!settings->IsPbrON());
+		}
+	}
+
+	
+
+	switch (key)
+	{
+
+		case GLFW_KEY_F3:	
+			if(action == GLFW_RELEASE)
+			{
+				EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+				float qf = settings->GetQualityFactor();
+				qf = glm::clamp(qf*1.25f,0.5f,1.0f);
+				settings->SetQualityFactor(qf);
+				SetRenderTargets(m_render_target_map,SCR_WIDTH, SCR_HEIGHT);
+			}
+		break;
+		case GLFW_KEY_F4:	
+			if(action == GLFW_RELEASE)
+			{
+				EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+				float qf = settings->GetQualityFactor();
+				qf = glm::clamp(qf*0.8f,0.5f,1.0f);
+				settings->SetQualityFactor(qf);
+				SetRenderTargets(m_render_target_map,SCR_WIDTH, SCR_HEIGHT);
+			}
+		break;
+
+		case GLFW_KEY_F2:	
+			if(action == GLFW_RELEASE)
+			{
+				EngineSettings::Settings * settings = EngineSettings::GetEngineSettings();
+				settings->SetQualityFactor(1.0);
+				SetRenderTargets(m_render_target_map,SCR_WIDTH, SCR_HEIGHT);
+			}
+		break;
+
+		default:
+		break;
+
+	}
+	
 }

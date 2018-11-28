@@ -32,6 +32,48 @@ void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,f
 
 }
 
+void Fit_Tile_Matrix(glm::mat4 &matrix,float x,float y,float width,float height)
+{
+	float mScale_Matrix[16] = {0};
+
+	//Matrix.setIdentityM(mScale_Matrix,0);
+	mScale_Matrix[0]=width;
+	mScale_Matrix[1]=0.0f;
+	mScale_Matrix[2]=0.0f;
+	mScale_Matrix[3]=0.0f;
+	mScale_Matrix[4]=0.0f;
+	mScale_Matrix[5]=height;
+	mScale_Matrix[6]=0.0f;
+	mScale_Matrix[7]=0.0f;
+	mScale_Matrix[8]=y;//0.0f;
+	mScale_Matrix[9]=0.0f;
+	mScale_Matrix[10]=0.0f;
+	mScale_Matrix[11]=0.0f;
+	mScale_Matrix[12]=x;//0.0f;
+	mScale_Matrix[13]=y;//0.0f;
+	mScale_Matrix[14]=0.0f;
+	mScale_Matrix[15]=1.0f;
+	// 	mScale_Matrix[0]=width;
+	// mScale_Matrix[1]=0.0f;
+	// mScale_Matrix[2]=0.0f;
+	// mScale_Matrix[3]=1.0f;
+	// mScale_Matrix[4]=0.0f;
+	// mScale_Matrix[5]=height;
+	// mScale_Matrix[6]=0.0f;
+	// mScale_Matrix[7]=1.0f;
+	// mScale_Matrix[8]=0.0f;
+	// mScale_Matrix[9]=0.0f;
+	// mScale_Matrix[10]=0.0f;
+	// mScale_Matrix[11]=1.0f;
+	// mScale_Matrix[12]=x;
+	// mScale_Matrix[13]=y;
+	// mScale_Matrix[14]=0.0f;
+	// mScale_Matrix[15]=1.0f;
+
+	matrix = glm::make_mat4(mScale_Matrix);
+
+}
+
 /*std::istream& operator>> ( std::istream& is, glm::vec3 & fill_vector)
 {
 	is>>fill_vector[0] >>fill_vector[1]>>fill_vector[2];
@@ -42,8 +84,11 @@ void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,f
 void renderSprite(GLuint current_shader,
 	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
 	const glm::vec4 & corrector_v,
-	const GLuint * texture 
-)
+	const GLuint * texture,
+	float t_sprite_w,float t_sprite_h,
+	float t_sprite_offset_x,
+	float t_sprite_offset_y
+	)
 {
 
 
@@ -90,6 +135,7 @@ void renderSprite(GLuint current_shader,
 	Fit_Matrix(position_m,
 		x0,y0,x1,y1,x2,y2,x3,y3
 	);
+	Fit_Tile_Matrix(texture_m,t_sprite_offset_x,t_sprite_offset_y,t_sprite_w,t_sprite_h);
 	GLuint position_u  = glGetUniformLocation(current_shader, "DrawMatrix");
 	glUniformMatrix4fv(position_u, 1, GL_FALSE, glm::value_ptr(position_m));
 
@@ -274,6 +320,156 @@ void renderQuad()
     glBindVertexArray(0);
 }
 
+void RenderHeightMap()
+{
+	static unsigned int quadVAO = 0;
+    static unsigned int quadVBO;
+    static unsigned int quadIBO;
+	static GLsizei vert_count = 0;
+
+    if (quadVAO == 0)
+    {
+        // float quadVertices[] = {
+        //     // positions        // texture Coords
+        //      1.0f,  0.0f, -1.0f, 
+        //     -1.0f,  0.0f, 1.0f, 
+        //      1.0f,  0.0f, 1.0f, 
+        //      0.5f, -0.5f, 0.0f, 
+        // };
+		std::vector<float> quadVertices;
+
+		size_t map_vertex_size = 500;
+		size_t map_size = map_vertex_size - 1;
+		const float tile_size = 0.15f;
+		float offset = 0.5f * tile_size * map_size;
+
+		for(size_t i_z = 0; i_z < map_vertex_size; i_z++)
+		{
+			for(size_t i_x = 0; i_x < map_vertex_size;i_x++)
+			{
+				quadVertices.push_back(-offset + tile_size * i_x);
+				quadVertices.push_back(0.0f);
+				quadVertices.push_back(offset - tile_size * i_z);
+			}
+		}
+
+	 	std::vector<unsigned int> indices;
+		
+		for(size_t i_z = 0; i_z < map_size; i_z++)
+		{
+			for(size_t i_x = 0; i_x < map_size;i_x++)
+			{
+				size_t current = i_z * map_vertex_size + i_x;
+				indices.push_back(current + map_vertex_size);
+				indices.push_back(current);
+				indices.push_back(current + 1);
+
+				indices.push_back(current + 1);
+				indices.push_back(current + map_vertex_size + 1);
+				indices.push_back(current + map_vertex_size);
+
+			}
+		}
+		vert_count =  indices.size();
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+		glGenBuffers(1, &quadIBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*quadVertices.size(), quadVertices.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIBO);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+		
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        // glEnableVertexAttribArray(1);
+        // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+	
+    glBindVertexArray(quadVAO);
+    //glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+	glDrawElements(
+     GL_TRIANGLES,      // mode
+     vert_count,    // count
+     GL_UNSIGNED_INT,   // type
+     0           // element array buffer offset
+ 	);
+    glBindVertexArray(0);
+	// static unsigned int quadVAO = 0;
+    // static unsigned int quadVBO;
+    // static unsigned int quadIBO;
+	// static GLsizei vert_count = 0;
+	// if (quadVAO == 0)
+    // {
+	// 	std::vector<unsigned int> indices;
+
+    //     std::vector<float> quadVertices;
+
+	// 	size_t map_vertex_size = 5;
+	// 	size_t map_size = map_vertex_size - 1;
+	// 	const float tile_size = 10.0f;
+	// 	float offset = 0.5f * tile_size * map_size;
+
+	// 	for(size_t i_z = 0; i_z < map_vertex_size; i_z++)
+	// 	{
+	// 		for(size_t i_x = 0; i_x < map_vertex_size;i_x++)
+	// 		{
+	// 			quadVertices.push_back(-offset + tile_size * i_x);
+	// 			quadVertices.push_back(1.0f);
+	// 			quadVertices.push_back(offset - tile_size * i_z);
+	// 		}
+	// 	}
+
+	// 	for(size_t i_z = 0; i_z < map_size; i_z++)
+	// 	{
+	// 		for(size_t i_x = 0; i_x < map_size;i_x++)
+	// 		{
+	// 			size_t current = i_z * map_vertex_size + i_x;
+	// 			indices.push_back(current + map_vertex_size);
+	// 			indices.push_back(current + 1);
+	// 			indices.push_back(current);
+
+	// 			indices.push_back(current + 1);
+	// 			indices.push_back(current + map_vertex_size);
+	// 			indices.push_back(current + map_vertex_size + 1);
+
+	// 		}
+	// 	}
+
+	// 	vert_count =  indices.size();
+
+	// 	unsigned int Indices[] = { 0, 3, 1,
+    //                        1, 3, 2,
+    //                        2, 3, 0,
+    //                        0, 1, 2 };
+    //     // setup plane VAO
+    //     glGenVertexArrays(1, &quadVAO);
+	// 	glGenBuffers(1, &quadIBO);
+    //     glGenBuffers(1, &quadVBO);
+    //     glBindVertexArray(quadVAO);
+	// 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIBO);
+	// 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+		
+    //     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    //     glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(float), quadVertices.data(), GL_STATIC_DRAW);
+    //     glEnableVertexAttribArray(0);
+    //     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	// 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //}
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIBO);
+	// glBindVertexArray(quadVAO);
+	// glDrawElements(
+    //  GL_TRIANGLES,      // mode
+    //  vert_count,    // count
+    //  GL_UNSIGNED_INT,   // type
+    //  0           // element array buffer offset
+ 	// );
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // glBindVertexArray(0);
+}
+
 
 std::istream& operator>> ( std::istream& is, glm::mat4& mat)
 {
@@ -286,6 +482,17 @@ std::istream& operator>> ( std::istream& is, glm::mat4& mat)
 	>> marray[3]	>> marray[7]>> marray[11]>> marray[15]	;
 	mat = glm::make_mat4(marray);
 	return is;
+}
+
+std::ostream& operator << ( std::ostream& os, const glm::mat4 & mat)
+{
+	const float *p_mat = static_cast<const float*> (glm::value_ptr(mat));
+	os 	 << p_mat[0] 	<<" "<< p_mat[4]<<" "<< p_mat[8]	<<" "<< p_mat[12]
+	<<" "<< p_mat[1]	<<" "<< p_mat[5]<<" "<< p_mat[9] 	<<" "<< p_mat[13]
+	<<" "<< p_mat[2]	<<" "<< p_mat[6]<<" "<< p_mat[10]	<<" "<< p_mat[14]
+	<<" "<< p_mat[3]	<<" "<< p_mat[7]<<" "<< p_mat[11]	<<" "<< p_mat[15];
+
+	return os;
 }
 
 
@@ -539,10 +746,19 @@ void EmptyShaders(GLuint * shaders, int shaders_count)
 
 void LoadTexture(std::string FileName,GLuint &texture)
 {
-	if(FileName.substr(FileName.find_last_of(".")+1) == "cub")
+	std::string extention = FileName.substr(FileName.find_last_of(".")+1);
+	if(extention == "cub")
 	{
 		LoadCubemap(FileName,texture);
 		return;
+	}
+
+	if(extention == "tex")
+	{
+		std::ifstream tex_file;
+		tex_file.open(FileName);
+		if (!tex_file)
+        	throw std::runtime_error("Could not open file");
 	}
 	glGenTextures(1, &texture);
 
@@ -551,7 +767,7 @@ void LoadTexture(std::string FileName,GLuint &texture)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     // Set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // Load image, create texture and generate mipmaps
     int tex_width, tex_height;
@@ -588,7 +804,7 @@ void LoadCubemap(const std::string file_name,GLuint &texture)
 	}
 	if(faces.size()<6)
 	{
-		std::cout << "Wrong cubemap descriptor: " <<file_name;
+		std::cout << "Wrong cubemap descriptor: " << file_name;
 	}
 
 	texture_descriptor_file.close();
@@ -722,14 +938,27 @@ void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 {
 	if(m_cache_frame == frame) 
 		return;
-	//std::cout <<"Caching " << frame <<" frame\n";
 	size_t bon_count = m_cashe_animation.bones.size();
-	for(int i = 0; i < bon_count; i++)
+	m_cashe_animation.bones[0] =glm::mat4(1.0f);
+	rotation_matrix = frame == 0 ? glm::mat4(1.0f) : glm::inverse(frames[frame - 1].bones[0] )*frames[frame].bones[0] ;
+	glm::mat4 base = glm::inverse(frames[frame].bones[0] );
+	//glm::mat4 rot = glm::rotate(glm::mat4(), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	if(bon_count>1)
 	{
-		m_cashe_animation.bones[i] = frames[frame].bones[i] * glm::inverse(bones[i].matrix);
+		for(int i = 1; i < bon_count; i++)
+		{
+			m_cashe_animation.bones[i] =  base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix);
+		}
 	}
 	m_cache_frame = frame;
 }
+
+const glm::mat4 & Animation::GetRotationMatrix(size_t frame,const std::vector <Bone> &bones)
+{
+	CalculateCache(bones, frame);
+	return rotation_matrix;
+}
+
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)
 {
@@ -741,7 +970,7 @@ std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)
 	return is;
 }
 
-std::ostream& operator << ( std::ostream& os, glm::vec3 & glm_vector)
+std::ostream& operator << ( std::ostream& os, const glm::vec3 & glm_vector)
 {
 	//float tmp[3];
 	const size_t max = 3;
@@ -752,4 +981,5 @@ std::ostream& operator << ( std::ostream& os, glm::vec3 & glm_vector)
 	}
 	return os;
 }
+
 

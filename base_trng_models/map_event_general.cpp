@@ -49,9 +49,9 @@ EventProcessResult MapEventGeneral::Process()
     return EventProcessResult::Nothing;
 }
 
-InteractionResult MapEventGeneral::Interact(IGlModel &model,std::string &return_value)
+InteractionResult MapEventGeneral::Interact(GlCharacter &model,std::string &return_value)
 {
-    std::cout<<m_message<<"\n";
+    //std::cout<<m_message<<"\n";
     return_value = m_message;
     return InteractionResult::PostMessage;
 }

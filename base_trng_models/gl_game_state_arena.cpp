@@ -8,7 +8,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glscene.h"
 
-GlGameStateArena::GlGameStateArena(std::map<std::string,GLuint> &shader_map,
+GlGameStateArena::GlGameStateArena(std::map<const std::string,GLuint> &shader_map,
                                     std::map<std::string,std::shared_ptr<glRenderTarget>> & render_target_map,
                                     std::map<std::string,std::shared_ptr<IGlModel>> & models_map,
                                     GLResourcesManager &resources_manager,
@@ -277,7 +277,7 @@ IGlGameState *  GlGameStateArena::Process(std::map <int, bool> &inputs, float jo
                     key_angle = 0;
                     now_frame++;
                     if(now_frame == Models[0]->animation->frames.size()) now_frame = 3;
-                    hero.Process();
+                    //hero.Process();
                 }
             return this;
 /**/

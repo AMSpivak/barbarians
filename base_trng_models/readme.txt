@@ -1,8 +1,9 @@
-﻿libraries:
-opengl
-glew
-glfw
-SOIL
+﻿compiled with gcc
+libraries:
+opengl  - https://www.opengl.org/
+glew    - http://glew.sourceforge.net/install.html
+glfw    - http://www.glfw.org/
+SOIL    - https://www.lonesock.net/soil.html
 
 credits:
 hand painted lamp(https://sketchfab.com/models/a2954459f2724f0e940e41652bee3115) by Jenioss(https://sketchfab.com/Jenioss) is licensed under CC Attribution-NonCommercial-ShareAlike(http://creativecommons.org/licenses/by-nc-sa/4.0/)

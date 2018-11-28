@@ -13,25 +13,32 @@
 
 void glModel::Draw()
 {
-
-	IGlJalStruct * mesh_ptr = jal_mesh.get();
 	
-	if(mesh_ptr->vertexcount > 2)
+	if(jal_mesh->vertexcount > 2)
 	{
-	    glBindVertexArray(mesh_ptr->VAO);
-	    glDrawArrays(GL_TRIANGLES, 0, mesh_ptr->vertexcount);
+	    glBindVertexArray(jal_mesh->VAO);
+	    glDrawArrays(GL_TRIANGLES, 0, jal_mesh->vertexcount);
 	    glBindVertexArray(0);
 	}
 }
-
+void glModel::SetDrawMatrix(const glm::mat4 &value)
+{
+	draw_matrix = value;
+}
 void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame)
+{
+	Draw(shaderProgram, animation,now_frame,draw_matrix);
+}
+void glModel::Draw(GLuint shaderProgram, Animation &animation, int now_frame,const glm::mat4 &matrix)
 {
 	//glUseProgram(shader);
 	unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+	unsigned int drawLoc = glGetUniformLocation(shaderProgram, "draw");
 	unsigned int boneLoc  = glGetUniformLocation(shaderProgram, "u_BoneMatrices");
 
 
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(drawLoc, 1, GL_FALSE, glm::value_ptr(matrix));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuse_texture.get()->m_texture);
@@ -53,7 +60,10 @@ void glModel::Draw(GLuint shaderProgram, int now_frame)
 {
 	Draw(shaderProgram, *animation ,now_frame);
 }
-
+void glModel::Draw(GLuint shaderProgram, int now_frame,const glm::mat4 &matrix)
+{
+	Draw(shaderProgram, *animation ,now_frame,matrix);
+}
 void glModel::AttachAnimation(std::vector <std::shared_ptr<Animation> > &animations, std::string Filename)
 {
 	animations.emplace_back(std::make_shared<Animation>());
@@ -66,6 +76,10 @@ const glm::mat4 &glModel::GetBoneMatrix(size_t frame, size_t bone)
 	animation->GetBoneMatrix(frame,bone,jub_bones.get()->bones);//frames[now_frame].bones[Models[i]->parent_bone];
 }
 
+const glm::mat4 &glModel::GetRotationMatrix(size_t frame)
+{
+	animation->GetRotationMatrix(frame,jub_bones.get()->bones);//frames[now_frame].bones[Models[i]->parent_bone];
+}
 
 void glModel::LoadAll(std::string FileName)
 {

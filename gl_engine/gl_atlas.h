@@ -31,7 +31,7 @@ public:
             return it->second.lock();
         }
         auto resource = std::shared_ptr<T>(new T(m_resourse_folder + filename), Deleter(this, filename));
-        m_map.insert( std::pair<std::string,std::weak_ptr<T>>(filename,resource));
+        m_map.insert( std::pair<const std::string,std::weak_ptr<T>>(filename,resource));
         std::cout << "New element: "<< filename <<"\n";
         return resource;
 
@@ -44,7 +44,7 @@ public:
 private:
 
     std::string m_resourse_folder;
-    std::map<std::string,std::weak_ptr<T>> m_map;
+    std::map<const std::string,std::weak_ptr<T>> m_map;
 
     struct Deleter
     {

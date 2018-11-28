@@ -45,7 +45,7 @@ EventProcessResult MapEventValhalla::Process()
     return m_alpha < 0.0 ? EventProcessResult::Kill: EventProcessResult::Nothing;
 }
 
-InteractionResult MapEventValhalla::Interact(IGlModel &model,std::string &return_value)
+InteractionResult MapEventValhalla::Interact(GlCharacter &model,std::string &return_value)
 {
     return InteractionResult::Nothing;
 }

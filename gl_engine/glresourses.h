@@ -9,6 +9,18 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glcamera.h"
+template <typename T1,typename T2>
+std::ostream& operator << ( std::ostream& os, const std::pair<T1,T2> & value)
+{
+    os<<value.first<<" "<<value.second;
+
+	return os;
+}
+template <typename T1,typename T2>
+std::istream& operator>> ( std::istream& is, std::pair<T1,T2> & value)
+{
+	is>>value.first>>value.second;
+}
 
 struct Bone {
 	std::string name;
@@ -38,21 +50,27 @@ public:
 	Animation(const std::string &file_name);
 	GLfloat * GetDrawValues(size_t frame,const std::vector <Bone> &bones);
 	const glm::mat4 & GetBoneMatrix(size_t frame,size_t bone,const std::vector <Bone> &bones);
+	const glm::mat4 & GetRotationMatrix(size_t frame,const std::vector <Bone> &bones);
 	
 private:
 	bool m_precalculated;
 	size_t m_cache_frame;
 	AnimationFrame m_cashe_animation;
+	glm::mat4 rotation_matrix;
+
 };
 
 
-std::istream& operator>> ( std::istream& is, glm::mat4& mat) ;
+std::istream& operator>> ( std::istream& is, glm::mat4& mat);
 
 std::istream& operator>> ( std::istream& is, Bone& bone) ;
 std::istream& operator>> ( std::istream& is, glm::vec3 & fill_vector) ;
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector);
-std::ostream& operator << ( std::ostream& os, glm::vec3 & glm_vector);
+std::ostream& operator << ( std::ostream& os, const glm::vec3 & glm_vector);
+std::ostream& operator << ( std::ostream& os, const glm::mat4 & mat);
+
+
 std::string readShaderFile(std::string FileName);
 
 GLuint LoadShader(std::string FileName,GLenum shaderType);
@@ -73,8 +91,10 @@ void Fit_Matrix(glm::mat4 &matrix,float x0,float y0,float x1,float y1,float x2,f
 void renderSprite(GLuint current_shader,
 	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
 	const glm::vec4 & corrector_v,
-	const GLuint * texture 
-);
+	const GLuint * texture,
+	float t_sprite_w = 1.0f,float t_sprite_h = 1.0f,
+	float t_sprite_offset_x = 0.0f,
+	float t_sprite_offset_y = 0.0f);
 
 void renderSpriteDepth(GLuint current_shader, GLuint depthmap, float sprite_depth,
 	float x0,float y0,float x1,float y1,float x2,float y2,float x3,float y3,
@@ -86,4 +106,7 @@ void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * 
 						 float width, float height,const glm::vec4 & corrector,
 						 const glm::vec3 & position, const glm::vec3 & offset, 
 						 glCamera & camera);
+
+
+void RenderHeightMap();
 #endif

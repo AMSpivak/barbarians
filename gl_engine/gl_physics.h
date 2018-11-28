@@ -8,7 +8,7 @@ namespace Physics
     std::pair<float,glm::vec3> Intersection(T1 &object1,T2 &object2)
     {
         std::vector < glm::vec3 > axes;
-        axes.push_back(glm::normalize(object2.position - object1.position));
+        axes.push_back(glm::normalize(object2.GetPosition() - object1.GetPosition()));
         object1.AddAxes(axes);
         object2.AddAxes(axes);
 
@@ -19,7 +19,7 @@ namespace Physics
         {
             std::pair<float,float> projection1 = object1.ProjectOnAxe(axe);
             std::pair<float,float> projection2 = object2.ProjectOnAxe(axe);
-            float axe_intersection = CollisionOnAxe(projection1,projection2);
+            float axe_intersection = Collision::CollisionOnAxe(projection1,projection2);
 
             if(axe_intersection < std::numeric_limits<float>::min())
                 return std::make_pair((float)0.0f,compensate_axe);

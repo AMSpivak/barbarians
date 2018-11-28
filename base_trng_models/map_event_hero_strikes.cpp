@@ -27,33 +27,14 @@ void IMapEventHeroStrike::Show(const glm::vec3 & offset, glCamera & camera)
 
 int IMapEventHeroStrike::AddAxes(std::vector<glm::vec3> &axes)
 {
-    glm::vec4 norm4;
-    glm::vec3 norm;
-    glm::vec3 norm_z(0.0f,0.0f,1.0f);
-
-    for(auto edge :m_edges)
-    {
-        norm4 = model_matrix * glm::vec4(edge.second[0],edge.second[1],edge.second[2],0.0f);
-        norm = glm::vec3(norm4[0],norm4[1],norm4[2]);        
-        axes.push_back(glm::normalize(norm));
-        norm = edge.second - edge.first;
-        /*float tmp = norm[0];
-        norm[0] = norm[2];
-        norm[2] = -tmp;*/
-        norm = glm::cross(norm_z,norm);
-        norm4 = model_matrix * glm::vec4(norm[0],norm[1],norm[2],0.0f);
-        norm = glm::vec3(norm4[0],norm4[1],norm4[2]);
-        axes.push_back(glm::normalize(norm));
-    }
-    
-    return 2 * m_edges.size();
+    return Collision::AddAxes(axes,m_edges,model_matrix);
 }
 
 
 
 std::pair<float, float> IMapEventHeroStrike::ProjectOnAxe(const glm::vec3 & axe)
 {
-    return ProjectEdgesOnAxe(model_matrix,m_edges,position,axe);
+    return Collision::ProjectEdgesOnAxe(model_matrix,m_edges,position,axe);
 }
 
 EventProcessResult IMapEventHeroStrike::Process()
@@ -62,7 +43,7 @@ EventProcessResult IMapEventHeroStrike::Process()
     return EventProcessResult::Kill;
 }
 
-InteractionResult IMapEventHeroStrike::Interact(IGlModel &model,std::string &return_value)
+InteractionResult IMapEventHeroStrike::Interact(GlCharacter &model,std::string &return_value)
 {
     model.Damage(0.1f);
     //std::cout<<"life "<<model.GetLifeValue()<<"\n";
