@@ -778,7 +778,7 @@ void LoadTexture(std::string FileName,GLuint &texture)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-unsigned char * LoadHeightmap(std::string FileName,int * tex_width, int * tex_height)
+unsigned char * LoadHeightMap(std::string FileName,int * tex_width, int * tex_height)
 {
 	std::string extention = FileName.substr(FileName.find_last_of(".")+1);
 
@@ -794,7 +794,7 @@ unsigned char * LoadHeightmap(std::string FileName,int * tex_width, int * tex_he
 	return image;
 }
 
-void DeleteHeightmap(unsigned char * image)
+void DeleteHeightMap(unsigned char * image)
 {
 	SOIL_free_image_data(image);
 }

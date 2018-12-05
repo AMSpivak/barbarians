@@ -13,6 +13,7 @@
 #include "gl_font16x16.h"
 #include "gl2d_item.h"
 #include "gl2d_image.h"
+#include "map_heightmap.h"
 #include <list>
 
 class GlGameStateDungeon: public IGlGameState
@@ -47,8 +48,8 @@ public:
     void SwitchOut(){}
 private:
 
-    std::shared_ptr<IGlTextureStruct> heightmap_texture;
-
+    //std::shared_ptr<IGlTextureStruct> heightmap_texture;
+    GameMap::HeightMap m_heightmap;
     bool m_show_intro;
 
     PauseStruct pause_interface;

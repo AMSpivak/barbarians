@@ -21,7 +21,7 @@ uniform sampler2D HeightMap;
 
 void main()
 {
-	vec3 position = a_Position.xyz+ offset_position;
+	vec3 position = a_Position.xyz + offset_position;
 
 
 

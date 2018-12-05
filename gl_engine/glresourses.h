@@ -110,7 +110,7 @@ void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * 
 
 void RenderHeightMap();
 
-unsigned char * LoadHeightmap(std::string FileName,int * tex_width, int * tex_height);
+unsigned char * LoadHeightMap(std::string FileName,int * tex_width, int * tex_height);
 
-void DeleteHeightmap(unsigned char * image);
+void DeleteHeightMap(unsigned char * image);
 #endif
