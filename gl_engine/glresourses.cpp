@@ -778,6 +778,27 @@ void LoadTexture(std::string FileName,GLuint &texture)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+unsigned char * LoadHeightmap(std::string FileName,int * tex_width, int * tex_height)
+{
+	std::string extention = FileName.substr(FileName.find_last_of(".")+1);
+
+	// if(extention == "tex")
+	// {
+	// 	std::ifstream tex_file;
+	// 	tex_file.open(FileName);
+	// 	if (!tex_file)
+    //     	throw std::runtime_error("Could not open file");
+	// }
+    unsigned char* image = SOIL_load_image(FileName.c_str(), tex_width, tex_height, 0, SOIL_LOAD_RGBA);
+    //SOIL_free_image_data(image);
+	return image;
+}
+
+void DeleteHeightmap(unsigned char * image)
+{
+	SOIL_free_image_data(image);
+}
+
 void LoadCubemap(const std::string file_name,GLuint &texture)
 {
 	size_t pos = file_name.rfind("/");
