@@ -10,6 +10,12 @@ GlText16x16::GlText16x16(const std::string & filename, GLAtlas<IGlTextureStruct>
 	
 }
 
+float GlText16x16::GetStringLength(const std::string &value)
+{
+	return m_width * 0.6 * value.length();
+}
+
+
 void GlText16x16::DrawString(const std::string &value,float x,float y, GLuint shader)
 {
 	glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

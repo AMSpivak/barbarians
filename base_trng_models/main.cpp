@@ -21,6 +21,8 @@
 #include "gl_game_state_dungeon.h"
 #include "animation_sequence.h"
 #include "engine_settings.h"
+#include "game_status.h"
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
@@ -57,7 +59,7 @@ void SetRenderTargets(
 
 void FillShaders(std::map<const std::string,GLuint> &shader_map, const std::string filename)
 {
-    shader_map.insert ( std::pair<const std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
+    //shader_map.insert ( std::pair<const std::string,GLuint>("sobel", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_cross.fs")) );
     shader_map.insert ( std::pair<const std::string,GLuint>("sobel_aa", LoadshaderProgram("shaders/dbg.vs","shaders/sobel_aa.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("shadowmap", LoadshaderProgram("shaders/vertex1.vs","shaders/frag1.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("sprite", LoadshaderProgram("shaders/sprite.vs","shaders/sprite.fs")) );
@@ -70,6 +72,7 @@ void FillShaders(std::map<const std::string,GLuint> &shader_map, const std::stri
 	shader_map.insert ( std::pair<const std::string,GLuint>("deffered_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deffered_cheap.fs")) );
     shader_map.insert ( std::pair<const std::string,GLuint>("deffered_simple_cheap",LoadshaderProgram("shaders/dbg.vs","shaders/deff_simple_cheap.fs")) );
     shader_map.insert ( std::pair<const std::string,GLuint>("deff_1st_pass",LoadshaderProgram("shaders/vert_norm.vs","shaders/frag_norm.fs")) );
+    shader_map.insert ( std::pair<const std::string,GLuint>("deff_1st_pass_heght",LoadshaderProgram("shaders/vert_norm_height.vs","shaders/frag_norm_height.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("luminocity",LoadshaderProgram("shaders/dbg.vs","shaders/luminocity.fs")) );
 }
 
@@ -77,6 +80,8 @@ std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;
 
 int main(int argc, char const *argv[])
 {
+
+
     bool is_fullscreen = true;
 
     if(argc > 1) is_fullscreen = false;
@@ -156,11 +161,16 @@ int main(int argc, char const *argv[])
 	
 
 	GLResourcesManager resources_atlas("material/textures/","material/meshes/","material/animations/","");
+	SetResourceManager(&resources_atlas);
 
 	EngineSettings::Settings main_settings;
 	EngineSettings::SetEngineSettings(&main_settings);
 
-	SetResourceManager(&resources_atlas);
+	
+
+	GameSettings::HeroStatus hero_status;
+	GameSettings::SetHeroStatus(&hero_status);
+
 
     std::map<const std::string,GLuint> m_shader_map;
 

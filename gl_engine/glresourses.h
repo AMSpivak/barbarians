@@ -106,4 +106,11 @@ void renderBillBoardDepth(GLuint current_shader, GLuint depthmap,const GLuint * 
 						 float width, float height,const glm::vec4 & corrector,
 						 const glm::vec3 & position, const glm::vec3 & offset, 
 						 glCamera & camera);
+
+
+void RenderHeightMap();
+
+unsigned char * LoadHeightMap(std::string FileName,int * tex_width, int * tex_height);
+
+void DeleteHeightMap(unsigned char * image);
 #endif

@@ -180,7 +180,7 @@ void GlCharacter::UseCommand(AnimationCommand command)
     }
     catch(const std::out_of_range& exp)
     {
-        std::cout<<"Unknown command\n";
+        // std::cout<<"Unknown command\n";
     }   
 }
 

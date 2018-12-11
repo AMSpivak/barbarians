@@ -8,6 +8,7 @@
 #include <functional>
 #include <utility>
 #include <algorithm>
+#include <math.h>  
 //#define GLM_SWIZZLE_XYZW
 
 #include "glm/glm.hpp"
@@ -24,7 +25,9 @@
 #include "collision.h"
 #include "loader.h"
 #include "engine_settings.h"
+#include "game_status.h"
 #include "game_event_fabric.h"
+#include "gl2d_progressbar.h"
 
 
 
@@ -99,10 +102,38 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,m_start_place("")
                                                         ,light_angle (90.0f)
                                                         ,light_radius (20.0f)
+                                                        ,camera_distance(12.f)
                                                         ,now_frame(91)
                                                         ,key_angle(0.0f)
+                                                        ,camera_rotation_angle(0.0f)
+                                                        ,old_joy_x(0.0f)
                                                         ,m_dungeon(10,10,1)
+                                                        ,m_show_intro(false)
+                                                        ,m_info_message("")
 {
+    glClearColor(0.0f,0.0f,0.0f,1.0f);
+
+
+    float a_ratio = screen_width;
+    a_ratio /= screen_height;
+
+
+    auto object_ptr = std::make_shared<Gl2D::GlProgressbar>(-1.0,0.9,0.8,0.1,a_ratio,
+                                GetResourceManager()->m_texture_atlas.Assign("halfbar_border.png"),
+                                GetResourceManager()->m_texture_atlas.Assign("halfbar.png"),
+                                m_shader_map["sprite2dsimple"],
+                                []() { return GameSettings::GetHeroStatus()->GetLife(); }
+                                );
+                                
+    object_ptr->SetItemAligment(Gl2D::ItemAligment::Left);
+    object_ptr->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);                    
+    Interface2D.push_back(object_ptr);
+
+    m_intro = std::make_shared<Gl2D::GlImage>(-1.0f,-0.56f,2.0f,1.12f,a_ratio,
+                                GetResourceManager()->m_texture_atlas.Assign("back.png"),m_shader_map["sprite2dsimple"]);
+    m_intro->SetItemAligment(Gl2D::ItemAligment::Center);
+    m_intro->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Maximal);     
+
     m_gl_text = std::make_shared<GlText16x16>("font2.png",GetResourceManager()->m_texture_atlas,0.1f,0.1f);
 
     m_message_processor.Add("teleport",[this](std::stringstream &sstream)
@@ -112,6 +143,20 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                         sstream >> level >> start;
                                         LoadMap(level,start);
                                     });
+
+    m_message_processor.Add("show_message",[this](std::stringstream &sstream)
+                                    {
+                                        std::getline(sstream,m_info_message);
+                                        //m_info_message = sstream.str();
+                                        std::cout<<m_info_message<<"\n";
+                                    });
+    
+    m_message_processor.Add("pause_interface",[this](std::stringstream &sstream)
+                                    {
+                                        pause_interface.duration = LoaderUtility::GetFromStream<double>(sstream);
+                                        pause_interface.start_time = glfwGetTime();
+                                    });
+
     m_message_processor.Add("spawn",[this](std::stringstream &sstream)
                                     {
                                         std::string object;
@@ -132,6 +177,18 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                             sstream >>angle;
                                             object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
                                             object->RefreshMatrixes();
+                                        }
+                                    });
+
+    m_message_processor.Add("run_script",[this](std::stringstream &sstream)
+                                    {
+                                        std::string name;
+                                        sstream >> name;
+                                        auto script = m_scripts.at(name);
+                                        for(auto message:script)
+                                        {
+                                            PostMessage(message);
+                                            //std::cout<<message<<"\n";
                                         }
                                     });
     
@@ -156,8 +213,14 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
         mob_events.push_back(GameEvents::CreateGameEvent(GameEvents::EventTypes::HeroUse,&(*hero)));
     });
 
-    glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+    m_message_processor.Add("show_intro",[this](std::stringstream &sstream)
+    {  
+        std::string image;
+        sstream >> image;
+        m_intro->SetImage(GetResourceManager()->m_texture_atlas.Assign(image)); 
+        m_mode = GameStateMode::Intro;
+        
+    });
 
     Camera.SetCameraLocation(glm::vec3(12.0f, 8.485f, -12.0f),glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Camera.SetCameraLens(45,(float)screen_width / (float)screen_height,0.1f, 100.0f);
@@ -165,6 +228,8 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
     time = glfwGetTime();
     LoadMap("levels/test.lvl","base");
 
+    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 }
 
 
@@ -243,7 +308,12 @@ void GlGameStateDungeon::SetDungeonSize(std::vector<std::string> &lines)
 
     ss >> width>> height>>floors;
     m_dungeon = GlDungeon(width,height,floors);
+}
 
+void GlGameStateDungeon::LoadScript(std::vector<std::string> &lines)
+{
+    std::vector<std::string> clean_lines(lines.begin()+1,lines.end());
+    m_scripts.insert(std::make_pair(lines[0],clean_lines));
 }
 
 void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
@@ -318,7 +388,7 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
         {
             if(object->GetType() == CharacterTypes::map_object)
             {
-                std::cout<<"Saving\n";
+                // std::cout<<"Saving\n";
                 savefile  << (*object);
                 #ifdef DBG
                 std::cout<<(*object);
@@ -326,23 +396,26 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
             }
         }
         savefile.close();
-        std::cout<<"sav closed\n";
+        // std::cout<<"sav closed\n";
     }
     
 }
 
 void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
 {  
+    
+    m_heightmap.LoadMap("desert_map.png");
+    m_heightmap.SetParameters(0.006f,2.0f);
     m_messages.clear();                                        
     
     std::ifstream level_file;
 	level_file.open(filename); 
-    std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
+    // std::cout<<"Level:"<<filename<<" "<<(level_file.is_open()?"-opened":"-failed")<<"\n";  
     if(!level_file.is_open()) return;
 
 
     SaveObjects(m_level_file);
-    std::cout<<"Level: old saves to"<< m_level_file<<"\n";
+    // std::cout<<"Level: old saves to"<< m_level_file<<"\n";
     m_level_file = filename;
 
     std::string tmp_filename(filename);
@@ -356,6 +429,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     hero_events.clear();
     mob_events.clear();
     map_events.clear();
+    m_scripts.clear();
     
     dungeon_objects.clear();
     //dungeon_objects.push_back(m_models_map["Hero"]);
@@ -377,6 +451,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     execute_funcs.insert(std::make_pair("dungeon_tiles",[this](std::vector<std::string> &lines){LoadTiles(lines);}));
     execute_funcs.insert(std::make_pair("dungeon_objects",[this](std::vector<std::string> &lines){LoadDungeonObjects(lines);}));
     execute_funcs.insert(std::make_pair("hero_event",[this](std::vector<std::string> &lines){LoadMapEvent(lines);}));
+    execute_funcs.insert(std::make_pair("script",[this](std::vector<std::string> &lines){LoadScript(lines);}));
     
 
     if(!AddObjectsFromFile(extention))
@@ -404,7 +479,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
         }
         catch(const std::out_of_range& exp)
         {
-            std::cout<<"Unknown prefix: "<<sufix<<"\n";
+            // std::cout<<"Unknown prefix: "<<sufix<<"\n";
         }
     }
 
@@ -425,8 +500,11 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
 
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader,std::shared_ptr<GlCharacter>hero)
 {
-    //hero_position = hero->GetPosition();
-    
+    glm::vec3 tmp_hero_position = hero->GetPosition();
+    tmp_hero_position[1] = m_heightmap.GetHeight(tmp_hero_position[0],tmp_hero_position[2]);
+    //std::cout<<"Z: "<< tmp_hero_position[1] <<"\n";
+    hero->SetPosition(tmp_hero_position);
+
     glm::mat4 model_matrix = Models[0]->model;
     glm::mat4 pos_matrix;
     size_t iz = 0;
@@ -461,11 +539,14 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,std::shared_ptr<GlCha
             pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
         }
     }
+
                 
     for(auto object : dungeon_objects)
     {  
         object->Draw(current_shader,glm::translate(glm::mat4(), object->GetPosition() - hero_position));
     }
+
+    
 }
 
 void DrawSimpleLight(const glm::vec4 &light_pos_vector,const glm::vec3 &light_color_vector,const glm::vec3 &camera_position,GLuint current_shader,glRenderTargetDeffered &render_target)
@@ -555,21 +636,41 @@ void GlGameStateDungeon::DrawFxSprite(GLuint &current_shader, GLuint texture)
 
 void GlGameStateDungeon::Draw2D(GLuint depth_map)
 {
-    for(std::shared_ptr<IMapEvent> event :map_events) 
+    for(/*std::shared_ptr<IMapEvent>*/auto event :map_events) 
     {
-        event.get()->Show(hero_position,Camera);
+        event->Show(hero_position,Camera);
     }
 
     
     glClear( GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_BLEND);	
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_CULL_FACE);
+    
+    for(auto item :Interface2D) 
+    {
+        item->Draw();
+    }
+    glEnable(GL_CULL_FACE);
+	glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+
     const float text_size_y = 0.060f;
     const float text_size_x = m_aspect_ratio * text_size_y;
 
     m_gl_text->SetTextSize(text_size_x,text_size_y); 
     auto shader = m_shader_map["sprite2dsimple"];
     std::stringstream ss;
-    ss<< std::fixed<<std::setprecision(1)<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS";
-    m_gl_text->DrawString(ss.str(),-1.0f,1.0f - text_size_y*1.2f, shader);
+    ss<< std::fixed<<std::setprecision(1)<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS; life: "<<std::setprecision(2)<<GameSettings::GetHeroStatus()->GetLife();
+    m_gl_text->DrawString(ss.str(),1.0f - m_gl_text->GetStringLength(ss.str()),1.0f - text_size_y*1.2f, shader);
+
+    if(m_info_message.length()!=0) 
+    {
+        m_gl_text->DrawString(m_info_message, - 0.5f * m_gl_text->GetStringLength(m_info_message),-1.0f + text_size_y*2.2f, shader);
+    }
+
 }
 void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharacter>hero)
 {
@@ -587,6 +688,8 @@ void GlGameStateDungeon::PrerenderLight(glLight &Light,std::shared_ptr<GlCharact
     glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Light.CameraMatrix()));
 
     DrawDungeon(current_shader,hero);
+    DrawHeightMap(m_shader_map["deff_1st_pass_heght"],hero,Light.CameraMatrix());
+    
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 }
@@ -600,6 +703,46 @@ void GlGameStateDungeon::DrawGlobalLight(const GLuint light_loc, const glLight &
 		renderQuad();
 }
 
+void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<GlCharacter>hero,const glm::mat4 camera)
+{
+    //current_shader = m_shader_map["deff_1st_pass_heght"];
+    glUseProgram(current_shader);
+    const float tile_size = 0.15f;
+    float inv = 1/tile_size;
+    float x = hero_position[0]-trunc(hero_position[0]);
+    float z = hero_position[2]-trunc(hero_position[2]);
+
+    float offset_x = x - (tile_size * round(x*inv)); 
+    float offset_z = z - (tile_size * round(z*inv)); 
+
+    //std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
+    // glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
+    glm::vec3 offset_position_vector = glm::vec3(-offset_x,-hero_position[1],-offset_z);
+    glm::vec4 map_position_vector = glm::vec4(hero_position[0],hero_position[2],
+                                                m_heightmap.GetMapScaler(),m_heightmap.GetHeightScaler());
+    
+    GLuint cameraLoc  = glGetUniformLocation(current_shader, "camera");
+    glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
+
+    GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
+    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
+
+    GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
+    glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_heightmap.m_heightmap_texture->m_texture);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glDisable(GL_CULL_FACE);
+
+    RenderHeightMap();
+    //glEnable(GL_CULL_FACE);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+
 void GlGameStateDungeon::Draw()
 {
     hero_position = hero->GetPosition();
@@ -611,6 +754,42 @@ void GlGameStateDungeon::Draw()
 
     size_t width = IGlGameState::m_screen_width;
     size_t height = IGlGameState::m_screen_height;
+    
+    if(m_mode == GameStateMode::Intro)
+    {
+
+        
+        glDisable(GL_STENCIL_TEST);
+        glDisable(GL_DEPTH_TEST);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
+        GLuint current_shader = m_shader_map["fullscreen"];
+
+        glClearColor(0.0f,0.0f,0.0f,1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glUseProgram(current_shader);
+
+
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, postprocess_render_target.AlbedoMap);
+        // renderQuad();/**/
+
+        m_intro->Draw();
+        if(m_info_message.length()!=0) 
+        {
+            const float text_size_y = 0.050f;
+            const float text_size_x = m_aspect_ratio * text_size_y;
+
+            m_gl_text->SetTextSize(text_size_x,text_size_y); 
+            auto shader = m_shader_map["sprite2dsimple"];
+            m_gl_text->DrawString(m_info_message, - 0.5f * m_gl_text->GetStringLength(m_info_message),-1.0f + text_size_y*2.2f, shader);
+        }
+        //Draw2D(render_target.depthMap);
+
+        glEnable(GL_DEPTH_TEST);
+        return;
+    }
 
     if(processed)
     {
@@ -645,6 +824,9 @@ void GlGameStateDungeon::Draw()
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
 
         DrawDungeon(current_shader,hero);
+
+        DrawHeightMap(m_shader_map["deff_1st_pass_heght"],hero,Camera.CameraMatrix());
+        
      
 		final_render_target.set();
         glEnable(GL_BLEND);
@@ -720,17 +902,12 @@ void GlGameStateDungeon::Draw()
         DrawLight(glm::vec4(hero_position[0],hero_position[1],hero_position[2],0.0f),glm::vec3(0.98f,0.1f,0.1f),render_target);
         
 
-    /**/
+
 		postprocess_render_target.set();
 
 
         glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-
-	// 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//    //glEnable(GL_MULTISAMPLE);
-
-	// 	glViewport(0, 0, width, height);
 
 		glClearColor(1.0f, 0.4f, 0.4f, 1.0f);
 
@@ -960,10 +1137,6 @@ void GlGameStateDungeon::FitObjects(int steps, float accuracy)
 
 
 
-void GlGameStateDungeon::MoveHero(const glm::vec3 & hero_move)
-{
-    //hero->SetPosition(hero->GetPosition() + hero_move);
-}
 
 bool IsKilled (std::shared_ptr<IMapEvent> value) { return value->Process() == EventProcessResult::Kill; }
 
@@ -1010,7 +1183,8 @@ void GlGameStateDungeon::PostMessage(const std::string & event_string)
 
 void GlGameStateDungeon::ProcessMessages()
 {
-    while (!m_messages.empty())
+    double l_time = glfwGetTime();
+    while (!m_messages.empty()&&!pause_interface.IsPaused(l_time))
     {
         m_message_processor.Process(m_messages.front());
         m_messages.pop_front();
@@ -1023,7 +1197,7 @@ bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<GlCharacter> hero_pt
     {
        if(ReactObjectToEvent(*hero_ptr,*event.get(),event_return_string) == InteractionResult::PostMessage)
        {
-           std::cout<<"\n"<<event_return_string<<"\n"<< hero_ptr->GetPosition()<<"\n";
+           //std::cout<<"\n"<<event_return_string<<"\n"<< hero_ptr->GetPosition()<<"\n";
            
            PostMessage(event_return_string);
            return true;
@@ -1035,135 +1209,163 @@ bool GlGameStateDungeon::HeroEventsInteract(std::shared_ptr<GlCharacter> hero_pt
 IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float joy_x, float joy_y)
 {
     glRenderTargetDeffered &render_target = *(dynamic_cast<glRenderTargetDeffered*>(m_render_target_map["base_deffered"].get()));
-    
-    static float camera_rotation_angle = 0.0f;
-    static float hero_rotation_angle = 0.0f;
-    static float old_joy_x = 0.0f;
     std::shared_ptr<GlCharacter> hero_ptr = m_models_map["Hero"];
    
     GLuint current_shader;
 
     int models_count = Models.size();
     double time_now = glfwGetTime();
-    //std::cout<<(time_now - time)<<'\n';
+
+    if(m_mode == GameStateMode::Intro)
+    {
+        
+        if((!pause_interface.IsPaused(time_now)) &&inputs[GLFW_KEY_SPACE])
+        {
+            m_mode = GameStateMode::General;
+        }
+        return this;
+    }
+    else
     if((time_now - time)>(1.0/30.0))
     {
+        time = time_now;        
         processed = true;
         MapObjectsEventsInteract();
         hero_position = hero->GetPosition();
         HeroEventsInteract(hero_ptr);
 
-
-        // m_antialiase_enabled = !inputs[GLFW_KEY_F1];
-        static float distance = 12.f;
-        bool moving = inputs[GLFW_KEY_RIGHT]|inputs[GLFW_KEY_DOWN]|inputs[GLFW_KEY_LEFT]|inputs[GLFW_KEY_UP];
-
-        //key_angle = 0.0f;
-        int joy_axes_count;
-        const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);       
-        if(joy_axes!=nullptr)
-        {
-            if(std::abs(joy_axes[0])+std::abs(joy_axes[1])>0.6f)
-            {
-                moving = true;
-            }
-        }
-
-        if(moving)
-        {
-            glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
-            glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
-
-            if(joy_axes!=nullptr)
-            {
-                x_basis[0]= -joy_axes[0];
-                x_basis[2]= -joy_axes[1];
-            }
-            else
-            {
-                if(inputs[GLFW_KEY_UP])
-                {
-                    x_basis[2]=1.0f;
-                }
-                else
-                if(inputs[GLFW_KEY_DOWN])
-                {
-                    x_basis[2]=-1.0f;                            
-                }
-
-                if(inputs[GLFW_KEY_LEFT])
-                {
-                    x_basis[0]=1.0f;
-                }
-                else
-                if(inputs[GLFW_KEY_RIGHT])
-                {
-                    x_basis[0]=-1.0f;                          
-                }
-            }
-
-            x_basis = glm::normalize(x_basis);
-            
-            glm::mat4 m = glm::rotate(glm::radians(camera_rotation_angle), glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::vec4 x_basis4 = m *glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f);
-            x_basis = glm::vec3(x_basis4[0],x_basis4[1],x_basis4[2]);
-            x_basis = glm::normalize(x_basis);
-            
-            glm::vec4 move_h = hero->model_matrix * glm::vec4(1.0f,0.0f,0.0f,1.0f);
-            glm::vec3 old_dir = glm::vec3(move_h);
-
-            float l = 0.2f * glm::length(old_dir - x_basis);
-            x_basis =(1.0f - l) * old_dir + l * x_basis;
-            x_basis = glm::normalize(x_basis);
-
-            glm::vec3 z_basis = glm::cross(x_basis, y_basis);
-
-            glm::mat4 rm(
-                glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f),
-                glm::vec4(y_basis[0],y_basis[1],y_basis[2],0.0f),
-                glm::vec4(z_basis[0],z_basis[1],z_basis[2],0.0f),
-                glm::vec4(0.0,0.0,0.0,1.0f)
-                );
-
-            //static const glm::mat4 hero_base_matrix = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            hero->model_matrix = rm;// * hero_base_matrix;
-            
-        }
-        
         ProcessMessages();
-
-        bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
-
-        int buttons_count;
-        const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
         
-        if(buttons!= nullptr)
+
+       
+         
+        ProcessInputsCamera(inputs,joy_x, joy_y);
+              
+        auto action = ProcessInputs(inputs);
+        switch(action)
         {
-            if(buttons_count>7)
-            {
-                attack = buttons[7] == GLFW_PRESS;
-            }
+            case AnimationCommand::kStrike:
+                hero->UseSequence("strike");
+                m_messages.push_back("hero_strike");
+            break;
+            case AnimationCommand::kUse:
+                hero->UseSequence("use");
+                m_messages.push_back("hero_use");
+            break;
+            case AnimationCommand::kMove:
+                hero->UseSequence("walk");
+            break;
+            case AnimationCommand::kFastMove:
+                hero->UseSequence("run");
+            break;
+            default:
+                hero->UseSequence("stance");
+            break;
         }
 
 
-        static bool old_attack = false;
-        bool start_attack = attack && (!old_attack);
-        old_attack = attack;
-
-        bool action_use = inputs[GLFW_KEY_LEFT_ALT];
-        
-        if(buttons!= nullptr)
-        {
-            if(buttons_count>6)
-            {
-                action_use = buttons[6] == GLFW_PRESS;
-            }
+        for(auto object : dungeon_objects)
+        {  
+            object->Process(m_messages);
         }
 
-        if(inputs[GLFW_KEY_RIGHT_BRACKET]) distance +=0.1f;
-        if(inputs[GLFW_KEY_LEFT_BRACKET]) distance -=0.1f;
+        FitObjects(10,0.01f);
+    }
+
+    return this;
+}
+
+AnimationCommand GlGameStateDungeon::ProcessInputs(std::map <int, bool> &inputs)
+{
+    auto move_inputs = ProcessInputsMoveControl(inputs);
+    bool moving = (std::abs(move_inputs.first)+std::abs(move_inputs.second)>0.6f);
+
+    if(moving)
+    {
+        glm::vec3 y_basis = glm::vec3(0.0f,1.0f,0.0f);
+        glm::vec3 x_basis = glm::vec3(0.0f,0.0f,0.0f);
+        
+
+        x_basis[0]= move_inputs.first;
+        x_basis[2]= move_inputs.second;
+
+        x_basis = glm::normalize(x_basis);
+        
+        glm::mat4 m = glm::rotate(glm::radians(camera_rotation_angle), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec4 x_basis4 = m *glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f);
+        x_basis = glm::vec3(x_basis4[0],x_basis4[1],x_basis4[2]);
+        x_basis = glm::normalize(x_basis);
+        
+        glm::vec4 move_h = hero->model_matrix * glm::vec4(1.0f,0.0f,0.0f,1.0f);
+        glm::vec3 old_dir = glm::vec3(move_h);
+
+        float l = 0.2f * glm::length(old_dir - x_basis);
+        x_basis =(1.0f - l) * old_dir + l * x_basis;
+        x_basis = glm::normalize(x_basis);
+
+        glm::vec3 z_basis = glm::cross(x_basis, y_basis);
+
+        glm::mat4 rm(
+            glm::vec4(x_basis[0],x_basis[1],x_basis[2],0.0f),
+            glm::vec4(y_basis[0],y_basis[1],y_basis[2],0.0f),
+            glm::vec4(z_basis[0],z_basis[1],z_basis[2],0.0f),
+            glm::vec4(0.0,0.0,0.0,1.0f)
+            );
+
+        hero->model_matrix = rm;
+        
+    }
+
+
+    int buttons_count;
+    const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
     
-        distance = glm::clamp(distance,3.0f,14.0f);
+    const auto joy_buttons = std::make_pair(buttons_count,buttons);
+
+    bool attack = inputs[GLFW_MOUSE_BUTTON_LEFT]|inputs[GLFW_KEY_SPACE];
+
+    if(joy_buttons.second!= nullptr)
+    {
+        if(joy_buttons.first>7)
+        {
+            attack = joy_buttons.second[7] == GLFW_PRESS;
+        }
+    }
+
+
+    static bool old_attack = false;
+    bool start_attack = attack && (!old_attack);
+    old_attack = attack;
+
+    if(attack) 
+        return AnimationCommand::kStrike;
+
+    bool action_use = inputs[GLFW_KEY_LEFT_ALT];
+    
+    if(joy_buttons.second!= nullptr)
+    {
+        if(joy_buttons.first>6)
+        {
+            action_use = joy_buttons.second[6] == GLFW_PRESS;
+        }
+    }
+
+    if(action_use) 
+        return AnimationCommand::kUse;
+
+    bool fast_move = inputs[GLFW_KEY_LEFT_SHIFT];
+
+    if(moving)
+        return fast_move ? AnimationCommand::kFastMove:AnimationCommand::kMove;
+}
+
+void GlGameStateDungeon::ProcessInputsCamera(std::map <int, bool> &inputs,float joy_x, float joy_y)
+{
+    
+        if(inputs[GLFW_KEY_RIGHT_BRACKET]) camera_distance +=0.1f;
+        if(inputs[GLFW_KEY_LEFT_BRACKET]) camera_distance -=0.1f;
+    
+        camera_distance = glm::clamp(camera_distance,6.0f,14.0f);
 
 
 
@@ -1172,7 +1374,9 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         {
             joy_diff = 0.0f;
         }
-
+        
+        int joy_axes_count;
+        const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);
         if(joy_axes_count>2&&joy_axes!=nullptr)
         {
             joy_diff = joy_axes[2];
@@ -1190,48 +1394,51 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
         {
             camera_rotation_angle +=  360.0f;
         }
-        
-        
-        glm::vec3 camera_position = glm::vec3(-distance * glm::cos(glm::radians(camera_rotation_angle)), distance,  distance * glm::sin(glm::radians(camera_rotation_angle)));
+
+        glm::vec3 camera_position = glm::vec3(-camera_distance * glm::cos(glm::radians(camera_rotation_angle)), camera_distance,  camera_distance * glm::sin(glm::radians(camera_rotation_angle)));
         Camera.SetCameraLocation(camera_position,glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         
         glm::vec3 light_orientation = glm::normalize(glm::vec3(-camera_position.x,0.0f,-camera_position.z));
         Light.SetCameraLocation(light_position,glm::vec3(0.0f, 0.0f, 0.0f), light_orientation);
         Light2.SetCameraLocation(light_position+light_orientation*10.0f,light_orientation*10.0f, light_orientation);
 
-
-        time = time_now;
-        bool fast_move = inputs[GLFW_KEY_LEFT_SHIFT];
-
-        if(moving&&!attack)
-        {
-            hero->UseSequence(fast_move? "run":"walk");
-            glm::vec4 move_h = hero->model_matrix * glm::vec4(0.0f,0.142f,0.0f,1.0f);
-            MoveHero(glm::vec3(move_h));
-        }else
-        if(attack)
-        {
-            hero->UseSequence("strike");
-            m_messages.push_back("hero_strike");
-        }
-        else
-        if(action_use)
-        {
-            hero->UseSequence("use");
-            m_messages.push_back("hero_use");
-        }
-        else
-        {
-            hero->UseSequence("stance");
-        }
-
-
-        for(auto object : dungeon_objects)
-        {  
-            object->Process(m_messages);
-        }
-
-        FitObjects(10,0.01f);
-    }
-    return this;
+        
 }
+
+
+std::pair<float,float> GlGameStateDungeon::ProcessInputsMoveControl(std::map <int, bool> &inputs)
+{
+    int joy_axes_count;
+    const float* joy_axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &joy_axes_count);  
+    float x = 0;
+    float z = 0;
+    if(joy_axes!=nullptr)
+    {
+        x = -joy_axes[0];
+        z= -joy_axes[1];
+    }
+    else
+    {
+        if(inputs[GLFW_KEY_UP])
+        {
+            z=1.0f;
+        }
+        else
+        if(inputs[GLFW_KEY_DOWN])
+        {
+            z=-1.0f;                            
+        }
+
+        if(inputs[GLFW_KEY_LEFT])
+        {
+            x=1.0f;
+        }
+        else
+        if(inputs[GLFW_KEY_RIGHT])
+        {
+            x=-1.0f;                          
+        }
+    }
+    return std::make_pair(x,z); 
+}
+

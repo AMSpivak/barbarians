@@ -12,6 +12,7 @@ class GlText16x16 : public IGlText
     }
 
     virtual void DrawString(const std::string &value,float x,float y, GLuint shader);
+    virtual float GetStringLength(const std::string &value);
 
 };
 #endif

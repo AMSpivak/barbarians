@@ -2,7 +2,7 @@
 skybox skybox/violent.cub
 light_pos 10.0 30.0 -15.0
 light_color 3.0 3.0 3.0
-camera_lens 20.0 1.0 45.0
+camera_lens 30.0 1.0 45.0
 <!sky>
 <models>
 material/tiles/tile.mdl
@@ -10,7 +10,7 @@ material/dungeon/walls/wall/wall.mdl
 material/dungeon/walls/wallcross/wallcross.mdl
 <!models>
 <dungeon_params>
-10 10 1
+10 30 1
 <!dungeon_params>
 <dungeon_tiles>
 -1 -1 -1 0 0 0 0 -1 -1 -1
@@ -31,10 +31,29 @@ material/dungeon/walls/wallcross/wallcross.mdl
 0 5 0 0 0 0 0 0 5 0
 0 5 0 0 0 0 0 0 5 0
 0 5 0 0 0 0 0 0 5 0
-0 5 0 0 0 0 0 0 5 0
-0 5 0 0 0 0 0 0 5 0
-0 5 0 0 0 0 0 0 5 0
-0 10 4 4 4 4 4 4 9 0
+0 5 4 0 0 0 0 4 5 0
+11 9 0 0 0 0 0 0 10 8
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+5 0 0 0 0 0 0 0 0 5
+10 4 4 4 4 4 4 4 4 9
 0 0 0 0 0 0 0 0 0 0
 <!dungeon_objects>
 <object>
@@ -48,44 +67,76 @@ sequence damage 2 3 0 0  "" "" ""
 sequence base 0 1 0 0  "" "" ""
 <!object>
 <object>
+name test_door
 mass_inv 0.0
 radius 0.01
-position 9.0 0.0 17.5
-orientation 0.0 270.0 0.0
-model material/sign/sign.mdl
-armor 0.0
-sequence damage 2 3 0 0  "" "" ""
-sequence base 0 1 0 0  "" "" ""
-<!object>
-<object>
-mass_inv 0.0
-radius 0.01
-position 17.5 0.0 9.0
+position 5.5 0.0 10.0
 orientation 0.0 0.0 0.0
-model material/sign/sign.mdl
+model material/door/door.mdl
 armor 0.0
-sequence damage 2 3 0 0  "" "" ""
-sequence base 0 1 0 0  "" "" ""
+sequence damage 2 3 0 1 base "" "" ""
+sequence open 25 35 0 1 opened "" "" ""
+sequence close 10 20 0 1 base "" "" ""
+sequence opened 1 8 0 0 "" "" "" "use close" "damage close"
+sequence base 1 8 0 0 "" "" "" "use open"
+edge -0.5 -0.5 0.0 3.5 -0.5 0.0
+edge 3.5 -0.5 0.0 3.5 0.5 0.0
+edge 3.5 0.5 0.0 -0.5 0.5 0.0
+edge -0.5 0.5 0.0 -0.5 -0.5 0.0
 <!object>
 <object>
+name test_door2
 mass_inv 0.0
 radius 0.01
-position 0.0 0.0 9.0
+position 12.5 0.0 10.0
 orientation 0.0 180.0 0.0
-model material/sign/sign.mdl
+model material/door/door.mdl
 armor 0.0
-sequence damage 2 3 0 0  "" "" ""
-sequence base 0 1 0 0  "" "" ""
-<!object>     
+sequence damage 2 3 0 1 base "" "" ""
+sequence open 10 20 0 1 opened "" "" ""
+sequence close 25 35 0 1 base "" "" ""
+sequence opened 1 8 0 0 "" "" "" "use close" "damage close"
+sequence base 1 8 0 0 "" "" "" "use open"
+edge -0.5 -0.5 0.0 3.5 -0.5 0.0
+edge 3.5 -0.5 0.0 3.5 0.5 0.0
+edge 3.5 0.5 0.0 -0.5 0.5 0.0
+edge -0.5 0.5 0.0 -0.5 -0.5 0.0
+<!object>
+<object>
+name stonesword
+mass_inv 0.0
+radius 0.01
+position 9.0 0.0 50.0
+orientation 0.0 180.0 0.0
+model material/dungeon/stonesword/stonesword.mdl
+armor 0.0
+sequence damage 2 3 0 1 base "" "" ""
+sequence base 1 8 0 0 "" "" ""
+edge -0.5 -0.5 0.0 0.5 -0.5 0.0
+edge 0.5 -0.5 0.0 0.5 0.5 0.0
+edge 0.5 0.5 0.0 -0.5 0.5 0.0
+edge -0.5 0.5 0.0 -0.5 -0.5 0.0
+<!object>
 <hero_event>
 radius 0.05
 position 9.0 0.0 0.0
-message teleport levels/test.lvl start_top
-<!hero_event> 
+message teleport levels/test.lvl base
+<!hero_event>
+<hero_event>
+radius 1.0
+position 9.0 0.0 50.0
+message run_script got_sword
+<!hero_event>
 <starts> 
 base 9.0 0.0 9.0      
 start_top 9.0 0.0 16.0      
 start_bottom 9.0 0.0 2.5      
 start_left 2.5 0.0 9.0      
 start_right 16.0 0.0 9.0      
-<!starts>       
+<!starts>
+<script> 
+got_sword
+show_message Thank you for test! Press Esc to exit
+show_intro sword_intro.png
+pause_interface 5.0
+<!script>     

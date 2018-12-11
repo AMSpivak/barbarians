@@ -29,5 +29,6 @@ class IGlText
         m_height = height;
     }
     virtual void DrawString(const std::string &value,float x,float y, GLuint shader) = 0;
+    virtual float GetStringLength(const std::string &value) = 0;
 };
 #endif

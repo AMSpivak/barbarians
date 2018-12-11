@@ -77,34 +77,34 @@ std::istream& operator>> ( std::istream& is, AnimationSequence & value)
     std::getline(std::getline(is, skip, '"'), tmp, '"') ;
 
     value.m_start_message = ParseCommand(tmp);
-    std::cout << "<m_start_message------->"<<tmp<<"!\n";
+    // std::cout << "<m_start_message------->"<<tmp<<"!\n";
     //is>>std::quoted(tmp);
     std::getline(std::getline(is, skip, '"'), tmp, '"') ;
 
     value.m_frame_message = ParseCommand(tmp);
-    std::cout << "<m_frame_message------->"<<tmp<<"!\n";
+    // std::cout << "<m_frame_message------->"<<tmp<<"!\n";
     //is>>std::quoted(tmp);
     std::getline(std::getline(is, skip, '"'), tmp, '"') ;
     value.m_end_message = ParseCommand(tmp);
-    std::cout << "<m_end_message------->"<<tmp<<"!\n";
-    std::cout << "<commands-------> \n";
+    // std::cout << "<m_end_message------->"<<tmp<<"!\n";
+    // std::cout << "<commands-------> \n";
     tmp = "";
     while(!is.eof())
     {
         //is >>std::quoted(tmp);
         std::getline(std::getline(is, skip, '"'), tmp, '"') ;
-        std::cout << "<skip><" << skip <<"> \n";
+        // std::cout << "<skip><" << skip <<"> \n";
         if(skip == "" && tmp == "") return is;
 
         if(tmp!="")
         {
             value.jumps.insert( ParseCommand(tmp));
-            std::cout << "<command><" << tmp <<"> \n";
+            // std::cout << "<command><" << tmp <<"> \n";
         }
         tmp="";
 
     }
-    std::cout << "<commands-------> \n";
+    // std::cout << "<commands-------> \n";
 
     return is;
     //std::cout<<"animation "<<value;

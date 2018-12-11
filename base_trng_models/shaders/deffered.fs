@@ -52,17 +52,30 @@ float ShadowCalculation(vec4 PosLight, vec3 tNormal)
 
     //  res = smoothstep(0.0,1.0, (texture(shadowMap,projCoords.xy) - currentDepth + bias));
 
-        res *=0.6;
-        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
-        shift =texelSize*vec2(0.0,-1.0);
-        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
-        shift =texelSize*vec2(1.0, 0.0);
-        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
-        shift = texelSize*vec2(-1.0, 0.0);
-        res += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        // res *=1.0;
+        // float swadowing = 0.0;
+        // shift = texelSize*vec2(-2.0,2.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        // shift =texelSize*vec2(2.0,-2.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        // shift =texelSize*vec2(2.0, 2.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        // shift = texelSize*vec2(-2.0,-2.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
 
-        //res*=0.2;/**/
-        return res;
+        // if(swadowing + res < 1.35)  return 0.0;
+
+        // swadowing =0.2 * res;
+        // shift = texelSize*vec2(0.0,1.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        // shift =texelSize*vec2(0.0,-1.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        // shift =texelSize*vec2(1.0, 0.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        // shift = texelSize*vec2(-1.0, 0.0);
+        // swadowing += 0.1*(texture(shadowMap,vec3(projCoords.xy + shift,currentDepth)));
+        return res;//1.0;
+        // return swadowing;
 
 }
 

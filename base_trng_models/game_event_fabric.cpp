@@ -23,6 +23,7 @@ namespace GameEvents
                 e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-2.5f),glm::vec3(-0.3f,0.0f,-0.5f)));
                 e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,-0.5f),glm::vec3(0.3f,0.0f,-0.5f)));
                 e_ptr->position = ptr->GetPosition();
+                e_ptr->position[1] = 0;
                 return e_ptr;
             }
             break;
@@ -36,6 +37,8 @@ namespace GameEvents
                 e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.5f,0.0f,-2.5f),glm::vec3(-0.3f,0.0f,-0.5f)));
                 e_ptr->AddEdge(std::pair<glm::vec3,glm::vec3>(glm::vec3(-0.3f,0.0f,-0.5f),glm::vec3(0.3f,0.0f,-0.5f)));
                 e_ptr->position = ptr->GetPosition();
+                e_ptr->position[1] = 0;
+                
                 return e_ptr;
             }
             break;
