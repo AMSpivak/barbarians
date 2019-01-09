@@ -955,8 +955,10 @@ const glm::mat4 & Animation::GetBoneMatrix(size_t frame,size_t bone,const std::v
 	return m_cashe_animation.bones[bone];
 }
 
+
 void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 {
+	float approx = 0.8f;
 	if(m_cache_frame == frame) 
 		return;
 	size_t bon_count = m_cashe_animation.bones.size();
@@ -968,7 +970,7 @@ void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 	{
 		for(int i = 1; i < bon_count; i++)
 		{
-			m_cashe_animation.bones[i] =  base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix);
+			m_cashe_animation.bones[i] =  SlerpMatrix(m_cashe_animation.bones[i],base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix),approx);
 		}
 	}
 	m_cache_frame = frame;
@@ -980,6 +982,26 @@ const glm::mat4 & Animation::GetRotationMatrix(size_t frame,const std::vector <B
 	return rotation_matrix;
 }
 
+
+const glm::mat4 SlerpMatrix(const glm::mat4 & m1,const glm::mat4 & m2,float approximation)
+{
+	glm::vec4 transformComp1 = glm::vec4(m1[0][3],m1[1][3],m1[2][3],m1[3][3]);
+	glm::vec4 transformComp2 = glm::vec4(m2[0][3],m2[1][3],m2[2][3],m2[3][3]);
+
+	glm::vec4 finalTrans = (float)(1.0-approximation)*transformComp1+transformComp2*approximation;
+
+
+	glm::quat firstQuat = glm::quat_cast(m1);
+	glm::quat secondQuat = glm::quat_cast(m2);
+	glm::quat finalQuat = glm::slerp(firstQuat, secondQuat, approximation);
+	glm::mat4 return_matrix = glm::mat4_cast(finalQuat);
+
+	return_matrix[0][3] = finalTrans.x;
+	return_matrix[1][3] = finalTrans.y;
+	return_matrix[2][3] = finalTrans.z;
+	return_matrix[3][3] = finalTrans.w;
+	return return_matrix;
+}
 
 std::istream& operator>> ( std::istream& is, glm::vec3 & glm_vector)
 {

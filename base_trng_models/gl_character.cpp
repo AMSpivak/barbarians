@@ -204,31 +204,47 @@ void GlCharacter::Draw(GLuint shader,const glm::mat4 &draw_matrix)
 
 
 
-void GlCharacter::RefreshMatrixes()
+void GlCharacter::RefreshMatrixes(float approximation)
 {
     bool first_base = true;
     int models_count = Models.size();
+    glm::mat4 target_matrix;
     for(int i = 0; i < models_count; i++)
-    if(Models[i]->parent_idx != -1)
     {
-        IGlJubStruct * bone_ptr = Models[Models[i]->parent_idx]->jub_bones.get();
-        Models[i]-> model = Models[Models[i]->parent_idx]->model *
-            Models[Models[i]->parent_idx]->GetBoneMatrix(now_frame,Models[i]->parent_bone) *
-            bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
-    }
-    else
-    {
-        if(first_base&&(now_frame!=0))
+
+        if(Models[i]->parent_idx != -1)
         {
-            glm::mat4 move_matrix = Models[i]->GetRotationMatrix(now_frame);
-            glm::vec4 move_position = model_matrix * move_matrix[3];//glm::vec4(move_matrix[3].x,move_matrix[3].y,move_matrix[3].z,1.0f);
-            m_position += glm::vec3(move_position[0],move_position[1],move_position[2]);
-            move_matrix[0].w = move_matrix[1].w = move_matrix[2].w = 0.0f;
-            move_matrix[3] = glm::vec4(0.0f,0.0f,0.0f,1.0f);
-            model_matrix = move_matrix * model_matrix;
-            first_base = false;
-        }        
-        Models[i]-> model = model_matrix;
+            IGlJubStruct * bone_ptr = Models[Models[i]->parent_idx]->jub_bones.get();
+            target_matrix = Models[Models[i]->parent_idx]->model *
+                Models[Models[i]->parent_idx]->GetBoneMatrix(now_frame,Models[i]->parent_bone) *
+                bone_ptr->bones[Models[i]->parent_bone].matrix * glm::inverse(Models[i]-> jub_bones.get()->bones[0].matrix);
+        }
+        else
+        {
+            if(first_base&&(now_frame!=0))
+            {
+                glm::mat4 move_matrix = Models[i]->GetRotationMatrix(now_frame);
+                glm::vec4 move_position = model_matrix * move_matrix[3];
+                m_position += glm::vec3(move_position[0],move_position[1],move_position[2]);
+                move_matrix[0].w = move_matrix[1].w = move_matrix[2].w = 0.0f;
+                move_matrix[3] = glm::vec4(0.0f,0.0f,0.0f,1.0f);
+                model_matrix = move_matrix * model_matrix;
+                first_base = false;
+            }        
+            target_matrix = model_matrix;
+        }
+
+        //approximation = 1.0f;
+
+        // if(approximation > 0.9f)
+        // {
+            Models[i]-> model = target_matrix;
+        // }
+        // else
+        // {
+        //     std::cout<<"approx: "<<approximation<<"\n";
+        //     Models[i]-> model = SlerpMatrix(Models[i]-> model,target_matrix,approximation);
+        // }
     }
 }
 void GlCharacter::ExecuteCommand(const std::pair<AnimationCommand,std::string> &command,std::list<std::string> &m_messages)
@@ -273,8 +289,12 @@ int GlCharacter::Process(std::list<std::string> &m_messages)
         }
     }
 
+    size_t diff_frame = current_animation->end_frame - current_animation->start_frame > 2 ?now_frame - current_animation->start_frame:4;
+
+    float approx = diff_frame > 3 ? 1.0f : 0.1f + 0.2f * diff_frame;
+
     if(control != now_frame)
-        RefreshMatrixes();
+        RefreshMatrixes(approx);
     return 0;
 }
 

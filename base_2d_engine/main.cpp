@@ -55,6 +55,7 @@ void FillShaders(std::map<const std::string,GLuint> &shader_map, const std::stri
 {
 	shader_map.insert ( std::pair<const std::string,GLuint>("fullscreen", LoadshaderProgram("shaders/dbg.vs","shaders/sprite.fs")) );
 	shader_map.insert ( std::pair<const std::string,GLuint>("sprite2dsimple", LoadshaderProgram("shaders/sprite2dsimple.vs","shaders/sprite2dsimple.fs")) );
+	shader_map.insert ( std::pair<const std::string,GLuint>("sprite2dsimpleBlur", LoadshaderProgram("shaders/sprite2dsimple.vs","shaders/sprite2dsimpleBlur.fs")) );
 }
 
 std::map<std::string,std::shared_ptr<glRenderTarget>> m_render_target_map;

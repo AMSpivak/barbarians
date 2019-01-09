@@ -113,4 +113,7 @@ void RenderHeightMap();
 unsigned char * LoadHeightMap(std::string FileName,int * tex_width, int * tex_height);
 
 void DeleteHeightMap(unsigned char * image);
+
+const glm::mat4 SlerpMatrix(const glm::mat4 & m1,const glm::mat4 & m2,float approximation);
+
 #endif

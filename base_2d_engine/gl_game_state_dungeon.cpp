@@ -42,7 +42,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
     chip_texture = GetResourceManager()->m_texture_atlas.Assign("chip1.png");
     float a_ratio = screen_width;
     a_ratio /= screen_height;
-    m_map_browser = new Gl2D::GlMapBrowser(-1,-1,2,2,a_ratio,GetResourceManager()->m_texture_atlas.Assign("chip1.png"),m_shader_map["sprite2dsimple"]);
+    m_map_browser = new Gl2D::GlMapBrowser(-1,-1,2,2,a_ratio,GetResourceManager()->m_texture_atlas.Assign("chip1.png"),m_shader_map["sprite2dsimpleBlur"]);
     m_map_browser->SetItemAligment(Gl2D::ItemAligment::Center);
     m_map_browser->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);
 
