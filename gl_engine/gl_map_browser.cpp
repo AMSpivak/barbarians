@@ -14,7 +14,6 @@ namespace Gl2D
         float x_off = 0.5f - m_map_x - tile_size;
         float y_off = 0.5f - m_map_y - tile_size;
         tile_size = m_zoom;
-
         renderSprite(m_shader,
 			real_x, real_y,
 			real_x + real_width, real_y, 
@@ -24,6 +23,27 @@ namespace Gl2D
 			tile_size, tile_size,
 			x_off,y_off
 			);
+
+        float focus = glm::abs(m_map_z)/m_zoom;
+        focus = glm::clamp(focus ,0.0f,1.0f);
+
+        glEnable(GL_ALPHA_TEST);
+        glEnable(GL_BLEND);	
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        renderSprite(m_shader,
+			real_x, real_y,
+			real_x + real_width, real_y, 
+			real_x + real_width, real_y + real_height,
+			real_x, real_y + real_height,
+			glm::vec4(focus,focus,focus,focus),&(m_blured_map_texture->m_texture),
+			tile_size, tile_size,
+			x_off,y_off
+			);
+
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_ALPHA_TEST);
+        glDisable(GL_BLEND);
     }
     
     void GlMapBrowser::SetZoom(float value)
@@ -32,6 +52,16 @@ namespace Gl2D
         {
             m_zoom = 1.0/value;
         }
+    }
+
+    void GlMapBrowser::SetFocus(float z)
+    {
+        m_map_z = z;
+    }
+
+    float GlMapBrowser::GetFocus()
+    {
+        return m_map_z;
     }
 
     float GlMapBrowser::GetZoom()
@@ -47,4 +77,14 @@ namespace Gl2D
         m_map_y = glm::clamp(m_map_y,-0.5f,0.5f);
     }
 
+    float GlMapBrowser::GetX()
+    {
+        return m_map_x;
+    }
+
+
+    float GlMapBrowser::GetY()
+    {
+        return m_map_y;        
+    }
 }
