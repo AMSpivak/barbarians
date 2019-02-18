@@ -148,7 +148,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                     {
                                         std::getline(sstream,m_info_message);
                                         //m_info_message = sstream.str();
-                                        std::cout<<m_info_message<<"\n";
+                                        //std::cout<<m_info_message<<"\n";
                                     });
     
     m_message_processor.Add("pause_interface",[this](std::stringstream &sstream)
@@ -316,6 +316,28 @@ void GlGameStateDungeon::LoadScript(std::vector<std::string> &lines)
     m_scripts.insert(std::make_pair(lines[0],clean_lines));
 }
 
+void GlGameStateDungeon::SetHeightmap(std::vector<std::string> &lines)
+{
+    if(lines.size()<=1) 
+        return;
+
+    LoaderUtility::LinesProcessor proc;
+    std::string map_string;
+    float h_scale =1.0f;
+    float m_scale =1.0f;
+
+    proc.Add("map",[this,&map_string](std::stringstream &sstream){sstream >> map_string;});
+    proc.Add("height_scale",[this,&h_scale](std::stringstream &sstream){sstream >> h_scale;});
+    proc.Add("map_scale",[this,&m_scale](std::stringstream &sstream){sstream >> m_scale;});
+    proc.Process(lines);
+
+    m_heightmap.LoadMap(map_string/*"desert_map.png"*/);
+    m_heightmap.SetParameters(h_scale,m_scale/*0.005f,5.0f*/);
+
+
+
+}
+
 void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 {
     if(lines.size()<=1) 
@@ -403,9 +425,6 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
 
 void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
 {  
-    
-    m_heightmap.LoadMap("desert_map.png");
-    m_heightmap.SetParameters(0.006f,2.0f);
     m_messages.clear();                                        
     
     std::ifstream level_file;
@@ -438,6 +457,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     
     std::map<std::string,const std::function<void(std::vector<std::string> &lines)>> execute_funcs;
     execute_funcs.insert(std::make_pair("sky",[this](std::vector<std::string> &lines){SetMapLight(lines);}));
+    execute_funcs.insert(std::make_pair("heightmap",[this](std::vector<std::string> &lines){SetHeightmap(lines);}));
     execute_funcs.insert(std::make_pair("models",[this](std::vector<std::string> &lines)
                                         {
                                             for(auto line : lines)

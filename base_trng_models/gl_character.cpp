@@ -172,11 +172,7 @@ void GlCharacter::UseCommand(AnimationCommand command)
     try
     {
         std::string jumper = current_animation->jumps.at(command);
-        std::cout<<"process command <"<<jumper<<">\n";
-        
-
-        current_animation = &sequence.at(jumper);              
-        // current_animation = &sequence.at(current_animation->jumps.at(command));              
+        current_animation = &sequence.at(jumper);                          
     }
     catch(const std::out_of_range& exp)
     {
@@ -274,7 +270,6 @@ int GlCharacter::Process(std::list<std::string> &m_messages)
     else
     {
         ++now_frame;
-        //++now_frame;
 
         if(now_frame < current_animation->start_frame) now_frame = current_animation->start_frame;
         if(now_frame > current_animation->end_frame) 

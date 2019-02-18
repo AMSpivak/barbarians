@@ -103,6 +103,7 @@ private:
     void LoadTiles(std::vector<std::string> &lines);
     void LoadDungeonObjects(std::vector<std::string> &lines);
     void LoadScript(std::vector<std::string> &lines);
+    void SetHeightmap(std::vector<std::string> &lines);
     
     bool AddObjectsFromFile(const std::string & object);
     bool AddObjectFromFile(const std::string & object,const std::string & name,glm::vec3 position);

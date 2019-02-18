@@ -958,7 +958,7 @@ const glm::mat4 & Animation::GetBoneMatrix(size_t frame,size_t bone,const std::v
 
 void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 {
-	float approx = 0.8f;
+	float approx = 1.0f;
 	if(m_cache_frame == frame) 
 		return;
 	size_t bon_count = m_cashe_animation.bones.size();
@@ -970,7 +970,8 @@ void Animation::CalculateCache(const std::vector <Bone> &bones,size_t frame)
 	{
 		for(int i = 1; i < bon_count; i++)
 		{
-			m_cashe_animation.bones[i] =  SlerpMatrix(m_cashe_animation.bones[i],base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix),approx);
+			//m_cashe_animation.bones[i] =  SlerpMatrix(m_cashe_animation.bones[i],base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix),approx);
+			m_cashe_animation.bones[i] =  base * frames[frame].bones[i] *  glm::inverse(bones[i].matrix);
 		}
 	}
 	m_cache_frame = frame;

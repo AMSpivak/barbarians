@@ -105,7 +105,7 @@ void glModel::LoadAll(std::string FileName)
     png_utility_name = /*path + */tmp_str;
 	getline(modelfile, tmp_str);
     std::string png_normal_name = /*path + */tmp_str;
-	std::cout<<"\n===\n";
+	//std::cout<<"\n===\n";
 	modelfile >> parent_idx >> parent_bone>>frames_name;
     //std::cout<<jal_name<<"\n"<<jub_name<<"\n"<<png_name<<"\n"<<png_utility_name<<"\n"<<"!"<<parent_idx<<"!"<<parent_bone<<"\n"<<frames_name<<"\n";
 
