@@ -332,7 +332,7 @@ void GlGameStateDungeon::SetHeightmap(std::vector<std::string> &lines)
     proc.Process(lines);
 
     m_heightmap.LoadMap(map_string/*"desert_map.png"*/);
-    m_heightmap.SetParameters(h_scale,m_scale/*0.005f,5.0f*/);
+    m_heightmap.SetParameters(m_scale,h_scale/*0.005f,5.0f*/);
 
 
 
@@ -725,6 +725,7 @@ void GlGameStateDungeon::DrawGlobalLight(const GLuint light_loc, const glLight &
 
 void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<GlCharacter>hero,const glm::mat4 camera)
 {
+    
     //current_shader = m_shader_map["deff_1st_pass_heght"];
     glUseProgram(current_shader);
     const float tile_size = 0.15f;
@@ -737,7 +738,7 @@ void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<Gl
 
     //std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
     // glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
-    glm::vec3 offset_position_vector = glm::vec3(-offset_x,-hero_position[1],-offset_z);
+    glm::vec4 offset_position_vector = glm::vec4(-offset_x,-hero_position[1],-offset_z,tile_size);
     glm::vec4 map_position_vector = glm::vec4(hero_position[0],hero_position[2],
                                                 m_heightmap.GetMapScaler(),m_heightmap.GetHeightScaler());
     
@@ -745,7 +746,7 @@ void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<Gl
     glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
 
     GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
-    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
+    glUniform4fv(offset_position, 1, glm::value_ptr(offset_position_vector));
 
     GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
     glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
@@ -842,10 +843,12 @@ void GlGameStateDungeon::Draw()
 		glUseProgram(current_shader);
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
+        glPolygonMode( GL_FRONT_AND_BACK, EngineSettings::GetEngineSettings()->IsPbrON()?GL_FILL: GL_LINE );
 
         DrawDungeon(current_shader,hero);
 
         DrawHeightMap(m_shader_map["deff_1st_pass_heght"],hero,Camera.CameraMatrix());
+        glPolygonMode( GL_FRONT_AND_BACK,GL_FILL );
         
      
 		final_render_target.set();
@@ -878,6 +881,7 @@ void GlGameStateDungeon::Draw()
 		glClear(GL_DEPTH_BUFFER_BIT);
 
         current_shader = m_shader_map[EngineSettings::GetEngineSettings()->IsPbrON()?"deffered":"deffered_cheap"];
+
 
 		glUseProgram(current_shader);
 

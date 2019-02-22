@@ -6,8 +6,8 @@ camera_lens 29.0 1.0 45.0
 <!sky>
 <heightmap>
 map desert_map.png
-height_scale 0.006f
-map_scale 5.0f
+height_scale 18.0f
+map_scale 0.002f
 <!heightmap>
 <models>
 material/tiles/tile_sand.mdl
