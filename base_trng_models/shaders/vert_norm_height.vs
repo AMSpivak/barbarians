@@ -40,6 +40,8 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord, vec2 TextureSize, vec2 Te
     vec4 nDenom = vec4( 0.0, 0.0, 0.0, 0.0 );
     float a = fract( TexCoord.x * TextureSize.x ); // get the decimal part
     float b = fract( TexCoord.y * TextureSize.y ); // get the decimal part
+	vec3 probes[16];
+	int probe_position = 0;
     for( int m = -1; m <=2; m++ )
     {
         for( int n =-1; n<= 2; n++)
@@ -47,15 +49,24 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord, vec2 TextureSize, vec2 Te
 			vec4 vecData = texture2D(textureSampler, 
                                TexCoord + vec2(TexelSize.x * float( m ), 
 					TexelSize.y * float( n )));
+
 			float f  = Triangular( float( m ) - a );
 			vec4 vecCooef1 = vec4( f,f,f,f );
 			float f1 = Triangular ( -( float( n ) - b ) );
 			vec4 vecCoeef2 = vec4( f1, f1, f1, f1 );
             nSum = nSum + ( vecData * vecCoeef2 * vecCooef1  );
             nDenom = nDenom + (( vecCoeef2 * vecCooef1 ));
+			probes[probe_position] = vec3(vecData.x,f,f1);
+			//probes[probe_position] = vec3(vecData.x,1.0,1.0);
+			probe_position++;
         }
+		//probe_position++;
     }
-    return nSum / nDenom;
+	vec4 h = nSum / nDenom;
+	float gz = (probes[7].x - h.x)*probes[7].y - (probes[4].x - h.x)*probes[4].y;
+	float gx = (probes[14].x - h.x)*probes[14].z - (probes[2].x - h.x)*probes[2].z;
+	ourColor = normalize(vec3(-gx,0.01,-gz));
+    return h;
 }
 
 vec4 tex2DBiLinear( sampler2D textureSampler_i, vec2 texCoord_i, vec2 TextureSize, vec2 TexelSize )
@@ -100,9 +111,9 @@ void main()
 	//vec3 X = vec3(1.0 * offset_position.w, (height_x2 - height_x1)* map_position.w, 0.0);
 	//vec3 Z = vec3(0.0, -(height_y2 - height_y1)* map_position.w, 1.0 * offset_position.w);
 	//vec3 Normal = normalize(cross(Z, X));
-	vec3 Normal = vec3(texColor.x,texColor.x,texColor.x);
+	//vec3 Normal = vec3(texColor.x,texColor.x,texColor.x);
 
-    ourColor = vec3( vec4(Normal, 0.0));
+    //ourColor = vec3( vec4(Normal, 0.0));
 
         //vec3 tangent = vec3(vec4(a_Tangent.xyz, 0.0));
 		//tangent = normalize(tangent - dot(tangent, ourColor) * ourColor);
