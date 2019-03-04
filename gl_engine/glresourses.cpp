@@ -338,9 +338,9 @@ void RenderHeightMap()
         // };
 		std::vector<float> quadVertices;
 
-		size_t map_vertex_size = 500;
+		size_t map_vertex_size = 100;
 		size_t map_size = map_vertex_size - 1;
-		const float tile_size = 0.15f;
+		const float tile_size = 1.0f;
 		float offset = 0.5f * tile_size * map_size;
 
 		for(size_t i_z = 0; i_z < map_vertex_size; i_z++)

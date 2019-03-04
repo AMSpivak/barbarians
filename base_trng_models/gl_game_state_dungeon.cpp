@@ -525,40 +525,40 @@ void GlGameStateDungeon::DrawDungeon(GLuint current_shader,std::shared_ptr<GlCha
     //std::cout<<"Z: "<< tmp_hero_position[1] <<"\n";
     hero->SetPosition(tmp_hero_position);
 
-    glm::mat4 model_matrix = Models[0]->model;
-    glm::mat4 pos_matrix;
-    size_t iz = 0;
-    glm::mat4 rotation_matrixes[4];
-    for(int i =0; i<4; i++)
-    {
-        rotation_matrixes[i] = glm::rotate(rotation_matrixes[i], glm::radians(-90.0f * i), glm::vec3(0.0f, 1.0f, 0.0f));
-    }
+    // glm::mat4 model_matrix = Models[0]->model;
+    // glm::mat4 pos_matrix;
+    // size_t iz = 0;
+    // glm::mat4 rotation_matrixes[4];
+    // for(int i =0; i<4; i++)
+    // {
+    //     rotation_matrixes[i] = glm::rotate(rotation_matrixes[i], glm::radians(-90.0f * i), glm::vec3(0.0f, 1.0f, 0.0f));
+    // }
                 
 
-    for(int iy = 0; iy < m_dungeon.Height(); iy++)
-    {
-        pos_matrix = glm::mat4();
-        pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
+    // for(int iy = 0; iy < m_dungeon.Height(); iy++)
+    // {
+    //     pos_matrix = glm::mat4();
+    //     pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
 
-        for(int ix = 0; ix < m_dungeon.Width(); ix++)
-        {
-            int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
-            if(index>=0)
-            {
-                Models[index]->Draw(current_shader,now_frame,pos_matrix);
-            }
+    //     for(int ix = 0; ix < m_dungeon.Width(); ix++)
+    //     {
+    //         int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
+    //         if(index>=0)
+    //         {
+    //             Models[index]->Draw(current_shader,now_frame,pos_matrix);
+    //         }
             
-            index = m_dungeon.GetMapObjectIndex(ix,iy,iz);
-            if(index>0)
-            {
-                int mod_index = index>>2;
-                int rot = index - (mod_index<<2);
-                model_matrix = Models[mod_index]->model;
-                Models[mod_index]->Draw(current_shader,now_frame,pos_matrix * rotation_matrixes[rot]);
-            }
-            pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-        }
-    }
+    //         index = m_dungeon.GetMapObjectIndex(ix,iy,iz);
+    //         if(index>0)
+    //         {
+    //             int mod_index = index>>2;
+    //             int rot = index - (mod_index<<2);
+    //             model_matrix = Models[mod_index]->model;
+    //             Models[mod_index]->Draw(current_shader,now_frame,pos_matrix * rotation_matrixes[rot]);
+    //         }
+    //         pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+    //     }
+    // }
 
                 
     for(auto object : dungeon_objects)
@@ -728,7 +728,7 @@ void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<Gl
     
     //current_shader = m_shader_map["deff_1st_pass_heght"];
     glUseProgram(current_shader);
-    const float tile_size = 0.15f;
+    const float tile_size = 1.0f;
     float inv = 1/tile_size;
     float x = hero_position[0]-trunc(hero_position[0]);
     float z = hero_position[2]-trunc(hero_position[2]);
@@ -1062,32 +1062,35 @@ std::pair<float,const glm::vec3> GlGameStateDungeon::FitObjectToMap(IGlModel& ob
 {
     if(object.mass_inv < 0.001)
         return std::make_pair(0.0f,position);
+        
     float hero_radius = object.radius;
 
-    int x = static_cast<int>(position[0]*0.5f);
-    int z = static_cast<int>(position[2]*0.5f);
+    const glm::vec3 edge=glm::vec3(100.0f,100.0f,100.0f);
+    glm::vec3 new_position = glm::clamp(position,-edge,edge);
+    // int x = static_cast<int>(position[0]*0.5f);
+    // int z = static_cast<int>(position[2]*0.5f);
 
-    int xp = x;
-    int zp = z;
+    // int xp = x;
+    // int zp = z;
 
 
-    glm::vec3 shift = glm::vec3(0.0f,0.0f,0.0f);
-    for(int ix = -1; ix<2; ix++)
-    {
-        for(int iz = -1; iz<2; iz++)
-        {
-            xp = x +ix;
-            zp = z +iz;
-            if(m_dungeon.GetMapObjectIndex(xp,zp,0)>0||m_dungeon.GetMapTilesIndex(xp,zp,0)<0)
-            {
-                glm::vec3 tile_position = glm::vec3(2.0f * xp,0.0f,2.0f * zp);
-                glm::vec3 intersection =IntersectionProjection(tile_position, position, hero_radius);
-                shift += intersection;
-            }
-        }
-    }
+    // glm::vec3 shift = glm::vec3(0.0f,0.0f,0.0f);
+    // for(int ix = -1; ix<2; ix++)
+    // {
+    //     for(int iz = -1; iz<2; iz++)
+    //     {
+    //         xp = x +ix;
+    //         zp = z +iz;
+    //         if(m_dungeon.GetMapObjectIndex(xp,zp,0)>0||m_dungeon.GetMapTilesIndex(xp,zp,0)<0)
+    //         {
+    //             glm::vec3 tile_position = glm::vec3(2.0f * xp,0.0f,2.0f * zp);
+    //             glm::vec3 intersection =IntersectionProjection(tile_position, position, hero_radius);
+    //             shift += intersection;
+    //         }
+    //     }
+    // }
 
-    return std::make_pair(0.0f,shift+position);
+    return std::make_pair(0.0f,new_position);
 }
 
 float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)

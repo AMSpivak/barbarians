@@ -18,6 +18,7 @@ namespace GameMap
         float GetHeightScaler();
 
         std::shared_ptr<IGlTextureStruct> m_heightmap_texture;
+        std::shared_ptr<IGlTextureStruct> m_texture;
 
         private:
         float m_map_scaler;

@@ -96,14 +96,18 @@ void main()
 	vec2 texCoord = vec2(map_position.x + position.x,map_position.y + position.z) * map_position.z + vec2(0.5,0.5);
 	vec2 textureSize = textureSize(HeightMap, 0);
 	vec2 texelSize = 1.0 / textureSize;
-	vec4 texColor = BiCubic(HeightMap, texCoord,textureSize,texelSize);
-	//float multiplier = map_position.z * offset_position.w;
-	//float height_x1 = texture2DLod(HeightMap , texCoord + vec2(1.0,0.0)* multiplier,0.0).x;
-	//float height_x2 = texture2DLod(HeightMap , texCoord + vec2(-1.0,0.0)* multiplier,0.0).x;
-	//float height_y1 = texture2DLod(HeightMap , texCoord + vec2(0.0,1.0)* multiplier,0.0).x;
-	//float height_y2 = texture2DLod(HeightMap , texCoord + vec2(0.0,-1.0)* multiplier,0.0).x;
+	vec4 texColor = texture(HeightMap , texCoord);//BiCubic(HeightMap, texCoord,textureSize,texelSize);
+	float multiplier = texelSize.x;//map_position.z * offset_position.w;
+	float height_x1 = texture(HeightMap , texCoord + vec2(1.0,0.0)* multiplier).x;
+	float height_x2 = texture(HeightMap , texCoord + vec2(-1.0,0.0)* multiplier).x;
+	float height_y1 = texture(HeightMap , texCoord + vec2(0.0,1.0)* multiplier).x;
+	float height_y2 = texture(HeightMap , texCoord + vec2(0.0,-1.0)* multiplier).x;
 	float height = texColor.x;
-	
+
+	float gz = map_position.w *(height_y2 - height_y1);
+	float gx = map_position.w *(height_x2 - height_x1);
+	ourColor = normalize(vec3(-gx,2.0,-gz));
+
 	//position.y += 0.1f;//height * map_position.w;
 	position.y += height * map_position.w;
     v_Position = position.xyz;
