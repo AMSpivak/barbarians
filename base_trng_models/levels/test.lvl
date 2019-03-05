@@ -2,8 +2,13 @@
 skybox skybox/violent.cub
 light_pos 10.0 30.0 -15.0
 light_color 4.0 4.0 4.0
-camera_lens 29.0 1.0 45.0
+camera_lens 50.0 1.0 45.0
 <!sky>
+<heightmap>
+map desert_map.png
+height_scale 30.0f
+map_scale 0.002f
+<!heightmap>
 <models>
 material/tiles/tile_sand.mdl
 <!models>

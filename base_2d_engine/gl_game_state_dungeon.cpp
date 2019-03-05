@@ -39,63 +39,14 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                                         ,key_angle(0.0f)
 {
     m_gl_text = std::make_shared<GlText16x16>("font3.png",GetResourceManager()->m_texture_atlas,0.1f,0.1f);
-    chip_texture = GetResourceManager()->m_texture_atlas.Assign("chip1.png");
     float a_ratio = screen_width;
     a_ratio /= screen_height;
-    m_map_browser = new Gl2D::GlMapBrowser(-1,-1,2,2,a_ratio,GetResourceManager()->m_texture_atlas.Assign("chip1.png"),m_shader_map["sprite2dsimple"]);
+    m_map_browser = new Gl2D::GlMapBrowser(-1,-1,2,2,a_ratio,
+                                            GetResourceManager()->m_texture_atlas.Assign("chip1.png"),
+                                            GetResourceManager()->m_texture_atlas.Assign("chip1blur.png"),
+                                            m_shader_map["sprite2dsimple"]);
     m_map_browser->SetItemAligment(Gl2D::ItemAligment::Center);
     m_map_browser->SetAspectRatioKeeper(Gl2D::AspectRatioKeeper::Minimal);
-
-    // m_message_processor.Add("teleport",[this](std::stringstream &sstream)
-    //                                 {
-    //                                     std::string level;
-    //                                     std::string start;
-    //                                     sstream >> level >> start;
-    //                                     LoadMap(level,start);
-    //                                 });
-    // m_message_processor.Add("spawn",[this](std::stringstream &sstream)
-    //                                 {
-    //                                     std::string object;
-    //                                     std::string name;
-    //                                     glm::vec3 position;
-    //                                     sstream >> object >> name >> position;
-    //                                     AddObjectFromFile(object,name,position);
-    //                                 });
-
-    // m_message_processor.Add("rotate",[this](std::stringstream &sstream)
-    //                                 {
-    //                                     std::string name;
-    //                                     sstream >> name;
-    //                                     auto object = FindSharedCollectionByName(dungeon_objects.begin(), dungeon_objects.end(),name);
-    //                                     if(object != nullptr)
-    //                                     {
-    //                                         float angle =0.0f;
-    //                                         sstream >>angle;
-    //                                         object->model_matrix = glm::rotate(object->model_matrix, glm::radians(angle), LoaderUtility::GetFromStream<glm::vec3>(sstream));
-    //                                         object->RefreshMatrixes();
-    //                                     }
-    //                                 });
-    
-    // m_message_processor.Add("play_ani",[this](std::stringstream &sstream)
-    //                             {
-    //                                 std::string name;
-    //                                 sstream >> name;
-    //                                 auto object = FindSharedCollectionByName(dungeon_objects.begin(), dungeon_objects.end(),name);
-    //                                 if(object != nullptr)
-    //                                 {
-    //                                     object->UseSequence(LoaderUtility::GetFromStream<std::string>(sstream));
-    //                                 }
-    //                             });                         
-
-    // m_message_processor.Add("hero_strike",[this](std::stringstream &sstream)
-    // {                                
-    //     mob_events.push_back(AddStrike(hero->model_matrix,hero->GetPosition()));
-    // });
-
-    // m_message_processor.Add("hero_use",[this](std::stringstream &sstream)
-    // {                                
-    //     mob_events.push_back(AddUse(hero->model_matrix,hero->GetPosition()));
-    // });
 
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -124,7 +75,7 @@ void GlGameStateDungeon::Draw2D(GLuint depth_map)
     m_gl_text->SetTextSize(text_size_x,text_size_y); 
     auto shader = m_shader_map["sprite2dsimple"];
     std::stringstream ss;
-    ss<< std::fixed<<std::setprecision(1)<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS";
+    ss<< std::fixed<<std::setprecision(1)/*<<EngineSettings::GetEngineSettings() ->GetFPS()<<" FPS;"*/<<" X(mkm):"<<m_map_browser->GetX()*700 <<" Y(mkm):"<<m_map_browser->GetY()*700 <<" Z(mkm):" <<std::setprecision(2)<<m_map_browser->GetFocus() - 0.52f;;
     m_gl_text->DrawString(ss.str(),-1.0f,1.0f - text_size_y*1.2f, shader);
 }
 
@@ -207,6 +158,17 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
             m_map_browser->MoveMap(x,y);      
         }
 
+        if(inputs[GLFW_KEY_LEFT_BRACKET])
+        {
+            m_map_browser->SetFocus(m_map_browser->GetFocus()+0.01f);
+        }
+
+        if(inputs[GLFW_KEY_RIGHT_BRACKET])
+        {
+            m_map_browser->SetFocus(m_map_browser->GetFocus()-0.01f);            
+        }
+
+
         if(inputs[GLFW_KEY_LAST+3])
         {
             m_map_browser->SetZoom(2.0f * m_map_browser->GetZoom());
@@ -219,13 +181,8 @@ IGlGameState *  GlGameStateDungeon::Process(std::map <int, bool> &inputs, float 
 
         ProcessMessages();
 
-   
-        // distance = glm::clamp(distance,3.0f,14.0f);
-
         time = time_now;
-        //bool fast_move = inputs[GLFW_KEY_LEFT_SHIFT];
 
-        // m_messages.push_back("hero_use");
 
         
     }

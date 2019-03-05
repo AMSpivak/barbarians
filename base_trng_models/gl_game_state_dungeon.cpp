@@ -148,7 +148,7 @@ GlGameStateDungeon::GlGameStateDungeon(std::map<const std::string,GLuint> &shade
                                     {
                                         std::getline(sstream,m_info_message);
                                         //m_info_message = sstream.str();
-                                        std::cout<<m_info_message<<"\n";
+                                        //std::cout<<m_info_message<<"\n";
                                     });
     
     m_message_processor.Add("pause_interface",[this](std::stringstream &sstream)
@@ -316,6 +316,28 @@ void GlGameStateDungeon::LoadScript(std::vector<std::string> &lines)
     m_scripts.insert(std::make_pair(lines[0],clean_lines));
 }
 
+void GlGameStateDungeon::SetHeightmap(std::vector<std::string> &lines)
+{
+    if(lines.size()<=1) 
+        return;
+
+    LoaderUtility::LinesProcessor proc;
+    std::string map_string;
+    float h_scale =1.0f;
+    float m_scale =1.0f;
+
+    proc.Add("map",[this,&map_string](std::stringstream &sstream){sstream >> map_string;});
+    proc.Add("height_scale",[this,&h_scale](std::stringstream &sstream){sstream >> h_scale;});
+    proc.Add("map_scale",[this,&m_scale](std::stringstream &sstream){sstream >> m_scale;});
+    proc.Process(lines);
+
+    m_heightmap.LoadMap(map_string/*"desert_map.png"*/);
+    m_heightmap.SetParameters(m_scale,h_scale/*0.005f,5.0f*/);
+
+
+
+}
+
 void GlGameStateDungeon::SetMapLight(std::vector<std::string> &lines)
 {
     if(lines.size()<=1) 
@@ -403,8 +425,6 @@ void GlGameStateDungeon::SaveObjects(const std::string &filename)
 
 void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &start_place)
 {  
-    heightmap_texture = GetResourceManager()->m_texture_atlas.Assign("desert_map.png");
-
     m_messages.clear();                                        
     
     std::ifstream level_file;
@@ -437,6 +457,7 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
     
     std::map<std::string,const std::function<void(std::vector<std::string> &lines)>> execute_funcs;
     execute_funcs.insert(std::make_pair("sky",[this](std::vector<std::string> &lines){SetMapLight(lines);}));
+    execute_funcs.insert(std::make_pair("heightmap",[this](std::vector<std::string> &lines){SetHeightmap(lines);}));
     execute_funcs.insert(std::make_pair("models",[this](std::vector<std::string> &lines)
                                         {
                                             for(auto line : lines)
@@ -499,42 +520,45 @@ void GlGameStateDungeon::LoadMap(const std::string &filename,const std::string &
 
 void GlGameStateDungeon::DrawDungeon(GLuint current_shader,std::shared_ptr<GlCharacter>hero)
 {
-    //hero_position = hero->GetPosition();
-    
-    glm::mat4 model_matrix = Models[0]->model;
-    glm::mat4 pos_matrix;
-    size_t iz = 0;
-    glm::mat4 rotation_matrixes[4];
-    for(int i =0; i<4; i++)
-    {
-        rotation_matrixes[i] = glm::rotate(rotation_matrixes[i], glm::radians(-90.0f * i), glm::vec3(0.0f, 1.0f, 0.0f));
-    }
+    glm::vec3 tmp_hero_position = hero->GetPosition();
+    tmp_hero_position[1] = m_heightmap.GetHeight(tmp_hero_position[0],tmp_hero_position[2]);
+    //std::cout<<"Z: "<< tmp_hero_position[1] <<"\n";
+    hero->SetPosition(tmp_hero_position);
+
+    // glm::mat4 model_matrix = Models[0]->model;
+    // glm::mat4 pos_matrix;
+    // size_t iz = 0;
+    // glm::mat4 rotation_matrixes[4];
+    // for(int i =0; i<4; i++)
+    // {
+    //     rotation_matrixes[i] = glm::rotate(rotation_matrixes[i], glm::radians(-90.0f * i), glm::vec3(0.0f, 1.0f, 0.0f));
+    // }
                 
 
-    for(int iy = 0; iy < m_dungeon.Height(); iy++)
-    {
-        pos_matrix = glm::mat4();
-        pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
+    // for(int iy = 0; iy < m_dungeon.Height(); iy++)
+    // {
+    //     pos_matrix = glm::mat4();
+    //     pos_matrix = glm::translate(pos_matrix, glm::vec3(0.0f, 0.0f, 2.0f*iy) - hero_position);
 
-        for(int ix = 0; ix < m_dungeon.Width(); ix++)
-        {
-            int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
-            if(index>=0)
-            {
-                Models[index]->Draw(current_shader,now_frame,pos_matrix);
-            }
+    //     for(int ix = 0; ix < m_dungeon.Width(); ix++)
+    //     {
+    //         int index = m_dungeon.GetMapTilesIndex(ix,iy,iz);
+    //         if(index>=0)
+    //         {
+    //             Models[index]->Draw(current_shader,now_frame,pos_matrix);
+    //         }
             
-            index = m_dungeon.GetMapObjectIndex(ix,iy,iz);
-            if(index>0)
-            {
-                int mod_index = index>>2;
-                int rot = index - (mod_index<<2);
-                model_matrix = Models[mod_index]->model;
-                Models[mod_index]->Draw(current_shader,now_frame,pos_matrix * rotation_matrixes[rot]);
-            }
-            pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-        }
-    }
+    //         index = m_dungeon.GetMapObjectIndex(ix,iy,iz);
+    //         if(index>0)
+    //         {
+    //             int mod_index = index>>2;
+    //             int rot = index - (mod_index<<2);
+    //             model_matrix = Models[mod_index]->model;
+    //             Models[mod_index]->Draw(current_shader,now_frame,pos_matrix * rotation_matrixes[rot]);
+    //         }
+    //         pos_matrix = glm::translate(pos_matrix, glm::vec3(2.0f, 0.0f, 0.0f));
+    //     }
+    // }
 
                 
     for(auto object : dungeon_objects)
@@ -701,9 +725,10 @@ void GlGameStateDungeon::DrawGlobalLight(const GLuint light_loc, const glLight &
 
 void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<GlCharacter>hero,const glm::mat4 camera)
 {
+    
     //current_shader = m_shader_map["deff_1st_pass_heght"];
     glUseProgram(current_shader);
-    const float tile_size = 0.15f;
+    const float tile_size = 1.0f;
     float inv = 1/tile_size;
     float x = hero_position[0]-trunc(hero_position[0]);
     float z = hero_position[2]-trunc(hero_position[2]);
@@ -712,20 +737,22 @@ void GlGameStateDungeon::DrawHeightMap(GLuint current_shader, std::shared_ptr<Gl
     float offset_z = z - (tile_size * round(z*inv)); 
 
     //std::cout<<hero_position[0]<<" "<<hero_position[2]<<":"<<offset_x<<" "<<offset_z<<"\n";
-    glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
-    glm::vec4 map_position_vector = glm::vec4(hero_position[0],hero_position[2],0.006f,2.0f);
+    // glm::vec3 offset_position_vector = glm::vec3(-offset_x,-0.0f,-offset_z);
+    glm::vec4 offset_position_vector = glm::vec4(-offset_x,-hero_position[1],-offset_z,tile_size);
+    glm::vec4 map_position_vector = glm::vec4(hero_position[0],hero_position[2],
+                                                m_heightmap.GetMapScaler(),m_heightmap.GetHeightScaler());
     
     GLuint cameraLoc  = glGetUniformLocation(current_shader, "camera");
     glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
 
     GLuint offset_position  = glGetUniformLocation(current_shader, "offset_position");
-    glUniform3fv(offset_position, 1, glm::value_ptr(offset_position_vector));
+    glUniform4fv(offset_position, 1, glm::value_ptr(offset_position_vector));
 
     GLuint map_position  = glGetUniformLocation(current_shader, "map_position");
     glUniform4fv(map_position, 1, glm::value_ptr(map_position_vector));
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, heightmap_texture->m_texture);
+    glBindTexture(GL_TEXTURE_2D, m_heightmap.m_heightmap_texture->m_texture);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //glDisable(GL_CULL_FACE);
@@ -816,10 +843,12 @@ void GlGameStateDungeon::Draw()
 		glUseProgram(current_shader);
 		cameraLoc  = glGetUniformLocation(current_shader, "camera");
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(Camera.CameraMatrix()));
+        glPolygonMode( GL_FRONT_AND_BACK, EngineSettings::GetEngineSettings()->IsPbrON()?GL_FILL: GL_LINE );
 
         DrawDungeon(current_shader,hero);
 
         DrawHeightMap(m_shader_map["deff_1st_pass_heght"],hero,Camera.CameraMatrix());
+        glPolygonMode( GL_FRONT_AND_BACK,GL_FILL );
         
      
 		final_render_target.set();
@@ -852,6 +881,7 @@ void GlGameStateDungeon::Draw()
 		glClear(GL_DEPTH_BUFFER_BIT);
 
         current_shader = m_shader_map[EngineSettings::GetEngineSettings()->IsPbrON()?"deffered":"deffered_cheap"];
+
 
 		glUseProgram(current_shader);
 
@@ -1032,32 +1062,35 @@ std::pair<float,const glm::vec3> GlGameStateDungeon::FitObjectToMap(IGlModel& ob
 {
     if(object.mass_inv < 0.001)
         return std::make_pair(0.0f,position);
+        
     float hero_radius = object.radius;
 
-    int x = static_cast<int>(position[0]*0.5f);
-    int z = static_cast<int>(position[2]*0.5f);
+    const glm::vec3 edge=glm::vec3(100.0f,100.0f,100.0f);
+    glm::vec3 new_position = glm::clamp(position,-edge,edge);
+    // int x = static_cast<int>(position[0]*0.5f);
+    // int z = static_cast<int>(position[2]*0.5f);
 
-    int xp = x;
-    int zp = z;
+    // int xp = x;
+    // int zp = z;
 
 
-    glm::vec3 shift = glm::vec3(0.0f,0.0f,0.0f);
-    for(int ix = -1; ix<2; ix++)
-    {
-        for(int iz = -1; iz<2; iz++)
-        {
-            xp = x +ix;
-            zp = z +iz;
-            if(m_dungeon.GetMapObjectIndex(xp,zp,0)>0||m_dungeon.GetMapTilesIndex(xp,zp,0)<0)
-            {
-                glm::vec3 tile_position = glm::vec3(2.0f * xp,0.0f,2.0f * zp);
-                glm::vec3 intersection =IntersectionProjection(tile_position, position, hero_radius);
-                shift += intersection;
-            }
-        }
-    }
+    // glm::vec3 shift = glm::vec3(0.0f,0.0f,0.0f);
+    // for(int ix = -1; ix<2; ix++)
+    // {
+    //     for(int iz = -1; iz<2; iz++)
+    //     {
+    //         xp = x +ix;
+    //         zp = z +iz;
+    //         if(m_dungeon.GetMapObjectIndex(xp,zp,0)>0||m_dungeon.GetMapTilesIndex(xp,zp,0)<0)
+    //         {
+    //             glm::vec3 tile_position = glm::vec3(2.0f * xp,0.0f,2.0f * zp);
+    //             glm::vec3 intersection =IntersectionProjection(tile_position, position, hero_radius);
+    //             shift += intersection;
+    //         }
+    //     }
+    // }
 
-    return std::make_pair(0.0f,shift+position);
+    return std::make_pair(0.0f,new_position);
 }
 
 float GlGameStateDungeon::FitObjectToObject(IGlModel& object1,IGlModel& object2)

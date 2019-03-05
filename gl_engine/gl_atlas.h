@@ -41,6 +41,10 @@ public:
     {
     }
 
+    const std::string & GetResourceFolder() const
+    {
+        return m_resourse_folder;
+    }
 private:
 
     std::string m_resourse_folder;

@@ -24,7 +24,8 @@ public:
     void UseSequence(const std::string & name);
     void UseCommand(AnimationCommand command);
     void Damage(float damage);
-    void RefreshMatrixes();
+    void RefreshMatrixes(float approximation);
+    void RefreshMatrixes(){RefreshMatrixes(1.0f);};
 
     int AddAxes(std::vector<glm::vec3> &axes);
     std::pair<float, float> ProjectOnAxe(const glm::vec3 & axe) const;
